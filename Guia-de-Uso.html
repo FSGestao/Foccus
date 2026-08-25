@@ -1,0 +1,598 @@
+<title>Guia do Foccus</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{
+    --bg:#eef6f7;
+    --bg-gradient: radial-gradient(1200px 520px at 15% -10%, rgba(14,154,167,0.13), transparent), radial-gradient(900px 440px at 100% 0%, rgba(255,166,0,0.10), transparent);
+    --surface:#ffffff;
+    --glass: rgba(255,255,255,0.66);
+    --glass-card: linear-gradient(165deg, rgba(14,154,167,0.14), rgba(255,166,0,0.06)), rgba(255,255,255,0.4);
+    --glass-strong: rgba(255,255,255,0.88);
+    --border: rgba(14,100,110,0.16);
+    --border-strong: rgba(14,100,110,0.28);
+    --text:#0b2530;
+    --text-muted: rgba(11,37,48,0.64);
+    --text-dim: rgba(11,37,48,0.44);
+    --accent:#0e9aa7;
+    --accent-deep:#0a7a85;
+    --accent-bg: rgba(14,154,167,0.12);
+    --amber:#b56400;
+    --amber-bg: rgba(255,166,0,0.14);
+    --red:#dc2626;
+    --blue:#0369a1;
+    --green:#15803d;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a1420;
+      --bg-gradient: radial-gradient(1800px 900px at 8% -15%, rgba(14,154,167,0.34), transparent 62%), radial-gradient(1300px 750px at 102% -8%, rgba(255,166,0,0.16), transparent 60%);
+      --surface:#101d29;
+      --glass: rgba(255,255,255,0.055);
+      --glass-card: rgba(255,255,255,0.055);
+      --glass-strong: rgba(255,255,255,0.09);
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.22);
+      --text:#eef6f7;
+      --text-muted: rgba(238,246,247,0.64);
+      --text-dim: rgba(238,246,247,0.42);
+      --accent:#2dc0cc;
+      --accent-deep:#12a3b0;
+      --accent-bg: rgba(18,163,176,0.20);
+      --amber:#ffa600;
+      --amber-bg: rgba(255,166,0,0.18);
+      --red:#f87171;
+      --blue:#38bdf8;
+      --green:#4ade80;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a1420;
+    --bg-gradient: radial-gradient(1800px 900px at 8% -15%, rgba(14,154,167,0.34), transparent 62%), radial-gradient(1300px 750px at 102% -8%, rgba(255,166,0,0.16), transparent 60%);
+    --surface:#101d29;
+    --glass: rgba(255,255,255,0.055);
+    --glass-card: rgba(255,255,255,0.055);
+    --glass-strong: rgba(255,255,255,0.09);
+    --border: rgba(255,255,255,0.12);
+    --border-strong: rgba(255,255,255,0.22);
+    --text:#eef6f7;
+    --text-muted: rgba(238,246,247,0.64);
+    --text-dim: rgba(238,246,247,0.42);
+    --accent:#2dc0cc;
+    --accent-deep:#12a3b0;
+    --accent-bg: rgba(18,163,176,0.20);
+    --amber:#ffa600;
+    --amber-bg: rgba(255,166,0,0.18);
+    --red:#f87171;
+    --blue:#38bdf8;
+    --green:#4ade80;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background-color:var(--bg); background-image:var(--bg-gradient); background-attachment:fixed;
+    color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:rgba(14,154,167,0.25); }
+  .wrap{ max-width:880px; margin:0 auto; padding:0 24px 100px; }
+  a{ color:var(--accent-deep); }
+  code{ font-family:ui-monospace,'SF Mono',Consolas,monospace; font-size:0.9em; background:var(--glass-strong); border:1px solid var(--border); padding:1px 6px; border-radius:4px; }
+  strong{ color:var(--text); }
+  img{ max-width:100%; display:block; border-radius:10px; border:1px solid var(--border-strong); box-shadow:0 8px 24px rgba(0,0,0,0.12); margin:14px 0 4px; }
+  .caption{ font-size:12.5px; color:var(--text-dim); margin:6px 0 0; text-align:center; }
+
+  header.app-bar{
+    position:sticky; top:0; z-index:5;
+    background:var(--glass); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 24px;
+  }
+  header.app-bar .brand{ display:flex; align-items:center; gap:9px; font-weight:800; font-size:15px; letter-spacing:-0.02em; }
+  .f-badge{ width:24px; height:24px; border-radius:6px; background:linear-gradient(135deg,var(--accent),var(--accent-deep)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:800; flex:none; }
+  .ver-chip{ font-size:11.5px; font-weight:700; color:var(--amber); background:var(--amber-bg); border:1px solid rgba(255,166,0,0.35); padding:3px 10px; border-radius:20px; }
+
+  .hero{ padding:56px 0 20px; }
+  .eyebrow{ font-size:11.5px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--accent-deep); margin-bottom:10px; }
+  h1{ font-size:clamp(28px,4.2vw,38px); font-weight:800; letter-spacing:-0.02em; margin:0 0 14px; text-wrap:balance; }
+  .lede{ font-size:16.5px; color:var(--text-muted); max-width:640px; margin:0; }
+
+  .facts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:28px 0 8px; }
+  .fact{ background:var(--glass-card); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid var(--border-strong); border-radius:10px; padding:14px 16px; }
+  .fact .k{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); margin-bottom:4px; }
+  .fact .v{ font-size:14px; font-weight:600; }
+
+  /* table of contents */
+  .toc{ background:var(--glass-card); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid var(--border-strong); border-radius:12px; padding:20px 22px; margin-top:24px; }
+  .toc h2{ margin:0 0 12px; font-size:15px; }
+  .toc ol{ margin:0; padding-left:20px; columns:2; column-gap:28px; }
+  .toc ol li{ margin-bottom:6px; font-size:13.5px; break-inside:avoid; }
+  .toc ol li a{ text-decoration:none; }
+  .toc ol li a:hover{ text-decoration:underline; }
+  @media (max-width:640px){ .toc ol{ columns:1; } }
+
+  section{ margin-top:58px; padding-top:6px; }
+  section > h2{ font-size:23px; font-weight:800; letter-spacing:-0.01em; margin:0 0 8px; scroll-margin-top:16px; }
+  section > h3{ font-size:17px; font-weight:700; margin:34px 0 6px; letter-spacing:-0.005em; scroll-margin-top:16px; }
+  .section-lede{ color:var(--text-muted); max-width:640px; margin:0 0 20px; font-size:14.5px; }
+  .back-top{ display:inline-block; margin-top:10px; font-size:12px; color:var(--text-dim); text-decoration:none; }
+
+  .card{
+    background:var(--glass-card); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%);
+    border:1px solid var(--border-strong); border-radius:12px; padding:20px 22px; margin:16px 0;
+  }
+  .card p:first-child{ margin-top:0; }
+  .card p:last-child{ margin-bottom:0; }
+
+  .note{ display:flex; gap:12px; background:var(--amber-bg); border:1px solid rgba(255,166,0,0.35); border-radius:10px; padding:14px 16px; margin:16px 0; font-size:13.5px; }
+  .note .ic{ font-size:18px; flex:none; line-height:1.3; }
+  .note b{ color:var(--amber); }
+
+  .warn{ display:flex; gap:12px; background:rgba(220,38,38,0.08); border:1px solid rgba(220,38,38,0.3); border-radius:10px; padding:14px 16px; margin:16px 0; font-size:13.5px; }
+  .warn .ic{ font-size:18px; flex:none; line-height:1.3; }
+  .warn b{ color:var(--red); }
+
+  ul, ol.plain{ margin:10px 0; padding-left:20px; }
+  ul li, ol.plain li{ margin-bottom:7px; font-size:14px; }
+  ul li b, ol.plain li b{ color:var(--text); font-weight:600; }
+
+  ol.walk{ counter-reset:walk; list-style:none; margin:16px 0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  ol.walk li{ counter-increment:walk; position:relative; padding-left:38px; font-size:14.5px; }
+  ol.walk li::before{ content: counter(walk); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,var(--accent),var(--accent-deep)); color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; }
+
+  .kbd{ font-family:ui-monospace,'SF Mono',Consolas,monospace; font-size:11.5px; font-weight:600; background:var(--glass-strong); border:1px solid var(--border-strong); padding:2px 7px; border-radius:5px; color:var(--text); white-space:nowrap; }
+
+  table.shortcuts{ width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px; }
+  table.shortcuts th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:700; padding:0 10px 8px; border-bottom:1px solid var(--border-strong); }
+  table.shortcuts td{ padding:10px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  table.shortcuts tr:last-child td{ border-bottom:none; }
+
+  footer{ margin-top:70px; padding-top:22px; border-top:1px solid var(--border); font-size:12.5px; color:var(--text-dim); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+</style>
+
+<header class="app-bar">
+  <div class="brand"><span class="f-badge">F</span> Foccus</div>
+  <span class="ver-chip">guia · v4.4.0</span>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Guia de uso completo</div>
+    <h1>Como usar o Foccus, passo a passo</h1>
+    <p class="lede">Este guia explica <strong>cada botão, cada tela e cada função</strong> do sistema, com prints reais de cada passo. Ele foi escrito pensando em quem está abrindo o Foccus pela primeira vez e nunca usou um sistema parecido — não é preciso saber nada de informática para seguir.</p>
+
+    <div class="facts">
+      <div class="fact"><div class="k">O que é</div><div class="v">Gestão de tarefas e projetos</div></div>
+      <div class="fact"><div class="k">Onde roda</div><div class="v">Direto no navegador</div></div>
+      <div class="fact"><div class="k">Precisa instalar algo?</div><div class="v">Não</div></div>
+      <div class="fact"><div class="k">Seus dados</div><div class="v">Ficam salvos no seu computador</div></div>
+    </div>
+
+    <div class="note">
+      <span class="ic">💡</span>
+      <div><b>Antes de começar:</b> ao longo deste guia, "clicar" sempre significa apertar e soltar o botão esquerdo do mouse uma vez sobre o item indicado. Quando o texto disser "clique no ✎", por exemplo, é para posicionar o ponteiro do mouse em cima daquele símbolo e clicar.</div>
+    </div>
+  </div>
+
+  <div class="toc">
+    <h2>Índice — clique em qualquer item para pular direto para ele</h2>
+    <ol>
+      <li><a href="#primeiro-acesso">1. Abrindo o Foccus pela primeira vez</a></li>
+      <li><a href="#cabecalho">2. O topo da tela (cabeçalho)</a></li>
+      <li><a href="#menu-lateral">3. O menu do lado esquerdo</a></li>
+      <li><a href="#minha-lista">4. Minha Lista — sua tela principal</a></li>
+      <li><a href="#criar-tarefa">5. Criando uma tarefa nova</a></li>
+      <li><a href="#detalhe-tarefa">6. Abrindo os detalhes de uma tarefa</a></li>
+      <li><a href="#excluir-tarefa">7. Concluindo e excluindo tarefas</a></li>
+      <li><a href="#selecao-multipla">8. Selecionando várias tarefas de uma vez</a></li>
+      <li><a href="#busca">9. Buscando tarefas, projetos e pessoas</a></li>
+      <li><a href="#projetos">10. A tela de Projetos</a></li>
+      <li><a href="#pessoas">11. A tela de Pessoas</a></li>
+      <li><a href="#anotacoes">12. A tela de Anotações</a></li>
+      <li><a href="#aguardando">13. A tela de Aguardando</a></li>
+      <li><a href="#kanban">14. A tela de Kanban</a></li>
+      <li><a href="#dashboard">15. O Painel do Projeto (Dashboard)</a></li>
+      <li><a href="#tema">16. Trocando entre modo claro e escuro</a></li>
+      <li><a href="#atalhos">17. Atalhos de teclado</a></li>
+      <li><a href="#dados">18. Onde ficam os seus dados — leia com atenção</a></li>
+      <li><a href="#versao">19. Versão deste guia</a></li>
+    </ol>
+  </div>
+
+  <section id="primeiro-acesso">
+    <h2>1. Abrindo o Foccus pela primeira vez</h2>
+    <p class="section-lede">O Foccus é um arquivo — não é um programa que se instala nem um site que precisa de internet para funcionar. Para usar, basta dar dois cliques no arquivo <code>Foccus.dc.html</code> (ou, se alguém já deixou um atalho pronto pra você, dois cliques nesse atalho). Ele vai abrir sozinho dentro do seu navegador de internet (Chrome, Edge, Firefox — qualquer um serve).</p>
+    <div class="note">
+      <span class="ic">🌐</span>
+      <div>Você <b>não precisa estar conectado à internet</b> para usar o Foccus no dia a dia — só a primeira vez que abrir, pra carregar a fonte de letra usada no visual. Depois disso, funciona normalmente até sem internet.</div>
+    </div>
+    <p>Assim que abrir, o sistema já aparece pronto pra uso, com uma tela parecida com esta:</p>
+    <img src="guia-imagens/01-visao-geral.png" alt="Tela inicial do Foccus, mostrando a lista de tarefas">
+    <p class="caption">A tela inicial do Foccus: menu à esquerda, cabeçalho no topo, e a lista de tarefas ocupando o centro.</p>
+  </section>
+
+  <section id="cabecalho">
+    <h2>2. O topo da tela (cabeçalho)</h2>
+    <p class="section-lede">A faixa fixa no topo da tela aparece em qualquer lugar do sistema em que você esteja, e tem sempre os mesmos botões. Da esquerda para a direita:</p>
+    <div class="card">
+      <ul>
+        <li><b>Ícone de três tracinhos (☰), no canto superior esquerdo</b> — abre e fecha o menu lateral, mostrando ou escondendo os nomes das telas. Veja a seção <a href="#menu-lateral">3. O menu do lado esquerdo</a>.</li>
+        <li><b>"F Foccus"</b> — é só o nome do sistema, não faz nada ao clicar.</li>
+        <li><b>Caixa de busca no meio</b>, com a lupa e o texto "Buscar tarefas, projetos, pessoas..." — clique nela e digite qualquer palavra para procurar em tudo que você já cadastrou. Veja a seção <a href="#busca">9. Buscando tarefas, projetos e pessoas</a>.</li>
+        <li><b>Botão "Atalhos (?)"</b> — abre uma pequena janela mostrando os atalhos de teclado do sistema (explicados na seção <a href="#atalhos">17. Atalhos de teclado</a>).</li>
+        <li><b>Botão "Modo claro" / "Modo escuro"</b> — troca a aparência do sistema entre um fundo claro e um fundo escuro. Veja a seção <a href="#tema">16. Trocando entre modo claro e escuro</a>.</li>
+        <li><b>Círculo colorido com duas letras</b>, no canto superior direito (as iniciais do seu nome) — clique nele para abrir uma janelinha e trocar o nome que aparece pra você dentro do sistema (por exemplo, no título "Lista de Fulano").</li>
+      </ul>
+    </div>
+    <img src="guia-imagens/03-editar-nome.png" alt="Janela para editar o nome do usuário, aberta ao clicar no círculo com as iniciais">
+    <p class="caption">Clicando no círculo com suas iniciais, abre esta janela para você digitar como quer ser chamado.</p>
+    <p>Para trocar o nome: apague o texto que já está escrito, digite o nome que você quer usar, e clique no botão azul-esverdeado <b>"Salvar"</b>. Se desistir, clique em <b>"Cancelar"</b> ou clique em qualquer área cinza-escura fora da janela.</p>
+
+    <h3>O botão de Atalhos</h3>
+    <p>Clicando em <b>"Atalhos (?)"</b>, aparece esta lista — é só uma referência rápida, você não precisa decorar nada, pode voltar aqui sempre que quiser:</p>
+    <img src="guia-imagens/04-atalhos.png" alt="Janela com a lista de atalhos de teclado do sistema">
+    <p class="caption">A janela de atalhos — os mesmos atalhos estão detalhados, um por um, na seção 17 deste guia.</p>
+    <p>Uma linha fininha logo abaixo do cabeçalho, quase imperceptível, muda de tamanho conforme o dia passa — é a <b>barra de eficiência diária</b>: ela mostra visualmente quantas das tarefas com prazo para hoje você já concluiu.</p>
+  </section>
+
+  <section id="menu-lateral">
+    <h2>3. O menu do lado esquerdo</h2>
+    <p class="section-lede">É a lista de telas do sistema. Por padrão ele aparece "encolhido", mostrando só os ícones, para ocupar pouco espaço. Clique no ícone de três tracinhos (☰) no canto superior esquerdo do cabeçalho para expandi-lo e ver o nome de cada tela:</p>
+    <img src="guia-imagens/02-menu-lateral.png" alt="Menu lateral expandido, mostrando o nome de cada tela do sistema">
+    <p class="caption">Menu lateral expandido. Clique no ☰ de novo para encolher e ganhar mais espaço na tela.</p>
+    <p>As sete telas disponíveis, na ordem em que aparecem:</p>
+    <div class="card">
+      <ul>
+        <li><b>Minha Lista</b> — a tela principal, com todas as suas tarefas em aberto. É onde você provavelmente vai passar mais tempo. Explicada em detalhes na seção 4.</li>
+        <li><b>Projetos</b> — as iniciativas ou frentes de trabalho que você acompanha, e o progresso de cada uma. Seção 10.</li>
+        <li><b>Pessoas</b> — os contatos ligados às suas tarefas (de quem você espera retorno, por exemplo). Seção 11.</li>
+        <li><b>Anotações</b> — um espaço para registrar avanços ou decisões que não viram uma tarefa formal. Seção 12.</li>
+        <li><b>Aguardando</b> — tudo que está travado esperando alguém te responder. Seção 13.</li>
+        <li><b>Kanban</b> — as mesmas tarefas, organizadas em colunas que você arrasta com o mouse. Seção 14.</li>
+        <li><b>Dashboard</b> — um painel visual e mais executivo, por projeto. Seção 15.</li>
+      </ul>
+    </div>
+    <p>Logo abaixo do nome de cada tela, quando o menu está expandido, aparecem dois botões extras: <b>"+ Tarefa"</b> e <b>"+ Pessoa"</b> — atalhos rápidos para criar uma tarefa nova (seção 5) ou cadastrar uma pessoa nova (seção 11), de qualquer lugar do sistema, sem precisar primeiro navegar até a tela certa.</p>
+    <p>Bem no rodapé do menu (só visível com ele expandido) aparece a data de hoje e o número da versão do sistema que está rodando no seu computador (por exemplo, <code>v4.2.0</code>).</p>
+  </section>
+
+  <section id="minha-lista">
+    <h2>4. Minha Lista — sua tela principal</h2>
+    <p class="section-lede">É a primeira coisa que você vê ao abrir o Foccus, e reúne todas as suas tarefas em aberto numa lista só. Vamos por partes, de cima para baixo.</p>
+    <img src="guia-imagens/05-minha-lista.png" alt="Tela Minha Lista completa, com cabeçalho, filtros e a lista de tarefas">
+    <p class="caption">A tela Minha Lista completa.</p>
+
+    <h3>4.1 — O título e os cartões de números</h3>
+    <p>No canto superior esquerdo da tela, o título mostra <b>"Lista de [seu nome]"</b> — clicando nele (ou no lápis ✎ ao lado), abre a mesma janela de trocar nome explicada na seção 2.</p>
+    <p>No canto superior direito, quatro cartões mostram números resumidos:</p>
+    <ul>
+      <li><b>Hoje</b> — quantas tarefas têm prazo para hoje.</li>
+      <li><b>Atrasadas</b> — quantas já passaram do prazo e ainda não foram concluídas.</li>
+      <li><b>Aguardando</b> — quantas estão esperando retorno de alguém.</li>
+      <li><b>Próximas</b> — tarefas com prazo nos próximos dias.</li>
+    </ul>
+    <p>Clicando em qualquer um desses quatro números, a lista abaixo é filtrada automaticamente para mostrar só aquelas tarefas.</p>
+
+    <h3>4.2 — As três abas: Todas, Hoje, Concluídas</h3>
+    <p>Logo abaixo do título, há três abas em formato de pílula:</p>
+    <ul>
+      <li><b>Todas</b> — mostra todas as tarefas ainda em aberto (esta é a aba que fica selecionada quando você abre o sistema).</li>
+      <li><b>Hoje</b> — mostra só as tarefas com prazo vencendo hoje.</li>
+      <li><b>Concluídas</b> — mostra o histórico de tarefas que você já marcou como feitas.</li>
+    </ul>
+    <p>Clique em uma delas para trocar de visualização — a aba selecionada fica destacada em verde-azulado.</p>
+
+    <h3>4.3 — Os filtros rápidos</h3>
+    <p>Abaixo das abas, há quatro botões menores: <b>🏳 P1</b>, <b>⏳ Aguardando</b>, <b>⛔ Bloqueadas</b> e <b>⚠ Atrasadas</b>. Eles funcionam como interruptores — clique em um para ligá-lo (ele fica destacado) e a lista passa a mostrar só as tarefas daquele tipo; clique de novo para desligar. Dá para ligar mais de um ao mesmo tempo, e a lista mostra só as tarefas que se encaixam em <i>todos</i> os filtros ligados.</p>
+    <img src="guia-imagens/12-filtro-rapido.png" alt="Lista de tarefas filtrada pelo botão P1, mostrando só tarefas de prioridade urgente">
+    <p class="caption">Exemplo: com o filtro "P1" ligado, a lista mostra só as tarefas de prioridade mais urgente. Repare que o balão "Tarefa excluída · Desfazer" no canto inferior direito é o aviso deixado por uma exclusão recente — mais sobre isso na seção 7.</p>
+
+    <h3>4.4 — Filtrar por Projeto ou por Pessoa</h3>
+    <p>No canto superior direito da área de filtros, há duas caixas de seleção: <b>"📁 Todos os Projetos"</b> e <b>"👤 Todas as Pessoas"</b>. Clicando em qualquer uma delas, abre uma lista para você escolher um projeto (ou pessoa) específico — a lista de tarefas passa a mostrar só o que está ligado àquele projeto ou pessoa. Para voltar a ver tudo, escolha a opção "Todos os Projetos" / "Todas as Pessoas" de novo.</p>
+
+    <h3>4.5 — Agrupar a lista</h3>
+    <p>No mesmo canto, há a caixa <b>"Agrupar: Nenhum"</b>. Clicando nela, você pode escolher agrupar a lista por <b>Projeto</b>, <b>Urgência</b> ou <b>Prazo</b> — em vez de uma lista corrida, as tarefas passam a ficar divididas em blocos com um título em cima de cada bloco (por exemplo, um bloco "Simplifica", outro "MEF", e assim por diante).</p>
+    <img src="guia-imagens/11-agrupar-projeto.png" alt="Lista de tarefas agrupada por projeto, com um título de bloco para cada projeto">
+    <p class="caption">A mesma lista, agora agrupada por Projeto — cada bloco mostra o nome do projeto e as tarefas daquele projeto embaixo.</p>
+
+    <h3>4.6 — Criando uma tarefa rápida</h3>
+    <p>Logo abaixo dos filtros, há uma caixa de texto tracejada escrito <b>"Criar tarefa rápida e pressionar Enter..."</b>. Esse é o jeito mais rápido de anotar algo: clique nela, digite o título da tarefa, e aperte a tecla <span class="kbd">Enter</span> do teclado. A tarefa é criada na hora, sem prioridade específica e sem projeto vinculado (você pode ajustar isso depois, abrindo o detalhe da tarefa — seção 6).</p>
+    <img src="guia-imagens/06-tarefa-rapida.png" alt="Caixa de tarefa rápida com um texto digitado, pronta para pressionar Enter">
+    <p class="caption">Digite o título e aperte Enter — a tarefa aparece imediatamente no topo da lista.</p>
+
+    <h3>4.7 — Lendo uma linha de tarefa</h3>
+    <p>Cada linha da lista é um "cartão" com várias informações lado a lado. Da esquerda para a direita:</p>
+    <div class="card">
+      <ul>
+        <li><b>✓ (marca de visto, cinza)</b> — clique para marcar a tarefa como concluída. Explicado na seção 7.</li>
+        <li><b>✕ (xis, vermelho)</b> — clique para excluir a tarefa. Também explicado na seção 7.</li>
+        <li><b>Seta pequena ▸</b> — só aparece em tarefas que têm subtarefas dentro. Clique para expandir e ver a lista de subtarefas ali mesmo, sem precisar abrir o detalhe completo.</li>
+        <li><b>Número dentro de um círculo colorido (❶❷❸❹)</b> — é a prioridade da tarefa. Clicando nele, abre um menu para trocar a prioridade na hora, sem precisar abrir o detalhe: <b>❶ vermelho = P1 (Urgente)</b>, <b>❷ laranja = P2 (Alta)</b>, <b>❸ azul = P3 (Normal)</b>, <b>❹ verde = P4 (Baixa)</b>.</li>
+        <li><b>Símbolo pequeno antes do título</b> (○ ◐ ⏳ ⛔ ✓ ⨯) — mostra o status atual da tarefa: círculo vazio (○) é "A Fazer", meio-preenchido (◐) é "Em andamento", ampulheta (⏳) é "Aguardando", proibido (⛔) é "Bloqueada", visto (✓) é "Concluída", xis (⨯) é "Cancelada".</li>
+        <li><b>Título da tarefa</b> — o texto principal da linha.</li>
+        <li><b>Bolinha colorida + nome do projeto</b>, à direita — mostra a qual projeto a tarefa pertence (ou "Inbox", se não tiver projeto).</li>
+        <li><b>Etiqueta amarela "Aguardando"</b> — só aparece se a tarefa estiver esperando retorno de alguém.</li>
+        <li><b>Etiqueta vermelha "⛔ Bloqueada"</b> — só aparece se a tarefa estiver marcada como bloqueada.</li>
+        <li><b>Data no fim da linha</b> — o prazo da tarefa. Clicando nela, você pode editar a data diretamente ali, sem abrir o detalhe. Datas em vermelho já passaram do prazo; em âmbar/laranja, vencem hoje.</li>
+      </ul>
+    </div>
+    <p>Clicando em qualquer parte vazia da linha (fora dos botões descritos acima), abre o painel de detalhes completo da tarefa — veja a seção 6.</p>
+
+    <h3>4.8 — Subtarefas dentro da linha</h3>
+    <p>Quando uma tarefa tem uma lista de subtarefas cadastrada (explicado na seção 6), aparece uma seta ▸ do lado esquerdo da linha. Clicando nela, a linha se expande e mostra cada subtarefa com uma caixinha de marcar (checkbox) — clique na caixinha pra marcar aquele item específico como feito, sem precisar concluir a tarefa inteira.</p>
+  </section>
+
+  <section id="criar-tarefa">
+    <h2>5. Criando uma tarefa nova</h2>
+    <p class="section-lede">Além da "tarefa rápida" explicada na seção anterior (que só pede o título), existe um formulário completo para criar uma tarefa já com projeto e prioridade definidos. Há três formas de abrir esse formulário:</p>
+    <ol class="walk">
+      <li>Clique no botão <b>"+ Tarefa"</b> na barra lateral esquerda (com o menu expandido).</li>
+      <li>Aperte a tecla <span class="kbd">N</span> do teclado, em qualquer lugar do sistema (desde que você não esteja digitando dentro de uma caixa de texto no momento).</li>
+      <li>Dentro do detalhe de uma tarefa já aberta, não há botão para "nova" — use uma das duas opções acima.</li>
+    </ol>
+    <img src="guia-imagens/07-nova-tarefa-modal.png" alt="Janela Nova Tarefa, com campos de título, projeto e prioridade">
+    <p class="caption">A janela "Nova Tarefa": título, projeto e prioridade.</p>
+    <p>Preencha:</p>
+    <ul>
+      <li><b>Título da tarefa</b> — obrigatório, digite o que precisa ser feito.</li>
+      <li><b>Caixa de seleção com o nome de um projeto</b> (à esquerda, mostrando "Inbox" por padrão) — escolha a qual projeto essa tarefa pertence. "Inbox" quer dizer "sem projeto definido ainda".</li>
+      <li><b>Caixa de seleção de prioridade</b> (à direita, mostrando "P3 — Normal" por padrão) — escolha entre P1 Urgente, P2 Alta, P3 Normal ou P4 Baixa.</li>
+    </ul>
+    <p>Depois de preencher, clique no botão verde-azulado <b>"Criar Tarefa"</b>. Se desistir, clique em <b>"Cancelar"</b> ou no ✕ no canto superior direito da janela, ou clique em qualquer área escura fora da janela.</p>
+  </section>
+
+  <section id="detalhe-tarefa">
+    <h2>6. Abrindo os detalhes de uma tarefa</h2>
+    <p class="section-lede">Clicando em qualquer parte vazia de uma linha da lista (em Minha Lista, Aguardando, no Kanban ou no detalhe de um Projeto), abre um painel deslizando pelo lado direito da tela, com tudo que dá pra configurar naquela tarefa. É o lugar mais completo do sistema para editar uma tarefa.</p>
+    <img src="guia-imagens/09-detalhe-tarefa.png" alt="Painel de detalhes de uma tarefa, mostrando todos os campos disponíveis">
+    <p class="caption">O painel de detalhes, com todos os campos visíveis de uma vez (nesta captura a tela foi alongada só para caber tudo na imagem — no seu computador, role a página para baixo dentro do painel para ver os campos de baixo).</p>
+    <p>De cima para baixo, os campos são:</p>
+    <div class="card">
+      <ul>
+        <li><b>Título</b>, bem no topo — clique nele para poder editar o texto.</li>
+        <li><b>✕</b> no canto superior direito — fecha o painel (também fecha clicando em qualquer área escura fora dele, ou apertando <span class="kbd">Esc</span>).</li>
+        <li><b>Projeto</b> — caixa de seleção para escolher a qual projeto a tarefa pertence.</li>
+        <li><b>Prioridade</b> — caixa de seleção com P1 a P4.</li>
+        <li><b>Status</b> — caixa de seleção com A Fazer, Em andamento, Aguardando, Bloqueada, Concluída ou Cancelada. Trocar para "Aguardando" faz surgir os campos extras de "Dados de Aguardo" descritos abaixo; trocar para "Bloqueada" pede o motivo do bloqueio.</li>
+        <li><b>Prazo</b> — campo de data. Clique no ícone de calendário para escolher a data num calendário visual, ou digite direto.</li>
+        <li><b>% de conclusão desta tarefa</b> — um número de 0 a 100 e uma barrinha visual, para você registrar o quanto já foi feito (usado também nos cálculos de progresso da tela Projetos e do Dashboard).</li>
+        <li><b>Dados de Aguardo</b> (só aparece se o Status estiver como "Aguardando") — <b>Pessoa</b> (de quem você espera retorno; se a pessoa ainda não existe, há a opção "+ Nova pessoa..." dentro da própria lista), <b>Data Follow-up</b> (quando você espera essa resposta) e <b>Motivo do Aguardo</b> (um texto livre explicando o que está sendo esperado).</li>
+        <li><b>Estimativa (minutos)</b> — quanto tempo você acha que essa tarefa deve levar, em minutos.</li>
+        <li><b>Descrição</b> — um campo de texto livre e maior, para detalhes ou instruções sobre a tarefa.</li>
+        <li><b>Checklist / Subtarefas</b> — uma caixinha de texto "Novo sub-item..." com um botão <b>"Adicionar"</b> ao lado. Digite o texto de uma subtarefa e clique em Adicionar (ou aperte Enter) para incluí-la na lista; cada subtarefa criada aparece com uma caixinha de marcar, que também fica visível direto na linha da lista (seção 4.8).</li>
+        <li><b>Anotações (número)</b> — duas caixas: uma maior para "Anotações gerais e notas rápidas..." (um bloco de texto livre que fica salvo junto com a tarefa, edite e ele salva sozinho) e uma menor "Adicionar anotação registrada..." com um botão <b>"Salvar"</b> — essa segunda cria um registro com data, que também aparece automaticamente na tela Anotações (seção 12).</li>
+        <li><b>Histórico de alterações</b> — uma lista somente de leitura, mostrando data e o que foi mudado nessa tarefa ao longo do tempo (por exemplo "Tarefa criada", "Status alterado para Concluída"). Serve como registro, não dá pra editar.</li>
+        <li><b>Botão verde "Concluir tarefa"</b>, no rodapé do painel — marca a tarefa como feita (mesmo efeito do ✓ na linha da lista).</li>
+        <li><b>Botão "Excluir"</b>, ao lado — apaga a tarefa. Veja a seção 7 sobre como desfazer, caso erre.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <span class="ic">💾</span>
+      <div>Você não precisa clicar em nenhum botão de "salvar" geral — cada campo desse painel salva sozinho assim que você sai dele (clica fora ou aperta Tab/Enter). Só os dois campos de anotação registrada e o checklist têm um botão próprio, porque cada clique ali cria um novo item na lista.</div>
+    </div>
+  </section>
+
+  <section id="excluir-tarefa">
+    <h2>7. Concluindo e excluindo tarefas</h2>
+    <h3>Concluir</h3>
+    <p>Clique na marca de visto (✓) no início de qualquer linha da lista, ou no botão verde "Concluir tarefa" dentro do painel de detalhes. O título da tarefa passa a aparecer riscado, e ela some da aba "Todas" (mas continua visível na aba "Concluídas"). Se clicar de novo no ✓ de uma tarefa já concluída, ela volta ao normal.</p>
+    <h3>Excluir</h3>
+    <p>Clique no xis vermelho (✕) ao lado do ✓, em qualquer linha, ou no botão "Excluir" dentro do painel de detalhes. A tarefa some da lista <b>imediatamente, sem pedir confirmação</b> — mas não se preocupe: no canto inferior direito da tela aparece um aviso "Tarefa excluída" com um link <b>"Desfazer"</b>.</p>
+    <img src="guia-imagens/08-excluir-desfazer.png" alt="Aviso no canto inferior direito da tela, avisando que uma tarefa foi excluída, com opção de desfazer">
+    <p class="caption">O aviso de exclusão, com a opção de desfazer, no canto inferior direito.</p>
+    <div class="warn">
+      <span class="ic">⚠️</span>
+      <div><b>Atenção:</b> esse aviso de "Desfazer" fica na tela só por alguns segundos, ou até você fazer outra ação. Se precisar desfazer, clique em "Desfazer" o quanto antes. Depois que ele sumir da tela, a exclusão não pode mais ser revertida.</div>
+    </div>
+  </section>
+
+  <section id="selecao-multipla">
+    <h2>8. Selecionando várias tarefas de uma vez</h2>
+    <p class="section-lede">Quando você precisa mudar várias tarefas ao mesmo tempo (por exemplo, mover todas para outro projeto, ou concluir várias juntas), não é preciso abrir uma por uma. Existem três formas de selecionar mais de uma tarefa:</p>
+    <ol class="walk">
+      <li>Segure a tecla <span class="kbd">Ctrl</span> do teclado e clique em cada tarefa que quiser incluir na seleção, uma de cada vez.</li>
+      <li>Clique numa tarefa, depois segure a tecla <span class="kbd">Shift</span> e clique em outra mais abaixo (ou acima) — todas as tarefas entre as duas ficam selecionadas de uma vez.</li>
+      <li>Clique num espaço vazio da tela (fora de qualquer tarefa) e, sem soltar o botão do mouse, arraste até formar um retângulo sobre as tarefas que quer selecionar — todas dentro do retângulo ficam marcadas.</li>
+    </ol>
+    <p>Assim que há alguma tarefa selecionada, uma barra flutuante aparece na parte de baixo da tela:</p>
+    <img src="guia-imagens/10-selecao-multipla.png" alt="Duas tarefas selecionadas na lista, com a barra de ações em lote aparecendo na parte de baixo da tela">
+    <p class="caption">Duas tarefas selecionadas (destacadas com uma faixa colorida à esquerda) e a barra de ações no rodapé.</p>
+    <p>Nessa barra, da esquerda para a direita:</p>
+    <ul>
+      <li><b>"[número] tarefas selecionadas"</b> com um ✕ ao lado — mostra quantas estão marcadas; clique no ✕ para limpar a seleção (ou aperte <span class="kbd">Esc</span>).</li>
+      <li><b>Caixa "Atribuir Projeto..."</b> — escolha um projeto para mover todas as tarefas selecionadas para ele de uma vez.</li>
+      <li><b>Quatro botões numerados coloridos (❶❷❸❹)</b> — clique em um para definir essa prioridade em todas as tarefas selecionadas de uma vez.</li>
+      <li><b>Botão "✓ Concluir"</b> — marca todas as selecionadas como concluídas.</li>
+      <li><b>Botão "✕ Excluir"</b> — apaga todas as selecionadas (também com aviso de desfazer, igual à exclusão individual).</li>
+    </ul>
+  </section>
+
+  <section id="busca">
+    <h2>9. Buscando tarefas, projetos e pessoas</h2>
+    <p class="section-lede">Clique na caixa de busca no topo da tela (com a lupa 🔍) ou aperte a tecla <span class="kbd">/</span> do teclado em qualquer lugar do sistema — o cursor pula direto para ela. Digite qualquer palavra: o nome de uma tarefa, de um projeto ou de uma pessoa.</p>
+    <img src="guia-imagens/13-busca.png" alt="Resultado de uma busca pelo nome de uma pessoa, mostrando as tarefas relacionadas">
+    <p class="caption">Buscando pelo nome "Ligia" — o sistema mostra todas as tarefas que mencionam ou estão ligadas a esse termo.</p>
+    <p>Os resultados aparecem na hora, substituindo a tela em que você estava, numa lista igual à de Minha Lista. Para sair da busca, apague o texto da caixa (ou apague tudo e aperte <span class="kbd">Esc</span>).</p>
+  </section>
+
+  <section id="projetos">
+    <h2>10. A tela de Projetos</h2>
+    <p class="section-lede">Abra clicando em "Projetos" no menu lateral. Mostra um cartão para cada projeto que você tem cadastrado, em forma de grade.</p>
+    <img src="guia-imagens/14-projetos.png" alt="Tela de Projetos, mostrando os cartões de cada projeto em uma grade">
+    <p class="caption">A tela Projetos — cada cartão resume um projeto.</p>
+
+    <h3>10.1 — As abas de status</h3>
+    <p>No topo, as abas <b>Todos</b>, <b>Ativos</b>, <b>Pausados</b>, <b>Concluídos</b> e <b>Arquivados / Inativos</b> filtram quais projetos aparecem na grade abaixo.</p>
+
+    <h3>10.2 — Lendo um cartão de projeto</h3>
+    <p>Cada cartão mostra: o nome do projeto (com uma bolinha colorida identificando ele) e um lápis ✎ ao lado para renomear; uma etiqueta de status no canto (Ativo, Pausado, Concluído...); uma barra de progresso com a porcentagem concluída; e, embaixo, quantas tarefas em aberto o projeto tem — e, se houver, quantas estão atrasadas, em vermelho.</p>
+    <p>Clique em qualquer parte do cartão (fora do lápis) para abrir o detalhe daquele projeto.</p>
+
+    <h3>10.3 — Criando um projeto novo</h3>
+    <p>Clique no botão <b>"+ Novo Projeto"</b> no canto superior direito da tela.</p>
+    <img src="guia-imagens/15-novo-projeto.png" alt="Janela Novo Projeto, com um campo para digitar o nome">
+    <p class="caption">A janela Novo Projeto — só pede o nome.</p>
+    <p>Digite o nome e clique em <b>"Criar Projeto"</b>.</p>
+
+    <h3>10.4 — O detalhe de um projeto</h3>
+    <p>Clicando em um cartão, você vê a lista de tarefas daquele projeto específico, junto com a barra de progresso geral:</p>
+    <img src="guia-imagens/16-detalhe-projeto.png" alt="Tela de detalhe de um projeto, com a lista de tarefas daquele projeto">
+    <p class="caption">O detalhe do projeto "Simplifica" — mesma lógica de linha de tarefa da Minha Lista.</p>
+    <p>O link <b>"← Voltar para Projetos"</b>, no canto superior esquerdo, leva de volta para a grade de cartões.</p>
+
+    <h3>10.5 — Renomeando um projeto</h3>
+    <p>Clique no lápis ✎ ao lado do nome do projeto — tanto no cartão da grade quanto no título da tela de detalhe — para abrir esta janela:</p>
+    <img src="guia-imagens/17-editar-projeto.png" alt="Janela Editar Projeto, com o nome atual já preenchido no campo de texto">
+    <p class="caption">A janela de renomear, com o nome atual já preenchido.</p>
+    <p>Apague, digite o novo nome, e clique em <b>"Salvar"</b>.</p>
+  </section>
+
+  <section id="pessoas">
+    <h2>11. A tela de Pessoas</h2>
+    <p class="section-lede">Abra clicando em "Pessoas" no menu lateral. É a lista de contatos que você relaciona às suas tarefas — principalmente para marcar de quem você está "aguardando" um retorno.</p>
+    <img src="guia-imagens/18-pessoas.png" alt="Tela de Pessoas, mostrando os cartões de cada pessoa cadastrada">
+    <p class="caption">A tela Pessoas.</p>
+    <p>Cada cartão mostra o nome da pessoa, o cargo ou área dela (se você preencheu), e quantas pendências estão aguardando resposta dela no momento. Clique no lápis ✎ no canto do cartão para editar nome ou cargo.</p>
+
+    <h3>11.1 — Cadastrando uma pessoa nova</h3>
+    <p>Clique em <b>"+ Nova Pessoa"</b>, no canto superior direito (esse mesmo botão também existe na barra lateral esquerda, com o menu expandido, para acesso rápido de qualquer tela).</p>
+    <img src="guia-imagens/19-nova-pessoa.png" alt="Janela Nova Pessoa, com campos para nome e cargo">
+    <p class="caption">A janela Nova Pessoa.</p>
+    <p>Preencha o <b>nome</b> (obrigatório) e, se quiser, o <b>cargo ou área</b> (por exemplo "Financeiro", "TI") — esse segundo campo é opcional. Clique em <b>"Salvar"</b>.</p>
+    <div class="note">
+      <span class="ic">💡</span>
+      <div>Você também pode cadastrar uma pessoa nova sem sair da tarefa: dentro do painel de detalhes de uma tarefa, ao marcar o Status como "Aguardando" e abrir a caixa "Pessoa", há sempre a opção <b>"+ Nova pessoa..."</b> no final da lista.</div>
+    </div>
+  </section>
+
+  <section id="anotacoes">
+    <h2>12. A tela de Anotações</h2>
+    <p class="section-lede">Abra clicando em "Anotações" no menu lateral. Serve para registrar o andamento de um projeto mesmo quando aquilo não é, formalmente, uma tarefa — um combinado, uma decisão tomada numa reunião, um aviso importante.</p>
+    <img src="guia-imagens/20-anotacoes.png" alt="Tela de Anotações, com o formulário para criar uma nova e a lista de anotações já registradas">
+    <p class="caption">A tela Anotações.</p>
+    <p>No topo, a caixa <b>"Consultar Projeto"</b> filtra as anotações mostradas abaixo por um projeto específico (ou "Todos os projetos").</p>
+    <p>No bloco <b>"Nova anotação do projeto"</b>, preencha:</p>
+    <ul>
+      <li><b>Caixa de seleção do projeto</b> — a qual projeto essa anotação se refere.</li>
+      <li><b>Título da anotação</b> — um resumo curto.</li>
+      <li><b>Data do registro</b> — já vem preenchida com a data de hoje, mas pode ser trocada.</li>
+      <li><b>Data referência</b> (opcional) — use quando o conteúdo da anotação se refere a um momento diferente de hoje (por exemplo, você está registrando hoje algo que aconteceu semana passada).</li>
+      <li><b>Caixa grande de descrição</b> — o texto da anotação em si.</li>
+    </ul>
+    <p>Clique em <b>"Adicionar anotação"</b> para salvar. Ela aparece na lista abaixo, agrupada pelo nome do projeto.</p>
+    <div class="note">
+      <span class="ic">🔗</span>
+      <div>As anotações registradas <i>dentro</i> de uma tarefa (campo "Adicionar anotação registrada..." explicado na seção 6) também aparecem automaticamente aqui, marcadas com a etiqueta roxa <b>"TAREFA"</b> — e um link <b>"Abrir tarefa →"</b> leva direto para ela.</div>
+    </div>
+  </section>
+
+  <section id="aguardando">
+    <h2>13. A tela de Aguardando</h2>
+    <p class="section-lede">Abra clicando em "Aguardando" no menu lateral. Reúne, num só lugar, todas as tarefas que estão travadas esperando alguém te dar um retorno — agrupadas pelo nome da pessoa.</p>
+    <img src="guia-imagens/21-aguardando.png" alt="Tela Aguardando, com as tarefas agrupadas pelo nome de cada pessoa">
+    <p class="caption">A tela Aguardando — um bloco para cada pessoa.</p>
+    <p>Uma tarefa aparece aqui automaticamente assim que você muda o <b>Status</b> dela para <b>"Aguardando"</b> no painel de detalhes (seção 6), e escolhe de quem está esperando resposta. Ela some da lista comum (Minha Lista) e passa a aparecer só aqui, junto com a data em que você espera essa resposta.</p>
+
+    <h3>13.1 — Comentários de acompanhamento</h3>
+    <p>Cada linha tem um botão <b>"💬 Comentários"</b> à direita. Clicando nele, a linha se expande e mostra um pequeno histórico de conversa sobre aquele acompanhamento:</p>
+    <img src="guia-imagens/22-aguardando-comentarios.png" alt="Linha de tarefa expandida na tela Aguardando, mostrando a caixa para adicionar um comentário de follow-up">
+    <p class="caption">A área de comentários expandida — ainda sem nenhum comentário registrado nesta tarefa.</p>
+    <p>Digite na caixa <b>"Escreva um comentário de follow-up..."</b> e clique em <b>"Enviar"</b> (ou aperte Enter) para registrar. Cada comentário fica salvo com a data, formando um histórico de cobranças/respostas sobre aquele assunto.</p>
+  </section>
+
+  <section id="kanban">
+    <h2>14. A tela de Kanban</h2>
+    <p class="section-lede">Abra clicando em "Kanban" no menu lateral. Mostra as mesmas tarefas de sempre, só que organizadas em colunas — um jeito visual muito usado para acompanhar o fluxo de trabalho.</p>
+    <img src="guia-imagens/23-kanban.png" alt="Tela Kanban, com tarefas organizadas em colunas por status">
+    <p class="caption">O Kanban, agrupado por Status (A Fazer, Em andamento, Bloqueada, Aguardando...).</p>
+    <p>Cada cartão mostra um círculo colorido com uma letra (a inicial da pessoa aguardada, ou do projeto), o título da tarefa, a prioridade, o projeto e o prazo.</p>
+    <p><b>Para mudar o status de uma tarefa</b>, clique e segure o botão do mouse sobre o cartão, arraste até a coluna desejada, e solte — a tarefa muda automaticamente para o status daquela coluna.</p>
+    <p>No canto superior direito, a caixa <b>"Agrupar"</b> deixa escolher se as colunas representam <b>Status</b>, <b>Projeto</b>, <b>Urgência</b> ou <b>Prazo</b> — trocando essa opção, arrastar um cartão passa a mudar o projeto, a prioridade ou o prazo em vez do status, dependendo da escolha.</p>
+    <p>Clicar em qualquer parte do cartão (sem arrastar) abre o painel de detalhes completo da tarefa, igual explicado na seção 6.</p>
+  </section>
+
+  <section id="dashboard">
+    <h2>15. O Painel do Projeto (Dashboard)</h2>
+    <p class="section-lede">Abra clicando em "Dashboard" no menu lateral. É a visão mais executiva do sistema — pensada para acompanhar o andamento de um projeto (ou de todos juntos) de forma visual, com gráficos.</p>
+    <img src="guia-imagens/24-dashboard-kanban.png" alt="Painel do Projeto, modo Kanban, com a barra de estatísticas no topo">
+    <p class="caption">O Dashboard, no modo Kanban — o padrão ao abrir a tela.</p>
+
+    <h3>15.1 — O seletor de projeto e a barra de estatísticas</h3>
+    <p>No topo, a caixa à esquerda escolhe qual projeto está sendo analisado (ou "Todos os Projetos", pra ver a soma de tudo). No canto direito, uma etiqueta laranja mostra a <b>previsão de conclusão</b> calculada pelo sistema, com base no ritmo de conclusão de tarefas até agora.</p>
+    <p>Logo abaixo, a barra central mostra: o <b>total de tarefas</b>, a <b>porcentagem de conclusão</b>, um <b>anel visual</b> com essa mesma porcentagem, e a contagem de quantas tarefas estão <b>Concluídas</b>, <b>Em Progresso</b> e <b>Futuras</b>.</p>
+
+    <h3>15.2 — Os quatro modos de visualização</h3>
+    <p>A pílula de botões <b>Kanban / Gantt / Burndown / Visão Geral</b> troca o que aparece abaixo da barra de estatísticas. Clique em qualquer um dos quatro nomes para trocar.</p>
+
+    <h3>15.3 — Modo Kanban</h3>
+    <p>Três colunas fixas — <b>Futuras</b>, <b>Em Progresso</b> e <b>Concluídas</b> — com os cartões de tarefa daquele projeto, também arrastáveis entre colunas (igual à tela Kanban da seção 14, mas com só três agrupamentos fixos e visual mais executivo).</p>
+
+    <h3>15.4 — Modo Gantt</h3>
+    <p>Um gráfico de barras horizontais, uma linha por tarefa, mostrando o período entre o início e o prazo de cada uma ao longo do tempo — útil para visualizar sobreposições e prazos apertados de uma vez.</p>
+    <img src="guia-imagens/25-dashboard-gantt.png" alt="Painel do Projeto, modo Gantt, com barras horizontais mostrando o período de cada tarefa">
+    <p class="caption">O modo Gantt — a linha vertical laranja marca o dia de hoje.</p>
+
+    <h3>15.5 — Modo Burndown</h3>
+    <p>Um gráfico de barras mostrando quantas tarefas ainda restavam em aberto, semana a semana — comparando o ritmo <b>Real</b> (barra azul-esverdeada) com o ritmo <b>Ideal</b> (contorno tracejado) e a <b>Previsão</b> de quando o trabalho deve terminar.</p>
+    <img src="guia-imagens/26-dashboard-burndown.png" alt="Painel do Projeto, modo Burndown, com gráfico de barras mostrando o ritmo de conclusão ao longo das semanas">
+    <p class="caption">O modo Burndown, com a previsão de conclusão destacada em laranja embaixo do gráfico.</p>
+
+    <h3>15.6 — Modo Visão Geral</h3>
+    <p>Três blocos empilhados: um gráfico de <b>Velocidade</b> (quantas tarefas você concluiu por semana, nas últimas semanas), um conjunto de <b>anéis de Progresso por Projeto</b> (um anel para cada projeto, comparando todos lado a lado) e um <b>Mapa de Calor</b> (uma tabela cruzando projetos com status, mostrando quantas tarefas de cada projeto estão em cada situação).</p>
+    <img src="guia-imagens/27-dashboard-visao-geral.png" alt="Painel do Projeto, modo Visão Geral, com gráfico de velocidade, anéis de progresso e mapa de calor">
+    <p class="caption">O modo Visão Geral — a visão mais ampla, comparando todos os projetos de uma vez.</p>
+  </section>
+
+  <section id="tema">
+    <h2>16. Trocando entre modo claro e escuro</h2>
+    <p class="section-lede">Clique no botão <b>"Modo claro"</b> ou <b>"Modo escuro"</b> no cabeçalho, no canto superior direito (o texto do botão sempre mostra o modo para o qual você vai mudar, não o modo atual). A troca é instantânea, em toda a tela.</p>
+    <img src="guia-imagens/28-modo-escuro.png" alt="Tela Minha Lista no modo escuro">
+    <p class="caption">A mesma tela Minha Lista, agora no modo escuro.</p>
+    <p>A escolha fica <b>salva automaticamente</b> — da próxima vez que você abrir o Foccus nesse mesmo computador e navegador, ele já abre no modo que você escolheu por último.</p>
+  </section>
+
+  <section id="atalhos">
+    <h2>17. Atalhos de teclado</h2>
+    <p class="section-lede">Todos esses atalhos funcionam em qualquer lugar do sistema (menos, claro, se você estiver digitando dentro de uma caixa de texto no momento — nesse caso, o teclado escreve normalmente). A mesma lista também está disponível dentro do próprio sistema, clicando em "Atalhos (?)" no cabeçalho.</p>
+    <table class="shortcuts">
+      <tr><th>Tecla</th><th>O que faz</th></tr>
+      <tr><td><span class="kbd">/</span></td><td>Coloca o cursor na caixa de busca, pronta para digitar.</td></tr>
+      <tr><td><span class="kbd">N</span></td><td>Abre a janela de criar uma nova tarefa.</td></tr>
+      <tr><td><span class="kbd">Shift</span> + clique</td><td>Seleciona um intervalo de tarefas de uma vez (da que você já tinha clicado até a nova).</td></tr>
+      <tr><td><span class="kbd">Ctrl</span> + clique</td><td>Adiciona ou remove uma tarefa da seleção múltipla, uma de cada vez.</td></tr>
+      <tr><td>Arraste do mouse</td><td>Clique numa área vazia e arraste para selecionar várias tarefas dentro de um retângulo.</td></tr>
+      <tr><td><span class="kbd">Esc</span></td><td>Fecha qualquer janela aberta, ou limpa uma seleção múltipla ativa.</td></tr>
+      <tr><td><span class="kbd">?</span></td><td>Abre a janela de atalhos dentro do próprio sistema.</td></tr>
+    </table>
+  </section>
+
+  <section id="dados">
+    <h2>18. Onde ficam os seus dados — leia com atenção</h2>
+    <p class="section-lede">Esta é a parte mais importante deste guia para quem nunca usou um sistema assim: <b>o Foccus não tem servidor, não tem "nuvem", e não sincroniza nada automaticamente entre computadores.</b></p>
+    <div class="warn">
+      <span class="ic">⚠️</span>
+      <div>
+        Tudo o que você cria — tarefas, projetos, pessoas, anotações — fica salvo <b>dentro do próprio navegador</b> que você usou para abrir o arquivo, numa área de armazenamento chamada <code>localStorage</code>. Isso tem consequências importantes:
+        <ul style="margin-top:10px;">
+          <li>Os dados <b>sobrevivem</b> a fechar o navegador, desligar o computador e ligar de novo — eles ficam guardados normalmente.</li>
+          <li>Os dados <b>não aparecem</b> se você abrir o mesmo arquivo Foccus em <b>outro computador</b>, ou até no <b>mesmo computador só que em outro navegador</b> (por exemplo, se você usou o Chrome e depois abre no Edge).</li>
+          <li>Se alguém (ou algum programa de limpeza) <b>apagar os dados de navegação/cookies/cache do site</b>, tudo o que você cadastrou é perdido — não tem como recuperar.</li>
+          <li>Não existe login, senha ou conta — qualquer pessoa que abrir esse mesmo arquivo, nesse mesmo navegador e computador, vê os mesmos dados que você.</li>
+        </ul>
+      </div>
+    </div>
+    <p>Na prática, isso significa: <b>use sempre o mesmo computador e o mesmo navegador</b> para acessar o Foccus, e evite limpar os dados de navegação desse navegador sem saber o que está fazendo. Se precisar de um backup, procure a pessoa responsável pelo sistema — existe uma pasta <code>versions/</code> no projeto com versões anteriores do arquivo, mas ela não guarda os <i>dados</i> que você digitou, só o funcionamento do sistema em si.</p>
+  </section>
+
+  <section id="versao">
+    <h2>19. Versão deste guia</h2>
+    <p class="section-lede">Este guia foi escrito para a versão <b>4.4.0</b> do Foccus (a versão aparece também no rodapé do menu lateral, com o menu expandido). Se o sistema for atualizado depois, pode ser que apareçam pequenas diferenças entre o que está escrito aqui e o que você vê na tela — a lógica geral de uso, porém, tende a continuar a mesma.</p>
+  </section>
+
+  <footer>
+    <span>Guia do Foccus</span>
+    <span>Sistema de gestão de tarefas e projetos — sem backend, seus dados ficam com você</span>
+  </footer>
+
+</div>

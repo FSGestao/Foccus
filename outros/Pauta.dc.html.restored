@@ -1,0 +1,603 @@
+Created At: 2026-08-21T15:07:10-03:00
+Completed At: 2026-08-21T15:07:10-03:00
+File Path: `file:///c:/Users/ivan.sereno/Desktop/Code/Foccus/Pauta.dc.html`
+Total Lines: 2230
+Total Bytes: 152674
+Showing lines 1 to 800
+Content truncated: showing bytes 0-46080 of 63322. To see more, call this tool again with the same line range and ContentOffset=46080.
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!DOCTYPE html>
+2: <html>
+3: <head>
+4: <meta charset="utf-8">
+5: <meta name="viewport" content="width=device-width, initial-scale=1">
+6: <title>Foccus — Lista Profissional</title>
+7: <script src="./support.js" onerror="(function(){
+8:   var d=document;
+9:   d.body.style.cssText='margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f11;font-family:system-ui,sans-serif;';
+10:   d.body.innerHTML='<div style="text-align:center;max-width:420px;padding:32px;"><div style="width:44px;height:44px;border-radius:10px;background:#6366f1;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;margin:0 auto 16px;">F</div><h2 style="color:#f1f1f3;margin:0 0 8px;font-size:17px;">Arquivo de suporte não encontrado</h2><p style="color:#888;font-size:13.5px;line-height:1.6;margin:0 0 20px;">O arquivo <code style=\"background:#1e1e22;padding:2px 6px;border-radius:4px;color:#a78bfa;\">support.js</code> não pôde ser carregado.<br>Certifique-se de que ele está na <strong style=\"color:#d4d4d8;\">mesma pasta</strong> que este arquivo HTML.</p><button onclick="location.reload()" style="cursor:pointer;padding:8px 20px;border-radius:7px;border:none;background:#6366f1;color:#fff;font-size:13px;font-weight:600;">⟳ Recarregar página</button></div>';
+11:   console.error('[Foccus] Falha ao carregar support.js. Verifique se o arquivo existe na mesma pasta que o HTML.');
+12: })()"></script>
+13: </head>
+14: <body>
+15: <x-dc>
+16: <helmet data-dc-atomics>
+17: <style>
+18: * { box-sizing: border-box; }
+19: body { margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+20: ::selection { background: rgba(99,102,241,0.25); }
+21: input, select, textarea, button { font-family: inherit; }
+22: input:focus, select:focus, textarea:focus { outline: none; border-color: var(--pb-accent) !important; box-shadow: 0 0 0 2px var(--pb-accent-bg); }
+23: input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; cursor: pointer; filter: var(--pb-calendar-filter); }
+24: button:focus-visible { outline: 2px solid var(--pb-accent); outline-offset: 1px; }
+25: a { color: inherit; text-decoration: none; }
+26: ::-webkit-scrollbar { width: 6px; height: 6px; }
+27: ::-webkit-scrollbar-track { background: transparent; }
+28: ::-webkit-scrollbar-thumb { background: rgba(var(--pb-text-rgb), 0.15); border-radius: 3px; }
+29: ::-webkit-scrollbar-thumb:hover { background: rgba(var(--pb-text-rgb), 0.25); }
+30: </style>
+31: </helmet>
+32: 
+33: <script>
+34: (function() {
+35:   // Monitoramento de desempenho (Foccus Performance Monitor)
+36:   var t0 = performance.now();
+37:   window.addEventListener('load', function() {
+38:     var loadTime = Math.round(performance.now() - t0);
+39:     console.info('[Foccus] Tempo de carregamento completo: ' + loadTime + ' ms');
+40:     // Detecta LCP via PerformanceObserver (suportado em Chrome/Edge)
+41:     if (typeof PerformanceObserver !== 'undefined') {
+42:       try {
+43:         var po = new PerformanceObserver(function(list) {
+44:           var entries = list.getEntries();
+45:           var last = entries[entries.length - 1];
+46:           console.info('[Foccus] LCP (Largest Contentful Paint): ' + Math.round(last.startTime) + ' ms' + (last.startTime > 2500 ? ' ⚠️ acima do ideal (> 2500 ms)' : ' ✅ dentro do ideal'));
+47:           po.disconnect();
+48:         });
+49:         po.observe({ type: 'largest-contentful-paint', buffered: true });
+50:       } catch(e) { /* navegador não suporta LCP observer */ }
+51:     }
+52:   });
+53: })();
+54: </script>
+55: 
+56: <div style="min-height:100vh;{{ themeVarsStyle }}background:var(--pb-bg);color:var(--pb-text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:1.45;letter-spacing:-0.006em;">
+57: 
+58:   <!-- Topbar -->
+59:   <header style="position:sticky;top:0;z-index:8;background:var(--pb-bg);border-bottom:1px solid var(--pb-border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+60:     <div style="{{ headerContainerStyle }}">
+61:       
+62:       <!-- Brand & Left Navigation Toggle -->
+63:       <div style="display:flex;align-items:center;gap:12px;">
+64:         <div style="display:flex;align-items:center;gap:8px;">
+65:           <div style="width:22px;height:22px;border-radius:6px;background:var(--pb-accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;box-shadow:0 1px 3px rgba(0,0,0,0.15);">F</div>
+66:           <span style="font-weight:600;font-size:15px;letter-spacing:-0.02em;">Foccus</span>
+67:         </div>
+68:         <span style="color:var(--pb-border);font-size:16px;">/</span>
+69:         <button onClick="{{ toggleMenu }}" style="cursor:pointer;font-size:12.5px;color:var(--pb-text-muted);background:transparent;border:1px solid var(--pb-border);border-radius:6px;padding:4px 10px;display:inline-flex;align-items:center;gap:6px;transition:all .12s ease;" style-hover="background:var(--pb-hover);color:var(--pb-text);border-color:var(--pb-border-hover);">
+70:           <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 16 16"><line x1="2" y1="4" x2="14" y2="4"></line><line x1="2" y1="8" x2="14" y2="8"></line><line x1="2" y1="12" x2="14" y2="12"></line></svg>
+71:           <span>{{ menuToggleLabel }}</span>
+72:         </button>
+73:       </div>
+74: 
+75:       <!-- Search bar -->
+76:       <div style="flex:1;max-width:440px;position:relative;">
+77:         <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--pb-text-dim);pointer-events:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"></circle><line x1="10.5" y1="10.5" x2="14" y2="14"></line></svg>
+78:         <input class="pauta-search" type="text" placeholder="Buscar tarefas, projetos, pessoas..." value="{{ search }}" onChange="{{ onSearchChange }}" aria-label="Buscar tarefas" style="width:100%;height:32px;padding:4px 10px 4px 30px;font-size:13px;color:var(--pb-text);background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:6px;transition:border-color .12s ease,box-shadow .12s ease;" />
+79:       </div>
+80: 
+81:       <!-- Right controls -->
+82:       <div style="display:flex;align-items:center;gap:8px;">
+83:         <button onClick="{{ toggleTheme }}" title="Alternar tema" style="cursor:pointer;font-size:12.5px;color:var(--pb-text-muted);background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:6px;padding:5px 10px;display:inline-flex;align-items:center;gap:6px;transition:all .12s ease;" style-hover="background:var(--pb-hover);color:var(--pb-text);border-color:var(--pb-border-hover);">
+84:           <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3.2"></circle><line x1="8" y1="1.5" x2="8" y2="3"></line><line x1="8" y1="13" x2="8" y2="14.5"></line><line x1="1.5" y1="8" x2="3" y2="8"></line><line x1="13" y1="8" x2="14.5" y2="8"></line><line x1="3.4" y1="3.4" x2="4.5" y2="4.5"></line><line x1="11.5" y1="11.5" x2="12.6" y2="12.6"></line><line x1="3.4" y1="12.6" x2="4.5" y2="11.5"></line><line x1="11.5" y1="4.5" x2="12.6" y2="3.4"></line></svg>
+85:           <span>{{ themeToggleLabel }}</span>
+86:         </button>
+87:         <div onClick="{{ onChangeName }}" style="width:28px;height:28px;border-radius:14px;background:var(--pb-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;cursor:pointer;flex:none;" title="Perfil">{{ userInitials }}</div>
+88:       </div>
+89: 
+90:     </div>
+91:     <!-- Barra de Progresso Global -->
+92:     <div role="progressbar" aria-valuenow="{{ progressPct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso geral das tarefas" style="height:2px;background:var(--pb-border);">
+93:       <div style="{{ progressBarStyle }}"></div>
+94:     </div>
+95:   </header>
+96: 
+97:   <!-- Sidebar (Mini Rail) -->
+98:   <aside style="{{ sidebarStyle }}">
+99:     <div style="{{ sidebarHeaderStyle }}">
+100:       <div style="display:flex;align-items:center;gap:8px;">
+101:         <div style="width:20px;height:20px;border-radius:5px;background:var(--pb-accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;flex-shrink:0;">F</div>
+102:         <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ true }}">
+103:           <span style="font-weight:600;font-size:14px;white-space:nowrap;">Navegação</span>
+104:         </sc-if>
+105:       </div>
+106:     </div>
+107: 
+108:     <div style="{{ sidebarActionStyle }}">
+109:       <button onClick="{{ openNewTaskModal }}" title="Nova tarefa" style="{{ newTaskButtonStyle }}" style-hover="opacity:0.92;box-shadow:0 2px 8px rgba(99,102,241,0.35);transform:translateY(-0.5px);">
+110:         <span style="font-size:14px;line-height:1;font-weight:600;">+</span>
+111:         <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ true }}">
+112:           <span style="white-space:nowrap;">Tarefa</span>
+113:         </sc-if>
+114:       </button>
+115:       <button onClick="{{ addPersonFromMenu }}" title="Cadastrar nova pessoa" style="{{ newPersonButtonStyle }}" style-hover="background:var(--pb-hover);">
+116:         <span style="font-size:14px;line-height:1;font-weight:600;">+</span>
+117:         <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ true }}">
+118:           <span style="white-space:nowrap;">Pessoa</span>
+119:         </sc-if>
+120:       </button>
+121:     </div>
+122: 
+123:     <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ true }}">
+124:       <div style="font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--pb-text-dim);padding:4px 8px 0;">Vistas</div>
+125:     </sc-if>
+126: 
+127:     <nav role="navigation" aria-label="Menu principal" style="display:flex;flex-direction:column;gap:2px;align-items:{{ menuOpen ? 'stretch' : 'center' }};">
+128:       <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+129:         <a href="#" title="{{ item.tooltip }}" onClick="{{ item.onClick }}" style="{{ item.style }}" style-hover="background:var(--pb-hover);color:var(--pb-text);" aria-current="{{ item.ariaCurrent }}">
+130:           <span style="display:inline-flex;flex:none;opacity:0.85;" aria-hidden="true">{{ item.icon }}</span>
+131:           <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ true }}">
+132:             <span style="flex:1;white-space:nowrap;">{{ item.label }}</span>
+133:           </sc-if>
+134:         </a>
+135:       </sc-for>
+136:     </nav>
+137: 
+138:     <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ true }}">
+139:       <div style="margin-top:auto;padding:10px 8px 4px;border-top:1px solid var(--pb-border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--pb-text-dim);">
+140:         <span>17 de agosto de 2026</span>
+141:         <span style="font-weight:500;color:var(--pb-text-muted);">v1.2</span>
+142:       </div>
+143:     </sc-if>
+144:   </aside>
+145: 
+146:   <!-- Main Canvas -->
+147:   <main style="{{ mainCanvasStyle }}">
+148: 
+149:     <!-- Searching State View -->
+150:     <sc-if value="{{ isSearching }}" hint-placeholder-val="{{ false }}">
+151:       <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
+152:         <div style="font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--pb-text-dim);">Resultados para "{{ search }}"</div>
+153:       </div>
+154:       <div style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+155:         <sc-for list="{{ searchResults }}" as="row" hint-placeholder-count="4">
+156:           <div onClick="{{ row.onOpen }}" style="display:flex;align-items:center;gap:12px;padding:9px 14px;border-bottom:1px solid var(--pb-border);cursor:pointer;transition:background .1s ease;" style-hover="background:var(--pb-hover);">
+157:             <button onClick="{{ row.onToggle }}" aria-label="Concluir" style="{{ row.checkStyle }}">{{ row.checkMark }}</button>
+158:             <div style="flex:1;min-width:0;display:flex;align-items:center;gap:12px;">
+159:               <span style="{{ row.titleStyle }}">{{ row.title }}</span>
+160:               <div style="display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;">
+161:                 <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--pb-text-muted);background:var(--pb-surface-subtle);border:1px solid var(--pb-border);padding:1px 6px;border-radius:4px;">
+162:                   <span style="{{ row.projectDotStyle }}"></span>
+163:                   <span>{{ row.projectName }}</span>
+164:                 </span>
+165:                 <span style="font-size:11.5px;padding:1px 5px;border-radius:4px;border:1px solid var(--pb-border);{{ row.priorityStyle }}">{{ row.priorityLabel }}</span>
+166:                 <sc-if value="{{ row.showWaiting }}" hint-placeholder-val="{{ false }}">
+167:                   <span style="font-size:11.5px;color:oklch(62% 0.14 75);background:rgba(234,179,8,0.1);padding:1px 6px;border-radius:4px;border:1px solid rgba(234,179,8,0.2);">Aguardando {{ row.waitingPersonName }}</span>
+168:                 </sc-if>
+169:                 <sc-if value="{{ row.dateLabel }}" hint-placeholder-val="{{ false }}">
+170:                   <span style="font-size:11.5px;padding:1px 6px;border-radius:4px;background:var(--pb-surface-subtle);border:1px solid var(--pb-border);{{ row.dateStyle }}">{{ row.dateLabel }}</span>
+171:                 </sc-if>
+172:               </div>
+173:             </div>
+174:           </div>
+175:         </sc-for>
+176:         <sc-if value="{{ noSearchResults }}" hint-placeholder-val="{{ false }}">
+177:           <div style="color:var(--pb-text-muted);font-size:13.5px;padding:32px 16px;text-align:center;">Nenhum resultado encontrado para esta busca.</div>
+178:         </sc-if>
+179:       </div>
+180:     </sc-if>
+181: 
+182:     <!-- Normal View -->
+183:     <sc-if value="{{ showNormalView }}" hint-placeholder-val="{{ true }}">
+184: 
+185:       <!-- LIST VIEW -->
+186:       <sc-if value="{{ viewList }}" hint-placeholder-val="{{ true }}">
+187:         
+188:         <!-- View Header & Stats Strip -->
+189:         <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+190:           <div>
+191:             <h1 onClick="{{ onChangeName }}" style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;cursor:pointer;display:inline-flex;align-items:center;gap:6px;" title="Alterar Nome" style-hover="color:var(--pb-accent);">Lista de {{ userFirstName }} <span style="font-size:14px;opacity:0.5;">✎</span></h1>
+192:             <div style="font-size:12.5px;color:var(--pb-text-muted);margin-top:2px;">Visualização operacional de tarefas e compromissos</div>
+193:           </div>
+194: 
+195:           <!-- Summary Metric Cards -->
+196:           <div style="display:flex;align-items:stretch;background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+197:             <sc-for list="{{ summaryStats }}" as="stat" hint-placeholder-count="4">
+198:               <div onClick="{{ stat.onClick }}" style="padding:7px 14px;border-right:1px solid var(--pb-border);display:flex;flex-direction:column;align-items:center;min-width:72px;cursor:pointer;transition:background .1s ease;" style-hover="background:var(--pb-hover);" title="Filtrar por {{ stat.label }}">
+199:                 <div style="font-weight:600;font-size:16px;line-height:1.2;font-variant-numeric:tabular-nums;">{{ stat.value }}</div>
+200:                 <div style="font-size:10.5px;font-weight:500;letter-spacing:0.02em;color:var(--pb-text-dim);margin-top:2px;text-transform:uppercase;">{{ stat.label }}</div>
+201:               </div>
+202:             </sc-for>
+203:           </div>
+204:         </div>
+205: 
+206:         <!-- Filter Tabs & Group By Controls -->
+207:         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--pb-border);margin-bottom:12px;padding-bottom:2px;overflow-x:auto;">
+208:           <div style="display:flex;gap:4px;">
+209:             <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="2">
+210:               <a href="#" onClick="{{ tab.onClick }}" style="{{ tab.style }}" style-hover="color:var(--pb-text);background:var(--pb-hover);">{{ tab.label }}</a>
+211:             </sc-for>
+212:           </div>
+213:           <div style="display:flex;align-items:center;gap:6px;padding-bottom:4px;flex-shrink:0;">
+214:             <label style="font-size:11.5px;font-weight:500;color:var(--pb-text-dim);white-space:nowrap;">Agrupar:</label>
+215:             <select value="{{ groupBy }}" onChange="{{ onGroupByChange }}" style="font:inherit;font-size:12px;color:var(--pb-text);background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:5px;padding:3px 8px;cursor:pointer;">
+216:               <option value="none">Nenhum</option>
+217:               <option value="project">Projeto</option>
+218:               <option value="priority">Urgência</option>
+219:               <option value="due">Prazo</option>
+220:             </select>
+221:           </div>
+222:         </div>
+223: 
+224:         <!-- Quick Filters -->
+225:         <sc-if value="{{ viewList }}" hint-placeholder-val="{{ true }}">
+226:           <div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;">
+227:             <sc-for list="{{ quickFilters }}" as="qf" hint-placeholder-count="4">
+228:                <button onClick="{{ qf.onClick }}" style="{{ qf.style }}">{{ qf.label }}</button>
+229:             </sc-for>
+230:           </div>
+231:         </sc-if>
+232: 
+233:         <!-- Inline Quick Add Task -->
+234:         <div style="margin-bottom:12px;position:relative;">
+235:           <input type="text" placeholder="+ Criar tarefa rápida e pressionar Enter..." value="{{ quickAddDraft }}" onChange="{{ onQuickAddChange }}" onKeyDown="{{ onQuickAddKeyDown }}" style="width:100%;height:36px;padding:6px 12px 6px 32px;font:inherit;font-size:13px;color:var(--pb-text);background:var(--pb-surface);border:1px dashed var(--pb-border-hover);border-radius:6px;transition:border-color .12s ease,background .12s ease;" style-hover="border-color:var(--pb-accent);background:var(--pb-surface);" />
+236:           <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--pb-text-dim);font-size:15px;line-height:1;pointer-events:none;">+</span>
+237:         </div>
+238: 
+239:         <!-- Bulk Action Bar -->
+240:         <sc-if value="{{ bulkBar.show }}" hint-placeholder-val="{{ false }}">
+241:           <div style="background:var(--pb-accent-bg);border:1px solid var(--pb-accent);border-radius:8px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+242:             <div style="display:flex;align-items:center;gap:12px;">
+243:               <span style="font-size:13px;font-weight:600;color:var(--pb-accent);">{{ bulkBar.count }} selecionadas</span>
+244:               <button onClick="{{ bulkBar.onClear }}" style="background:transparent;border:none;color:var(--pb-text-dim);font-size:12px;cursor:pointer;text-decoration:underline;">Limpar</button>
+245:             </div>
+246:             <div style="display:flex;gap:8px;flex-wrap:wrap;">
+247:               <button onClick="{{ bulkBar.onMove }}" style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:4px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--pb-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;" style-hover="background:var(--pb-hover);">📁 Mover para Projeto</button>
+248:               <button onClick="{{ bulkBar.onPriority }}" style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:4px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--pb-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;" style-hover="background:var(--pb-hover);">⚡ Alterar Prioridade</button>
+249:               <button onClick="{{ bulkBar.onComplete }}" style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:4px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--pb-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;" style-hover="background:var(--pb-hover);">✓ Concluir</button>
+250:               <button onClick="{{ bulkBar.onDelete }}" style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:4px;padding:5px 12px;font-size:12px;font-weight:500;color:#ef4444;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" style-hover="background:rgba(239,68,68,0.1);">✕ Excluir</button>
+251:             </div>
+252:           </div>
+253:         </sc-if>
+254: 
+255:         <!-- Task List (Ungrouped) -->
+256:         <sc-if value="{{ groupByNone }}" hint-placeholder-val="{{ true }}">
+257:           <div style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+258:             <sc-for list="{{ visibleTasks }}" as="row" hint-placeholder-count="6">
+259:               <div style="border-bottom:1px solid var(--pb-border);">
+260:                 <div onClick="{{ row.onOpen }}" style="display:flex;align-items:center;gap:12px;padding:8px 12px;cursor:pointer;transition:background .1s ease;" style-hover="background:var(--pb-hover);">
+261:                   
+262:                   <!-- Bulk selection -->
+263:                   <input onClick="{{ row.onSelect }}" type="checkbox" checked="{{ row.isSelected }}" style="cursor:pointer;width:14px;height:14px;accent-color:var(--pb-accent);margin:0;padding:0;" />
+264: 
+265:                   <!-- Completion Checkbox -->
+266:                   <button onClick="{{ row.onToggle }}" aria-label="Concluir" style="{{ row.checkStyle }}">{{ row.checkMark }}</button>
+267:                   
+268:                   <!-- Subtasks Toggle -->
+269:                   <sc-if value="{{ row.hasSubtasks }}" hint-placeholder-val="{{ false }}">
+270:                     <button onClick="{{ row.onToggleExpand }}" style="background:var(--pb-surface-subtle);border:1px solid var(--pb-border);cursor:pointer;color:var(--pb-text);font-size:10px;padding:2px 4px;border-radius:4px;display:flex;align-items:center;justify-content:center;height:18px;min-width:18px;" style-hover="background:var(--pb-hover);">
+271:                       {{ row.isExpanded ? '▼' : '▶' }}
+272:                     </button>
+273:                   </sc-if>
+274:                   <sc-if value="{{ !row.hasSubtasks }}" hint-placeholder-val="{{ true }}">
+275:                     <div style="width:18px;"></div>
+276:                   </sc-if>
+277:                   
+278:                   <!-- Task title -->
+279:                   <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;">
+280:                   <span style="display:inline-flex;align-items:center;flex-shrink:0;">
+281:                     <select onClick="{{ row.stop }}" onChange="{{ row.onPriorityChange }}" value="{{ row.priority }}" style="{{ row.priorityStyle }}" title="Prioridade">
+282:                       <option value="P1" style="color:#ef4444;font-weight:600;">❶ P1</option>
+283:                       <option value="P2" style="color:#f59e0b;font-weight:600;">❷ P2</option>
+284:                       <option value="P3" style="color:#1e40af;font-weight:600;">❸ P3</option>
+285:                       <option value="P4" style="color:#4d7c0f;font-weight:600;">❹ P4</option>
+286:                     </select>
+287:                   </span>
+288:                   <sc-if value="{{ row.statusBadgeIcon }}" hint-placeholder-val="{{ false }}">
+289:                     <span style="display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:{{ row.statusBadgeColor }};border:1px solid {{ row.statusBadgeColor }};background:{{ row.statusBadgeBg }};width:20px;height:20px;border-radius:4px;flex-shrink:0;" title="{{ row.statusBadgeLabel }}">{{ row.statusBadgeIcon }}</span>
+290:                   </sc-if>
+291:                   <span style="{{ row.titleStyle }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ row.title }}</span>
+292:                 </div>
+293: 
+294:                 <!-- Aligned metadata pills on the right -->
+295:                 <div style="display:inline-flex;align-items:center;gap:6px;flex-shrink:0;">
+296:                   
+297:                   <!-- Project Badge -->
+298:                   <span style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--pb-text-dim);white-space:nowrap;">
+299:                     <span style="{{ row.projectDotStyle }}"></span>
+300:                     <span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;">{{ row.projectName }}</span>
+301:                   </span>
+302: 
+303:                   <!-- Waiting tag -->
+304:                   <sc-if value="{{ row.showWaiting }}" hint-placeholder-val="{{ false }}">
+305:                     <span style="display:inline-flex;align-items:center;font-size:12.5px;color:oklch(62% 0.14 75);white-space:nowrap;cursor:help;" title="Aguardando {{ row.waitingPersonName }}">
+306:                       ⏳
+307:                     </span>
+308:                   </sc-if>
+309: 
+310:                   <!-- Blocked tag -->
+311:                   <sc-if value="{{ row.isBlocked }}" hint-placeholder-val="{{ false }}">
+312:                     <span style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--pb-danger);white-space:nowrap;font-weight:500;">
+313:                       <span>⛔</span>
+314:                       <span>Bloqueada</span>
+315:                     </span>
+316:                   </sc-if>
+317: 
+318:                   <!-- Due date tag / editor -->
+319:                   <sc-if value="{{ row.showDate }}" hint-placeholder-val="{{ false }}">
+320:                     <sc-if value="{{ row.editingDate }}" hint-placeholder-val="{{ false }}">
+321:                       <input onClick="{{ row.stop }}" type="date" value="{{ row.rawDateValue }}" onChange="{{ row.onDateInputChange }}" onBlur="{{ row.onDateInputBlur }}" style="font:inherit;font-size:11.5px;border:1px solid var(--pb-accent);border-radius:4px;padding:1px 4px;background:var(--pb-surface);color:var(--pb-text);" />
+322:                     </sc-if>
+323:                     <sc-if value="{{ row.editingDateOff }}" hint-placeholder-val="{{ true }}">
+324:                       <span onClick="{{ row.onDateLabelClick }}" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;white-space:nowrap;{{ row.dateStyle }}">
+325:                         <span>🗓</span>
+326:                         <span>{{ row.dateLabel }}</span>
+327:                       </span>
+328:                     </sc-if>
+329:                   </sc-if>
+330:                 </div>
+331:                 </div>
+332: 
+333:                 <!-- Expanded Subtasks -->
+334:                 <sc-if value="{{ row.isExpanded }}" hint-placeholder-val="{{ false }}">
+335:                   <div style="padding:0 12px 12px 84px;display:flex;flex-direction:column;gap:6px;background:var(--pb-surface);">
+336:                     <sc-for list="{{ row.subtasks }}" as="sub" hint-placeholder-count="2">
+337:                       <div onClick="{{ sub.onToggle }}" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+338:                         <input type="checkbox" checked="{{ sub.done }}" onChange="{{ sub.onToggle }}" style="cursor:pointer;accent-color:var(--pb-accent);width:13px;height:13px;" />
+339:                         <span style="font-size:12.5px;color:{{ sub.done ? 'var(--pb-text-dim)' : 'var(--pb-text)' }};text-decoration:{{ sub.done ? 'line-through' : 'none' }};">{{ sub.text }}</span>
+340:                       </div>
+341:                     </sc-for>
+342:                   </div>
+343:                 </sc-if>
+344: 
+345:               </div>
+346:             </sc-for>
+347:             <sc-if value="{{ visibleTasksEmpty }}" hint-placeholder-val="{{ false }}">
+348:               <div style="color:var(--pb-text-muted);font-size:13.5px;padding:36px 16px;text-align:center;">Nenhuma tarefa encontrada neste filtro.</div>
+349:             </sc-if>
+350:           </div>
+351:         </sc-if>
+352: 
+353:         <!-- Task List (Grouped) -->
+354:         <sc-if value="{{ groupByActive }}" hint-placeholder-val="{{ false }}">
+355:           <sc-for list="{{ groupedTasks }}" as="grp" hint-placeholder-count="3">
+356:             <div style="margin-top:20px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+357:               <span style="font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--pb-text-dim);">{{ grp.label }}</span>
+358:               <div style="flex:1;height:1px;background:var(--pb-border);"></div>
+359:             </div>
+360:             <div style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.03);margin-bottom:14px;">
+361:               <sc-for list="{{ grp.rows }}" as="row" hint-placeholder-count="3">
+362:                 <div style="border-bottom:1px solid var(--pb-border);">
+363:                   <div onClick="{{ row.onOpen }}" style="display:flex;align-items:center;gap:12px;padding:8px 12px;cursor:pointer;transition:background .1s ease;" style-hover="background:var(--pb-hover);">
+364:                     
+365:                     <!-- Bulk selection -->
+366:                     <input onClick="{{ row.onSelect }}" type="checkbox" checked="{{ row.isSelected }}" style="cursor:pointer;width:14px;height:14px;accent-color:var(--pb-accent);margin:0;padding:0;" />
+367: 
+368:                     <!-- Completion Checkbox -->
+369:                     <button onClick="{{ row.onToggle }}" aria-label="Concluir" style="{{ row.checkStyle }}">{{ row.checkMark }}</button>
+370:                     
+371:                     <!-- Subtasks Toggle -->
+372:                     <sc-if value="{{ row.hasSubtasks }}" hint-placeholder-val="{{ false }}">
+373:                       <button onClick="{{ row.onToggleExpand }}" style="background:transparent;border:none;cursor:pointer;color:var(--pb-accent);padding:2px;display:flex;align-items:center;justify-content:center;height:18px;min-width:18px;transition:opacity 0.15s ease;" style-hover="opacity:0.7;">
+374:                         <sc-if value="{{ row.isExpanded }}" hint-placeholder-val="{{ false }}">
+375:                           <svg style="width:11px;height:11px;fill:currentColor;" viewBox="0 0 16 16"><path d="M3 5l5 7 5-7z" /></svg>
+376:                         </sc-if>
+377:                         <sc-if value="{{ !row.isExpanded }}" hint-placeholder-val="{{ true }}">
+378:                           <svg style="width:11px;height:11px;fill:currentColor;" viewBox="0 0 16 16"><path d="M5 3l7 5-7 5z" /></svg>
+379:                         </sc-if>
+380:                       </button>
+381:                     </sc-if>
+382:                     <sc-if value="{{ !row.hasSubtasks }}" hint-placeholder-val="{{ true }}">
+383:                       <div style="width:18px;"></div>
+384:                     </sc-if>
+385: 
+386:                     <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;">
+387:                     <span style="display:inline-flex;align-items:center;flex-shrink:0;">
+388:                       <select onClick="{{ row.stop }}" onChange="{{ row.onPriorityChange }}" value="{{ row.priority }}" style="{{ row.priorityStyle }}" title="Prioridade">
+389:                         <option value="P1" style="color:#ef4444;font-weight:600;">⚑ P1</option>
+390:                         <option value="P2" style="color:#f59e0b;font-weight:600;">⚑ P2</option>
+391:                         <option value="P3" style="color:#1e40af;font-weight:600;">⚑ P3</option>
+392:                         <option value="P4" style="color:#4d7c0f;font-weight:600;">⚑ P4</option>
+393:                       </select>
+394:                     </span>
+395:                     <span style="{{ row.titleStyle }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ row.title }}</span>
+396:                   </div>
+397: 
+398:                   <div style="display:inline-flex;align-items:center;gap:6px;flex-shrink:0;">
+399:                     <!-- Project Badge -->
+400:                     <span style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--pb-text-dim);white-space:nowrap;">
+401:                       <span style="{{ row.projectDotStyle }}"></span>
+402:                       <span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;">{{ row.projectName }}</span>
+403:                     </span>
+404: 
+405:                     <!-- Waiting tag -->
+406:                     <sc-if value="{{ row.showWaiting }}" hint-placeholder-val="{{ false }}">
+407:                       <span style="display:inline-flex;align-items:center;font-size:12.5px;color:oklch(62% 0.14 75);white-space:nowrap;cursor:help;" title="Aguardando {{ row.waitingPersonName }}">
+408:                         ⏳
+409:                       </span>
+410:                     </sc-if>
+411: 
+412:                     <!-- Blocked tag -->
+413:                     <sc-if value="{{ row.isBlocked }}" hint-placeholder-val="{{ false }}">
+414:                       <span style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--pb-danger);white-space:nowrap;font-weight:500;">
+415:                         <span>⛔</span>
+416:                         <span>Bloqueada</span>
+417:                       </span>
+418:                     </sc-if>
+419: 
+420:                     <!-- Due date tag / editor -->
+421:                     <sc-if value="{{ row.showDate }}" hint-placeholder-val="{{ false }}">
+422:                       <sc-if value="{{ row.editingDate }}" hint-placeholder-val="{{ false }}">
+423:                         <input onClick="{{ row.stop }}" type="date" value="{{ row.rawDateValue }}" onChange="{{ row.onDateInputChange }}" onBlur="{{ row.onDateInputBlur }}" style="font:inherit;font-size:11.5px;border:1px solid var(--pb-accent);border-radius:4px;padding:1px 4px;background:var(--pb-surface);color:var(--pb-text);" />
+424:                       </sc-if>
+425:                       <sc-if value="{{ row.editingDateOff }}" hint-placeholder-val="{{ true }}">
+426:                         <span onClick="{{ row.onDateLabelClick }}" style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;white-space:nowrap;{{ row.dateStyle }}">
+427:                           <span>🗓</span>
+428:                           <span>{{ row.dateLabel }}</span>
+429:                         </span>
+430:                       </sc-if>
+431:                     </sc-if>
+432:                   </div>
+433:                   </div>
+434: 
+435:                   <!-- Expanded Subtasks -->
+436:                   <sc-if value="{{ row.isExpanded }}" hint-placeholder-val="{{ false }}">
+437:                     <div style="padding:0 12px 12px 84px;display:flex;flex-direction:column;gap:6px;background:var(--pb-surface);">
+438:                       <sc-for list="{{ row.subtasks }}" as="sub" hint-placeholder-count="2">
+439:                         <div onClick="{{ sub.onToggle }}" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+440:                           <input type="checkbox" checked="{{ sub.done }}" onChange="{{ sub.onToggle }}" style="cursor:pointer;accent-color:var(--pb-accent);width:13px;height:13px;" />
+441:                           <span style="font-size:12.5px;color:{{ sub.done ? 'var(--pb-text-dim)' : 'var(--pb-text)' }};text-decoration:{{ sub.done ? 'line-through' : 'none' }};">{{ sub.text }}</span>
+442:                         </div>
+443:                       </sc-for>
+444:                     </div>
+445:                   </sc-if>
+446: 
+447:                 </div>
+448:               </sc-for>
+449:             </div>
+450:           </sc-for>
+451:           <sc-if value="{{ visibleTasksEmpty }}" hint-placeholder-val="{{ false }}">
+452:             <div style="color:var(--pb-text-muted);font-size:13.5px;padding:36px 16px;text-align:center;">Nenhuma tarefa encontrada neste filtro.</div>
+453:           </sc-if>
+454:         </sc-if>
+455: 
+456:       </sc-if>
+457: 
+458:       <!-- KANBAN VIEW -->
+459:       <sc-if value="{{ viewKanban }}" hint-placeholder-val="{{ false }}">
+460:         <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+461:           <div>
+462:             <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">Kanban</h1>
+463:             <div style="font-size:12.5px;color:var(--pb-text-muted);margin-top:2px;">Organize suas tarefas visualmente em cards</div>
+464:           </div>
+465:           
+466:           <div style="display:flex;align-items:center;gap:6px;">
+467:             <label style="font-size:11.5px;font-weight:500;color:var(--pb-text-dim);white-space:nowrap;">Agrupar:</label>
+468:             <select value="{{ kanbanGroupBy }}" onChange="{{ onKanbanGroupByChange }}" style="font:inherit;font-size:12px;color:var(--pb-text);background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:5px;padding:4px 8px;cursor:pointer;">
+469:               <option value="status">Status</option>
+470:               <option value="project">Projeto</option>
+471:               <option value="priority">Urgência</option>
+472:               <option value="due">Prazo</option>
+473:             </select>
+474:           </div>
+475:         </div>
+476:         
+477:         <div role="region" aria-label="Quadro Kanban" style="display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;min-height:400px;align-items:flex-start;">
+478:           <sc-for list="{{ kanbanColumns }}" as="col" hint-placeholder-count="4">
+479:             <div role="group" aria-label="Coluna: {{ col.label }}" style="width:280px;flex-shrink:0;background:var(--pb-surface-subtle);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 180px);overflow-y:auto;border:1px solid var(--pb-border);">
+480:               <div style="display:flex;align-items:center;justify-content:space-between;">
+481:                 <span style="font-size:12px;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;color:var(--pb-text-dim);">{{ col.label }}</span>
+482:                 <span style="font-size:11px;background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:12px;padding:1px 6px;color:var(--pb-text-muted);font-weight:500;">{{ col.cards.length }}</span>
+483:               </div>
+484:               
+485:               <div style="display:flex;flex-direction:column;gap:8px;min-height:20px;">
+486:                 <sc-for list="{{ col.cards }}" as="card" hint-placeholder-count="3">
+487:                   <div onClick="{{ card.onOpen }}" role="article" aria-label="{{ card.title }}" style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:6px;padding:10px 12px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,0.03);transition:transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;" style-hover="transform:translateY(-2px) scale(1.01);box-shadow:0 6px 16px rgba(0,0,0,0.1);border-color:var(--pb-accent);">
+488:                     <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">
+489:                       <button onClick="{{ card.onToggle }}" aria-label="Concluir" style="{{ card.checkStyle }} margin-top:2px;">{{ card.checkMark }}</button>
+490:                       <div style="{{ card.titleStyle }};line-height:1.35;flex:1;">{{ card.title }}</div>
+491:                     </div>
+492:                     
+493:                     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-left:24px;">
+494:                       <span style="font-size:11px;padding:1px 5px;border-radius:4px;border:1px solid var(--pb-border);{{ card.priorityStyle }}">{{ card.priorityLabel }}</span>
+495:                       
+496:                       <span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--pb-text-dim);background:var(--pb-surface-subtle);border:1px solid var(--pb-border);border-radius:4px;padding:1px 5px;">
+497:                         <span style="{{ card.projectDotStyle }}"></span>
+498:                         <span style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ card.projectName }}</span>
+499:                       </span>
+500:                       
+501:                       <sc-if value="{{ card.showDate }}" hint-placeholder-val="{{ false }}">
+502:                         <span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;white-space:nowrap;{{ card.dateStyle }} padding:1px 5px;border-radius:4px;background:var(--pb-surface-subtle);border:1px solid var(--pb-border);">
+503:                           <span>🗓</span>
+504:                           <span>{{ card.dateLabel }}</span>
+505:                         </span>
+506:                       </sc-if>
+507:                       
+508:                       <sc-if value="{{ card.showWaiting }}" hint-placeholder-val="{{ false }}">
+509:                         <span style="display:inline-flex;align-items:center;font-size:11px;color:oklch(62% 0.14 75);background:rgba(234,179,8,0.1);padding:1px 5px;border-radius:4px;border:1px solid rgba(234,179,8,0.2);white-space:nowrap;">
+510:                           ⏳ {{ card.waitingPersonName }}
+511:                         </span>
+512:                       </sc-if>
+513:                     </div>
+514:                   </div>
+515:                 </sc-for>
+516:               </div>
+517:             </div>
+518:           </sc-for>
+519:         </div>
+520:       </sc-if>
+521: 
+522:       <!-- INBOX VIEW -->
+523:       <sc-if value="{{ viewInbox }}" hint-placeholder-val="{{ false }}">
+524:         <div style="margin-bottom:20px;">
+525:           <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">Inbox</h1>
+526:           <p style="color:var(--pb-text-muted);font-size:13px;margin:3px 0 0;">Captura rápida de ideias e pendências. Classifique depois em projeto, prioridade e prazo.</p>
+527:         </div>
+528: 
+529:         <div style="display:flex;gap:8px;margin-bottom:20px;max-width:640px;">
+530:           <input type="text" placeholder="Digite uma tarefa para capturar..." value="{{ inboxDraft }}" onChange="{{ onInboxDraftChange }}" onKeyDown="{{ onInboxKeyDown }}" style="flex:1;height:36px;padding:6px 12px;font:inherit;font-size:13.5px;background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:6px;" />
+531:           <button onClick="{{ addInboxTask }}" style="cursor:pointer;font-family:inherit;font-weight:500;font-size:13px;color:var(--pb-on-accent);background:var(--pb-accent);border:none;border-radius:6px;padding:0 16px;box-shadow:0 1px 2px rgba(0,0,0,0.1);transition:all .12s ease;" style-hover="opacity:0.92;">Adicionar</button>
+532:         </div>
+533: 
+534:         <div style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+535:           <sc-for list="{{ inboxTasks }}" as="row" hint-placeholder-count="3">
+536:             <div onClick="{{ row.onOpen }}" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--pb-border);cursor:pointer;transition:background .1s ease;" style-hover="background:var(--pb-hover);">
+537:               <button onClick="{{ row.onToggle }}" aria-label="Concluir" style="{{ row.checkStyle }}">{{ row.checkMark }}</button>
+538:               <div style="flex:1;font-size:14px;font-weight:500;">{{ row.title }}</div>
+539:               <span style="font-size:12px;font-weight:500;color:var(--pb-accent);display:inline-flex;align-items:center;gap:4px;">Classificar →</span>
+540:             </div>
+541:           </sc-for>
+542:           <sc-if value="{{ inboxEmpty }}" hint-placeholder-val="{{ false }}">
+543:             <div style="color:var(--pb-text-muted);font-size:13.5px;padding:36px 16px;text-align:center;">Inbox vazio. Tudo classificado!</div>
+544:           </sc-if>
+545:         </div>
+546:       </sc-if>
+547: 
+548:       <!-- PROJECTS VIEW -->
+549:       <sc-if value="{{ viewProjects }}" hint-placeholder-val="{{ false }}">
+550:         <div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+551:           <div>
+552:             <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.02em;">Projetos</h1>
+553:             <div style="font-size:12.5px;color:var(--pb-text-muted);margin-top:2px;">Acompanhamento de iniciativas e progresso das entregas</div>
+554:           </div>
+555:           <button onClick="{{ addProject }}" style="cursor:pointer;font-family:inherit;font-weight:500;font-size:13px;color:var(--pb-on-accent);background:var(--pb-accent);border:none;border-radius:6px;padding:6px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.1);transition:all .12s ease;" style-hover="opacity:0.92;">+ Novo Projeto</button>
+556:         </div>
+557: 
+558:         <!-- Filter pills for projects -->
+559:         <div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;">
+560:           <sc-for list="{{ projectFilterTabs }}" as="pf" hint-placeholder-count="5">
+561:             <button onClick="{{ pf.onClick }}" style="{{ pf.style }}">{{ pf.label }}</button>
+562:           </sc-for>
+563:         </div>
+564: 
+565:         <div style="background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+566:           <sc-for list="{{ projectRows }}" as="p" hint-placeholder-count="7">
+567:             <div onClick="{{ p.onOpen }}" style="display:flex;align-items:center;gap:16px;padding:12px 16px;border-bottom:1px solid var(--pb-border);cursor:pointer;transition:background .1s ease;" style-hover="background:var(--pb-hover);">
+568:               <div style="flex:1;min-width:0;">
+569:                 <div style="display:flex;align-items:center;font-weight:600;font-size:15px;letter-spacing:-0.01em;">
+570:                   <span style="{{ p.dotStyle }}"></span>
+571:                   <span>{{ p.name }}</span>
+572:                 </div>
+573:                 <div style="margin-top:4px;font-size:12px;color:var(--pb-text-muted);display:flex;align-items:center;gap:6px;">
+574:                   <span style="{{ p.statusStyle }}">{{ p.statusLabel }}</span>
+575:                 </div>
+576:               </div>
+577:               
+578:               <div style="text-align:right;font-size:12px;color:var(--pb-text-muted);min-width:100px;">
+579:                 <div>{{ p.openCount }} abertas</div>
+580:                 <sc-if value="{{ p.hasOverdue }}" hint-placeholder-val="{{ false }}">
+581:                   <div style="color:var(--pb-danger);font-weight:500;">{{ p.overdueCount }} atrasada(s)</div>
+582:                 </sc-if>
+583:               </div>
+584: 
+585:               <div style="width:100px;flex:none;">
+586:                 <div style="height:5px;background:var(--pb-surface-subtle);border-radius:3px;overflow:hidden;border:1px solid var(--pb-border);">
+587:                   <div style="{{ p.progressBarStyle }}"></div>
+588:                 </div>
+589:                 <div style="font-size:11px;font-weight:500;color:var(--pb-text-dim);margin-top:3px;text-align:right;font-variant-numeric:tabular-nums;">{{ p.progress }}%</div>
+590:               </div>
+591: 
+592:               <div style="display:
+<truncated 412 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

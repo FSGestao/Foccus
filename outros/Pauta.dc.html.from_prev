@@ -1,0 +1,108 @@
+Created At: 2026-08-21T13:47:32-03:00
+Completed At: 2026-08-21T13:47:32-03:00
+File Path: `file:///c:/Users/ivan.sereno/Desktop/Code/Foccus/Pauta.dc.html`
+Total Lines: 2198
+Total Bytes: 150163
+Showing lines 1 to 100
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!DOCTYPE html>
+2: <html>
+3: <head>
+4: <meta charset="utf-8">
+5: <meta name="viewport" content="width=device-width, initial-scale=1">
+6: <title>Foccus — Lista Profissional</title>
+7: <script src="./support.js" onerror="(function(){
+8:   var d=document;
+9:   d.body.style.cssText='margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f0f11;font-family:system-ui,sans-serif;';
+10:   d.body.innerHTML='<div style="text-align:center;max-width:420px;padding:32px;"><div style="width:44px;height:44px;border-radius:10px;background:#6366f1;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;margin:0 auto 16px;">F</div><h2 style="color:#f1f1f3;margin:0 0 8px;font-size:17px;">Arquivo de suporte não encontrado</h2><p style="color:#888;font-size:13.5px;line-height:1.6;margin:0 0 20px;">O arquivo <code style=\"background:#1e1e22;padding:2px 6px;border-radius:4px;color:#a78bfa;\">support.js</code> não pôde ser carregado.<br>Certifique-se de que ele está na <strong style=\"color:#d4d4d8;\">mesma pasta</strong> que este arquivo HTML.</p><button onclick="location.reload()" style="cursor:pointer;padding:8px 20px;border-radius:7px;border:none;background:#6366f1;color:#fff;font-size:13px;font-weight:600;">⟳ Recarregar página</button></div>';
+11:   console.error('[Foccus] Falha ao carregar support.js. Verifique se o arquivo existe na mesma pasta que o HTML.');
+12: })()"></script>
+13: </head>
+14: <body>
+15: <x-dc>
+16: <helmet data-dc-atomics>
+17: <style>
+18: * { box-sizing: border-box; }
+19: body { margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+20: ::selection { background: rgba(99,102,241,0.25); }
+21: input, select, textarea, button { font-family: inherit; }
+22: input:focus, select:focus, textarea:focus { outline: none; border-color: var(--pb-accent) !important; box-shadow: 0 0 0 2px var(--pb-accent-bg); }
+23: input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; cursor: pointer; filter: var(--pb-calendar-filter); }
+24: button:focus-visible { outline: 2px solid var(--pb-accent); outline-offset: 1px; }
+25: a { color: inherit; text-decoration: none; }
+26: ::-webkit-scrollbar { width: 6px; height: 6px; }
+27: ::-webkit-scrollbar-track { background: transparent; }
+28: ::-webkit-scrollbar-thumb { background: rgba(var(--pb-text-rgb), 0.15); border-radius: 3px; }
+29: ::-webkit-scrollbar-thumb:hover { background: rgba(var(--pb-text-rgb), 0.25); }
+30: </style>
+31: </helmet>
+32: 
+33: <script>
+34: (function() {
+35:   // Monitoramento de desempenho (Foccus Performance Monitor)
+36:   var t0 = performance.now();
+37:   window.addEventListener('load', function() {
+38:     var loadTime = Math.round(performance.now() - t0);
+39:     console.info('[Foccus] Tempo de carregamento completo: ' + loadTime + ' ms');
+40:     // Detecta LCP via PerformanceObserver (suportado em Chrome/Edge)
+41:     if (typeof PerformanceObserver !== 'undefined') {
+42:       try {
+43:         var po = new PerformanceObserver(function(list) {
+44:           var entries = list.getEntries();
+45:           var last = entries[entries.length - 1];
+46:           console.info('[Foccus] LCP (Largest Contentful Paint): ' + Math.round(last.startTime) + ' ms' + (last.startTime > 2500 ? ' ⚠️ acima do ideal (> 2500 ms)' : ' ✅ dentro do ideal'));
+47:           po.disconnect();
+48:         });
+49:         po.observe({ type: 'largest-contentful-paint', buffered: true });
+50:       } catch(e) { /* navegador não suporta LCP observer */ }
+51:     }
+52:   });
+53: })();
+54: </script>
+55: 
+56: <div style="min-height:100vh;{{ themeVarsStyle }}background:var(--pb-bg);color:var(--pb-text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:1.45;letter-spacing:-0.006em;">
+57: 
+58:   <!-- Topbar -->
+59:   <header style="position:sticky;top:0;z-index:8;background:var(--pb-bg);border-bottom:1px solid var(--pb-border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+60:     <div style="max-width:1040px;margin:0 auto;padding:0 24px;height:50px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+61:       
+62:       <!-- Brand & Left Navigation Toggle -->
+63:       <div style="display:flex;align-items:center;gap:12px;">
+64:         <div style="display:flex;align-items:center;gap:8px;">
+65:           <div style="width:22px;height:22px;border-radius:6px;background:var(--pb-accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;box-shadow:0 1px 3px rgba(0,0,0,0.15);">F</div>
+66:           <span style="font-weight:600;font-size:15px;letter-spacing:-0.02em;">Foccus</span>
+67:         </div>
+68:         <span style="color:var(--pb-border);font-size:16px;">/</span>
+69:         <button onClick="{{ toggleMenu }}" style="cursor:pointer;font-size:12.5px;color:var(--pb-text-muted);background:transparent;border:1px solid var(--pb-border);border-radius:6px;padding:4px 10px;display:inline-flex;align-items:center;gap:6px;transition:all .12s ease;" style-hover="background:var(--pb-hover);color:var(--pb-text);border-color:var(--pb-border-hover);">
+70:           <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 16 16"><line x1="2" y1="4" x2="14" y2="4"></line><line x1="2" y1="8" x2="14" y2="8"></line><line x1="2" y1="12" x2="14" y2="12"></line></svg>
+71:           <span>{{ menuToggleLabel }}</span>
+72:         </button>
+73:       </div>
+74: 
+75:       <!-- Search bar -->
+76:       <div style="flex:1;max-width:440px;position:relative;">
+77:         <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--pb-text-dim);pointer-events:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"></circle><line x1="10.5" y1="10.5" x2="14" y2="14"></line></svg>
+78:         <input class="pauta-search" type="text" placeholder="Buscar tarefas, projetos, pessoas..." value="{{ search }}" onChange="{{ onSearchChange }}" aria-label="Buscar tarefas" style="width:100%;height:32px;padding:4px 10px 4px 30px;font-size:13px;color:var(--pb-text);background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:6px;transition:border-color .12s ease,box-shadow .12s ease;" />
+79:       </div>
+80: 
+81:       <!-- Right controls -->
+82:       <div style="display:flex;align-items:center;gap:8px;">
+83:         <button onClick="{{ toggleTheme }}" title="Alternar tema" style="cursor:pointer;font-size:12.5px;color:var(--pb-text-muted);background:var(--pb-surface);border:1px solid var(--pb-border);border-radius:6px;padding:5px 10px;display:inline-flex;align-items:center;gap:6px;transition:all .12s ease;" style-hover="background:var(--pb-hover);color:var(--pb-text);border-color:var(--pb-border-hover);">
+84:           <svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3.2"></circle><line x1="8" y1="1.5" x2="8" y2="3"></line><line x1="8" y1="13" x2="8" y2="14.5"></line><line x1="1.5" y1="8" x2="3" y2="8"></line><line x1="13" y1="8" x2="14.5" y2="8"></line><line x1="3.4" y1="3.4" x2="4.5" y2="4.5"></line><line x1="11.5" y1="11.5" x2="12.6" y2="12.6"></line><line x1="3.4" y1="12.6" x2="4.5" y2="11.5"></line><line x1="11.5" y1="4.5" x2="12.6" y2="3.4"></line></svg>
+85:           <span>{{ themeToggleLabel }}</span>
+86:         </button>
+87:         <div onClick="{{ onChangeName }}" style="width:28px;height:28px;border-radius:14px;background:var(--pb-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;cursor:pointer;flex:none;" title="Perfil">{{ userInitials }}</div>
+88:       </div>
+89: 
+90:     </div>
+91:     <!-- Barra de Progresso Global -->
+92:     <div role="progressbar" aria-valuenow="{{ progressPct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso geral das tarefas" style="height:2px;background:var(--pb-border);">
+93:       <div style="{{ progressBarStyle }}"></div>
+94:     </div>
+95:   </header>
+96: 
+97:   <!-- Sidebar Overlay / Drawer -->
+98:   <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+99:     <div onClick="{{ toggleMenu }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.35);backdrop-filter:blur(2px);z-index:18;"></div>
+100:     <aside style="position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--pb-surface);border-right:1px solid var(--pb-border);box-shadow:4px 0 24px rgba(0,0,0,0.18);z-index:19;padding:16px 14px;display:flex;flex-direction:column;gap:18px;">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

@@ -1,0 +1,435 @@
+<title>Visão Executiva do Foccus</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{
+    --bg:#eef6f7;
+    --bg-gradient: radial-gradient(1200px 520px at 15% -10%, rgba(14,154,167,0.13), transparent), radial-gradient(900px 440px at 100% 0%, rgba(255,166,0,0.10), transparent);
+    --surface:#ffffff;
+    --glass: rgba(255,255,255,0.66);
+    --glass-card: linear-gradient(165deg, rgba(14,154,167,0.14), rgba(255,166,0,0.06)), rgba(255,255,255,0.4);
+    --glass-strong: rgba(255,255,255,0.88);
+    --border: rgba(14,100,110,0.16);
+    --border-strong: rgba(14,100,110,0.28);
+    --text:#0b2530;
+    --text-muted: rgba(11,37,48,0.64);
+    --text-dim: rgba(11,37,48,0.44);
+    --accent:#0e9aa7;
+    --accent-deep:#0a7a85;
+    --accent-bg: rgba(14,154,167,0.12);
+    --amber:#b56400;
+    --amber-bg: rgba(255,166,0,0.14);
+    --red:#dc2626;
+    --blue:#0369a1;
+    --green:#15803d;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a1420;
+      --bg-gradient: radial-gradient(1800px 900px at 8% -15%, rgba(14,154,167,0.34), transparent 62%), radial-gradient(1300px 750px at 102% -8%, rgba(255,166,0,0.16), transparent 60%);
+      --surface:#101d29;
+      --glass: rgba(255,255,255,0.055);
+      --glass-card: rgba(255,255,255,0.055);
+      --glass-strong: rgba(255,255,255,0.09);
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.22);
+      --text:#eef6f7;
+      --text-muted: rgba(238,246,247,0.64);
+      --text-dim: rgba(238,246,247,0.42);
+      --accent:#2dc0cc;
+      --accent-deep:#12a3b0;
+      --accent-bg: rgba(18,163,176,0.20);
+      --amber:#ffa600;
+      --amber-bg: rgba(255,166,0,0.18);
+      --red:#f87171;
+      --blue:#38bdf8;
+      --green:#4ade80;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a1420;
+    --bg-gradient: radial-gradient(1800px 900px at 8% -15%, rgba(14,154,167,0.34), transparent 62%), radial-gradient(1300px 750px at 102% -8%, rgba(255,166,0,0.16), transparent 60%);
+    --surface:#101d29;
+    --glass: rgba(255,255,255,0.055);
+    --glass-card: rgba(255,255,255,0.055);
+    --glass-strong: rgba(255,255,255,0.09);
+    --border: rgba(255,255,255,0.12);
+    --border-strong: rgba(255,255,255,0.22);
+    --text:#eef6f7;
+    --text-muted: rgba(238,246,247,0.64);
+    --text-dim: rgba(238,246,247,0.42);
+    --accent:#2dc0cc;
+    --accent-deep:#12a3b0;
+    --accent-bg: rgba(18,163,176,0.20);
+    --amber:#ffa600;
+    --amber-bg: rgba(255,166,0,0.18);
+    --red:#f87171;
+    --blue:#38bdf8;
+    --green:#4ade80;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background-color:var(--bg); background-image:var(--bg-gradient); background-attachment:fixed;
+    color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:rgba(14,154,167,0.25); }
+  .wrap{ max-width:900px; margin:0 auto; padding:0 24px 100px; }
+  a{ color:var(--accent-deep); }
+  strong{ color:var(--text); }
+
+  header.app-bar{
+    position:sticky; top:0; z-index:5;
+    background:var(--glass); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 24px;
+  }
+  header.app-bar .brand{ display:flex; align-items:center; gap:9px; font-weight:800; font-size:15px; letter-spacing:-0.02em; }
+  .f-badge{ width:24px; height:24px; border-radius:6px; background:linear-gradient(135deg,var(--accent),var(--accent-deep)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:800; flex:none; }
+  .ver-chip{ font-size:11.5px; font-weight:700; color:var(--amber); background:var(--amber-bg); border:1px solid rgba(255,166,0,0.35); padding:3px 10px; border-radius:20px; }
+
+  .hero{ padding:56px 0 8px; }
+  .eyebrow{ font-size:11.5px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--accent-deep); margin-bottom:10px; }
+  h1{ font-size:clamp(30px,4.6vw,42px); font-weight:800; letter-spacing:-0.02em; margin:0 0 16px; text-wrap:balance; }
+  .lede{ font-size:18px; color:var(--text-muted); max-width:680px; margin:0; font-weight:500; }
+
+  section{ margin-top:60px; padding-top:6px; }
+  section > h2{ font-size:24px; font-weight:800; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:baseline; gap:10px; }
+  section > h2 .num{ font-family:ui-monospace,monospace; font-size:13px; font-weight:700; color:var(--text-dim); }
+  section > h3{ font-size:16px; font-weight:700; margin:28px 0 8px; }
+  .section-lede{ color:var(--text-muted); max-width:660px; margin:0 0 22px; font-size:14.5px; }
+
+  .card{
+    background:var(--glass-card); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%);
+    border:1px solid var(--border-strong); border-radius:12px; padding:22px 24px; margin:16px 0;
+    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card p:first-child{ margin-top:0; }
+  .card p:last-child{ margin-bottom:0; }
+
+  /* positioning statement */
+  .position-card{
+    background:linear-gradient(165deg, rgba(14,154,167,0.14), rgba(255,166,0,0.05)), var(--glass);
+    border:1px solid var(--border-strong); border-radius:14px; padding:28px 30px; margin:18px 0;
+    font-size:17px; line-height:1.7;
+  }
+  .position-card .tag{ display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent-deep); background:var(--accent-bg); border:1px solid var(--accent); border-radius:20px; padding:3px 11px; margin-bottom:14px; }
+  .position-card b{ color:var(--accent-deep); }
+
+  /* pain grid */
+  .pain-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; margin:16px 0; }
+  .pain{ background:rgba(220,38,38,0.06); border:1px solid rgba(220,38,38,0.25); border-radius:10px; padding:16px 18px; }
+  .pain .ic{ font-size:20px; margin-bottom:8px; display:block; }
+  .pain b{ display:block; font-size:14px; margin-bottom:4px; color:var(--text); }
+  .pain span{ font-size:13px; color:var(--text-muted); }
+
+  /* persona */
+  .persona-card{ display:flex; gap:18px; align-items:flex-start; }
+  .persona-avatar{ width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-deep)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px; flex:none; }
+  .persona-card h3{ margin:0 0 4px; font-size:16px; }
+  .persona-card .role{ font-size:12.5px; color:var(--accent-deep); font-weight:600; margin-bottom:10px; }
+
+  /* feature groups */
+  .feature-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:16px; margin:18px 0; }
+  .feature{ background:var(--glass-card); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid var(--border-strong); border-radius:12px; padding:18px 20px; }
+  .feature .ic{ width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px; }
+  .feature h4{ margin:0 0 6px; font-size:14.5px; font-weight:700; }
+  .feature p{ margin:0; font-size:13px; color:var(--text-muted); }
+  .feature .tools{ margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+  .feature .tools span{ font-size:10.5px; font-weight:600; color:var(--accent-deep); background:var(--accent-bg); border:1px solid var(--accent); border-radius:12px; padding:2px 8px; }
+
+  /* journey */
+  .journey{ display:flex; flex-direction:column; gap:0; margin:20px 0; }
+  .journey-step{ display:grid; grid-template-columns:40px 1fr; gap:16px; position:relative; padding-bottom:26px; }
+  .journey-step:last-child{ padding-bottom:0; }
+  .journey-step::before{ content:''; position:absolute; left:19px; top:38px; bottom:0; width:2px; background:var(--border-strong); }
+  .journey-step:last-child::before{ display:none; }
+  .journey-dot{ width:40px; height:40px; border-radius:50%; background:var(--glass-strong); border:2px solid var(--accent); color:var(--accent-deep); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex:none; z-index:1; }
+  .journey-body{ padding-top:6px; }
+  .journey-body .time{ font-size:11px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-dim); margin-bottom:3px; }
+  .journey-body h4{ margin:0 0 5px; font-size:15px; }
+  .journey-body p{ margin:0; font-size:13.5px; color:var(--text-muted); }
+
+  /* relationship diagram */
+  .rel-diagram{ display:flex; flex-direction:column; align-items:center; gap:0; margin:24px 0; }
+  .rel-hub{ background:linear-gradient(135deg,var(--accent),var(--accent-deep)); color:#fff; font-weight:800; font-size:15px; padding:14px 28px; border-radius:12px; box-shadow:0 8px 20px rgba(14,154,167,0.3); position:relative; z-index:2; }
+  .rel-lines{ width:2px; height:26px; background:var(--border-strong); }
+  .rel-row{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+  .rel-node{ background:var(--glass-strong); border:1px solid var(--border-strong); border-radius:10px; padding:10px 16px; font-size:12.5px; font-weight:600; text-align:center; min-width:110px; }
+  .rel-node .sub{ display:block; font-size:10.5px; font-weight:500; color:var(--text-muted); margin-top:2px; }
+  .rel-arrow{ text-align:center; font-size:11px; color:var(--text-dim); margin:8px 0; }
+  .rel-views{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+  .rel-view{ background:var(--amber-bg); border:1px solid var(--amber); color:var(--amber); border-radius:20px; padding:5px 13px; font-size:11.5px; font-weight:700; }
+
+  /* differentiators */
+  .diff-table{ width:100%; border-collapse:collapse; font-size:13.5px; margin:16px 0; }
+  .diff-table th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); font-weight:700; padding:0 12px 10px; border-bottom:1px solid var(--border-strong); }
+  .diff-table td{ padding:12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .diff-table tr:last-child td{ border-bottom:none; }
+  .diff-table .good{ color:var(--green); font-weight:600; }
+  .diff-table .bad{ color:var(--text-dim); }
+
+  /* timeline mini */
+  .trajectory{ display:flex; gap:0; overflow-x:auto; padding:8px 2px 16px; margin:16px 0; }
+  .traj-stop{ flex:none; width:190px; padding-right:18px; position:relative; }
+  .traj-stop::after{ content:''; position:absolute; top:9px; right:0; width:18px; height:2px; background:var(--border-strong); }
+  .traj-stop:last-child::after{ display:none; }
+  .traj-dot{ width:9px; height:9px; border-radius:50%; background:var(--accent); margin-bottom:10px; }
+  .traj-stop b{ display:block; font-size:12.5px; margin-bottom:3px; }
+  .traj-stop span{ font-size:12px; color:var(--text-muted); }
+
+  .note{ display:flex; gap:12px; background:var(--amber-bg); border:1px solid rgba(255,166,0,0.35); border-radius:10px; padding:14px 16px; margin:16px 0; font-size:13.5px; }
+  .note .ic{ font-size:18px; flex:none; line-height:1.3; }
+
+  .warn{ display:flex; gap:12px; background:rgba(220,38,38,0.06); border:1px solid rgba(220,38,38,0.25); border-radius:10px; padding:16px 18px; margin:16px 0; font-size:13.5px; }
+  .warn .ic{ font-size:18px; flex:none; line-height:1.3; }
+  .warn ul{ margin:8px 0 0; padding-left:18px; }
+  .warn li{ margin-bottom:6px; }
+
+  .closing{ text-align:center; padding:40px 20px; margin-top:60px; }
+  .closing p{ font-size:19px; font-weight:600; color:var(--text); max-width:560px; margin:0 auto; line-height:1.5; }
+
+  footer{ margin-top:60px; padding-top:22px; border-top:1px solid var(--border); font-size:12.5px; color:var(--text-dim); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+</style>
+
+<header class="app-bar">
+  <div class="brand"><span class="f-badge">F</span> Foccus</div>
+  <span class="ver-chip">visão executiva · v4.4.0</span>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Documento executivo</div>
+    <h1>Foccus: o porquê, para quem, e como tudo se conecta</h1>
+    <p class="lede">Uma visão de alto nível do sistema — o problema que ele resolve, para quem foi pensado, o que ele faz, como o dia a dia de uso funciona, e como cada parte se encaixa nas outras.</p>
+  </div>
+
+  <section id="problema">
+    <h2><span class="num">01</span> O problema</h2>
+    <p class="section-lede">Quem acompanha vários projetos, pessoas e pendências ao mesmo tempo esbarra sempre nos mesmos cinco atritos — nenhum grave sozinho, mas que juntos consomem a maior parte do tempo que deveria ir para o trabalho em si:</p>
+    <div class="pain-grid">
+      <div class="pain"><span class="ic">🧩</span><b>Informação espalhada</b><span>Tarefa numa lista, prazo num e-mail, combinado numa mensagem de chat, status numa planilha — nada conversa entre si.</span></div>
+      <div class="pain"><span class="ic">⏳</span><b>Pendência de terceiro se perde</b><span>"Está esperando resposta do fulano" vira um post-it mental que some assim que outra urgência aparece.</span></div>
+      <div class="pain"><span class="ic">🧠</span><b>Memória de curto prazo sobrecarregada</b><span>Decisões e combinados que não viram uma tarefa formal simplesmente não ficam registrados em lugar nenhum.</span></div>
+      <div class="pain"><span class="ic">📊</span><b>Visão executiva é trabalho manual</b><span>Montar um status de projeto pra apresentar significa parar tudo pra compilar números numa planilha ou slide, na mão.</span></div>
+      <div class="pain"><span class="ic">🐘</span><b>Ferramentas corporativas pesam demais</b><span>Suítes de gestão de projeto genéricas pedem conta, configuração, curva de aprendizado e frequentemente custo — para um uso que é, no fundo, pessoal.</span></div>
+    </div>
+  </section>
+
+  <section id="posicionamento">
+    <h2><span class="num">02</span> Posicionamento</h2>
+    <p class="section-lede">Em uma frase — o que o Foccus é, para quem, e por que ele é diferente do que já existe:</p>
+    <div class="position-card">
+      <span class="tag">Positioning Statement</span>
+      Para o <b>profissional que coordena várias frentes de trabalho ao mesmo tempo</b> — projetos, pessoas, pendências —
+      o <b>Foccus</b> é um <b>sistema pessoal de gestão de tarefas e projetos</b> que reúne, num único lugar,
+      o que precisa ser feito, de quem depende uma resposta, e como cada projeto está evoluindo.
+      Diferente de planilhas genéricas ou de suítes corporativas de gestão de projetos,
+      o Foccus é <b>um único arquivo que roda direto no navegador</b> — sem instalação, sem conta,
+      sem custo, sem depender de infraestrutura de TI, e com os dados guardados só com o próprio usuário.
+    </div>
+  </section>
+
+  <section id="persona">
+    <h2><span class="num">03</span> Para quem é</h2>
+    <div class="card persona-card">
+      <div class="persona-avatar">👤</div>
+      <div>
+        <h3>O coordenador de múltiplas frentes</h3>
+        <div class="role">Perfil-alvo do Foccus</div>
+        <p style="margin:0;font-size:13.5px;color:var(--text-muted);">
+          Alguém com vários projetos abertos ao mesmo tempo, que depende regularmente de retorno de outras
+          pessoas para avançar, que precisa prestar contas de status pra cima (a um gestor, a um cliente,
+          a um comitê) e que hoje resolve isso com uma mistura de e-mail, chat, planilha e memória —
+          sem uma ferramenta dedicada, seja porque nenhuma se encaixa no fluxo real de trabalho, seja
+          porque adotar uma suíte corporativa completa é desproporcional ao problema.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="funcionalidades">
+    <h2><span class="num">04</span> O que o Foccus faz</h2>
+    <p class="section-lede">Organizado pelo objetivo que cada grupo de funcionalidades resolve — não pelas telas do sistema (isso está detalhado, tela por tela, no <code>Guia-de-Uso.html</code>).</p>
+    <div class="feature-grid">
+      <div class="feature">
+        <div class="ic">✓</div>
+        <h4>Organizar o trabalho do dia a dia</h4>
+        <p>Uma lista única de tudo em aberto, com prioridade, prazo e status — filtrável e agrupável na hora, sem esforço de organização manual.</p>
+        <div class="tools"><span>Minha Lista</span><span>Kanban</span><span>Busca</span></div>
+      </div>
+      <div class="feature">
+        <div class="ic">📁</div>
+        <h4>Acompanhar projetos</h4>
+        <p>Cada projeto com seu progresso calculado automaticamente a partir das tarefas reais — não um número digitado à mão que desatualiza.</p>
+        <div class="tools"><span>Projetos</span><span>Detalhe do Projeto</span></div>
+      </div>
+      <div class="feature">
+        <div class="ic">⏳</div>
+        <h4>Nunca perder uma pendência de terceiro</h4>
+        <p>Tarefas que dependem de resposta de alguém saem da lista comum e viram uma fila própria, agrupada por pessoa, com histórico da cobrança.</p>
+        <div class="tools"><span>Aguardando</span><span>Pessoas</span></div>
+      </div>
+      <div class="feature">
+        <div class="ic">📝</div>
+        <h4>Guardar decisões que não são tarefas</h4>
+        <p>Um espaço para registrar avanços e combinados que não justificam virar uma tarefa formal, mas que precisam ficar em algum lugar.</p>
+        <div class="tools"><span>Anotações</span></div>
+      </div>
+      <div class="feature">
+        <div class="ic">📊</div>
+        <h4>Prestar contas com visão executiva</h4>
+        <p>Um painel pronto por projeto — Kanban, Gantt, Burndown com previsão de conclusão e uma Visão Geral comparando tudo — sem montar nada manualmente.</p>
+        <div class="tools"><span>Dashboard</span></div>
+      </div>
+      <div class="feature">
+        <div class="ic">🔍</div>
+        <h4>Encontrar qualquer coisa em segundos</h4>
+        <p>Uma busca única que cruza tarefas, projetos e pessoas ao mesmo tempo — sem precisar saber em qual tela a informação está.</p>
+        <div class="tools"><span>Busca</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="jornada">
+    <h2><span class="num">05</span> A jornada do usuário</h2>
+    <p class="section-lede">Como um dia de trabalho real percorre o sistema, do início ao fim:</p>
+    <div class="journey">
+      <div class="journey-step">
+        <div class="journey-dot">1</div>
+        <div class="journey-body">
+          <div class="time">Início do dia</div>
+          <h4>Abre o Foccus direto em Minha Lista</h4>
+          <p>Vê de cara quantas tarefas vencem hoje, quantas já atrasaram e quantas dependem de resposta de alguém — sem precisar filtrar nada manualmente.</p>
+        </div>
+      </div>
+      <div class="journey-step">
+        <div class="journey-dot">2</div>
+        <div class="journey-body">
+          <div class="time">Ao longo do dia</div>
+          <h4>Cria tarefas no momento em que surgem</h4>
+          <p>Uma ideia rápida vira uma linha na lista em segundos; um pedido mais completo ganha projeto, prioridade e prazo já na criação.</p>
+        </div>
+      </div>
+      <div class="journey-step">
+        <div class="journey-dot">3</div>
+        <div class="journey-body">
+          <div class="time">Ao esbarrar num bloqueio</div>
+          <h4>Marca a tarefa como "Aguardando" a pessoa certa</h4>
+          <p>A tarefa some da lista de afazeres imediatos e reaparece organizada na tela Aguardando — o compromisso de cobrar não depende mais da memória.</p>
+        </div>
+      </div>
+      <div class="journey-step">
+        <div class="journey-dot">4</div>
+        <div class="journey-body">
+          <div class="time">Follow-up</div>
+          <h4>Revisita Aguardando e registra a cobrança</h4>
+          <p>Cada acompanhamento vira um comentário com data — um histórico de "já cobrei duas vezes" pronto para qualquer conversa difícil.</p>
+        </div>
+      </div>
+      <div class="journey-step">
+        <div class="journey-dot">5</div>
+        <div class="journey-body">
+          <div class="time">Quando algo é decidido</div>
+          <h4>Registra em Anotações, ligado ao projeto</h4>
+          <p>A decisão fica documentada mesmo sem virar tarefa — e continua rastreável a qualquer momento, por projeto.</p>
+        </div>
+      </div>
+      <div class="journey-step">
+        <div class="journey-dot">6</div>
+        <div class="journey-body">
+          <div class="time">Antes de uma reunião de status</div>
+          <h4>Abre o Dashboard do projeto</h4>
+          <p>Progresso, previsão de conclusão e um gráfico de tendência já prontos — a apresentação de status deixa de ser trabalho manual.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="relacao">
+    <h2><span class="num">06</span> Como as funcionalidades se conectam</h2>
+    <p class="section-lede">Tudo no Foccus gira em torno de uma única entidade: a <b>Tarefa</b>. Projetos, Pessoas e Anotações não guardam informação duplicada — são diferentes maneiras de olhar para o mesmo conjunto de tarefas, e cada tela é só um recorte ou uma visualização desse mesmo dado central.</p>
+    <div class="rel-diagram">
+      <div class="rel-hub">🗂 Tarefa</div>
+      <div class="rel-lines"></div>
+      <div class="rel-row">
+        <div class="rel-node">📁 Projeto<span class="sub">agrupa tarefas</span></div>
+        <div class="rel-node">👤 Pessoa<span class="sub">de quem se aguarda</span></div>
+        <div class="rel-node">📝 Anotação<span class="sub">ligada a um projeto ou tarefa</span></div>
+      </div>
+      <div class="rel-arrow">↓ cada uma dessas relações alimenta uma ou mais telas ↓</div>
+      <div class="rel-views">
+        <span class="rel-view">Minha Lista</span>
+        <span class="rel-view">Kanban</span>
+        <span class="rel-view">Aguardando</span>
+        <span class="rel-view">Projetos</span>
+        <span class="rel-view">Pessoas</span>
+        <span class="rel-view">Anotações</span>
+        <span class="rel-view">Dashboard</span>
+        <span class="rel-view">Busca</span>
+      </div>
+    </div>
+    <div class="card">
+      <p>Na prática, isso significa que nada precisa ser mantido em dois lugares: o <b>progresso de um projeto</b> não é um número digitado à parte — é calculado automaticamente a partir do status e do percentual de conclusão de cada tarefa daquele projeto. A <b>fila de Aguardando</b> não é uma lista separada — é a mesma tarefa, só filtrada pelo status "Aguardando" e reagrupada por pessoa. O <b>Dashboard</b> não pede que ninguém preencha um relatório — ele lê exatamente as mesmas tarefas que aparecem em Minha Lista, só que resumidas em gráficos. Uma mudança feita em qualquer lugar (marcar como concluída, mudar o prazo, trocar de projeto) se reflete instantaneamente em toda tela que depende daquela tarefa.</p>
+    </div>
+  </section>
+
+  <section id="diferenciais">
+    <h2><span class="num">07</span> Diferenciais</h2>
+    <p class="section-lede">Comparado às duas alternativas mais comuns hoje — planilha genérica e suíte corporativa de gestão de projetos:</p>
+    <table class="diff-table">
+      <tr><th>Critério</th><th>Foccus</th><th>Planilha</th><th>Suíte corporativa</th></tr>
+      <tr><td>Instalação / conta</td><td class="good">Nenhuma — abre um arquivo</td><td class="good">Nenhuma</td><td class="bad">Cadastro, licença, configuração</td></tr>
+      <tr><td>Custo</td><td class="good">Zero</td><td class="good">Zero (geralmente)</td><td class="bad">Assinatura por usuário</td></tr>
+      <tr><td>Curva de aprendizado</td><td class="good">Minutos</td><td class="good">Minutos</td><td class="bad">Dias a semanas</td></tr>
+      <tr><td>Feito sob medida pro fluxo pessoal</td><td class="good">Sim — construído em cima do fluxo real de uso</td><td class="bad">Exige montar tudo do zero</td><td class="bad">Fluxo genérico, adaptado à força</td></tr>
+      <tr><td>Visão executiva (Dashboard) pronta</td><td class="good">Sim, automática</td><td class="bad">Manual, refeita a cada relatório</td><td class="good">Sim, mas exige configuração</td></tr>
+      <tr><td>Dono dos dados</td><td class="good">100% local, só o usuário</td><td class="bad">Depende de onde está hospedada</td><td class="bad">Fornecedor terceiro</td></tr>
+      <tr><td>Colaboração multiusuário</td><td class="bad">Não tem (ver seção 9)</td><td class="good">Sim, com limitações</td><td class="good">Sim, é o forte dela</td></tr>
+    </table>
+  </section>
+
+  <section id="trajetoria">
+    <h2><span class="num">08</span> Trajetória até aqui</h2>
+    <p class="section-lede">Em alto nível — o histórico técnico completo, versão por versão, está em <code>CONTROLE_DE_VERSOES.txt</code> e resumido em <code>DOCUMENTACAO_TECNICA.md</code>.</p>
+    <div class="trajectory">
+      <div class="traj-stop"><div class="traj-dot"></div><b>Base (v2.x)</b><span>Lista de tarefas, Aguardando, Anotações e um primeiro Dashboard simples.</span></div>
+      <div class="traj-stop"><div class="traj-dot"></div><b>Painel do Projeto (v3.0-v3.2)</b><span>Dashboard reconstruído: Kanban, Gantt, Burndown, Visão Geral e previsão de conclusão.</span></div>
+      <div class="traj-stop"><div class="traj-dot"></div><b>Identidade visual única (v3.3-v3.9)</b><span>A paleta e o acabamento do Dashboard estendidos pro app inteiro, tela por tela.</span></div>
+      <div class="traj-stop"><div class="traj-dot"></div><b>Vidro Total (v4.0-v4.2)</b><span>Refino visual completo, ainda em fase experimental, avaliando o resultado antes de fechar como padrão definitivo.</span></div>
+      <div class="traj-stop"><div class="traj-dot"></div><b>Documentação (v4.3)</b><span>Guia do usuário com prints reais, documentação técnica e este documento executivo.</span></div>
+    </div>
+  </section>
+
+  <section id="limitacoes">
+    <h2><span class="num">09</span> Limitações conhecidas</h2>
+    <p class="section-lede">Transparência sobre o que o Foccus deliberadamente não faz hoje:</p>
+    <div class="warn">
+      <span class="ic">⚠️</span>
+      <div>
+        <ul>
+          <li><b>Sem colaboração multiusuário</b> — é um sistema de uso pessoal; os dados vivem só no navegador de quem está usando, não há como outra pessoa ver ou editar o mesmo conjunto de dados.</li>
+          <li><b>Sem sincronização entre dispositivos</b> — abrir o mesmo arquivo em outro computador (ou outro navegador) não traz os dados junto; cada ambiente guarda sua própria cópia.</li>
+          <li><b>Sem aplicativo mobile</b> — funciona num navegador de celular, mas não foi desenhado pra essa tela; a experiência é pensada para desktop.</li>
+          <li><b>Backup é responsabilidade do usuário</b> — não existe nuvem por trás; limpar os dados de navegação do navegador apaga tudo, sem recuperação.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note">
+      <span class="ic">💡</span>
+      <div>Essas limitações são o preço direto dos diferenciais da seção 7 (zero instalação, zero custo, zero dependência de infraestrutura) — não são lacunas a esconder, são a fronteira deliberada do que o Foccus se propõe a ser: uma ferramenta pessoal, não uma plataforma de equipe.</div>
+    </div>
+  </section>
+
+  <div class="closing">
+    <p>O Foccus existe para que coordenar várias frentes de trabalho ao mesmo tempo pare de depender de memória, planilha improvisada e retrabalho manual de status — tudo num único arquivo, sempre à mão.</p>
+  </div>
+
+  <footer>
+    <span>Visão Executiva — Foccus</span>
+    <span>Ver também: Guia-de-Uso.html (manual do usuário) e DOCUMENTACAO_TECNICA.md (referência para desenvolvedores)</span>
+  </footer>
+
+</div>

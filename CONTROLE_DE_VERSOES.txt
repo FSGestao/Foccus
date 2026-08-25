@@ -1,0 +1,685 @@
+CONTROLE DE VERSÕES — Foccus
+=============================================================================
+
+REGRA (obrigatória a partir da v2.0.0):
+  Todo ajuste feito no sistema (principal e/ou template) precisa, antes de ser dado
+  como concluído:
+    1. Incrementar a versão (2.0.0 -> 2.1.0 -> 2.2.0 -> ...).
+    2. Atualizar a constante APP_VERSION no(s) arquivo(s) .dc.html tocado(s)
+       (Foccus.dc.html e/ou Foccus_Template/Foccus_Template.dc.html).
+    3. Registrar uma nova entrada NO TOPO deste arquivo (logo abaixo desta regra),
+       com a versão, a data e a descrição de cada ajuste feito.
+    4. Copiar os arquivos finais dessa versão para uma pasta própria em
+       /versions/<versão>/, contendo tudo que é necessário para rodar aquela versão:
+         /versions/<versão>/Foccus.dc.html
+         /versions/<versão>/support.js
+         /versions/<versão>/Foccus_Template/Foccus_Template.dc.html
+         /versions/<versão>/Foccus_Template/support.js
+  Nenhum ajuste deve ser considerado finalizado sem passar por esses 4 passos —
+  mesmo ajustes pequenos contam como uma nova versão.
+
+Formato de cada entrada:
+-----------------------------------------------------------------------------
+v<versão> — <data>
+Pasta: /versions/<versão>/
+Ajustes:
+- ...
+- ...
+-----------------------------------------------------------------------------
+
+=============================================================================
+
+v5.3.0 — 25/08/2026
+Pasta: /versions/5.3.0/
+Ajustes:
+- Remoção do campo maior de anotações livres, mantendo apenas a listagem de anotações vinculadas e o campo de adicionar anotações na base.
+
+=============================================================================
+
+v5.2.0 — 25/08/2026
+Pasta: /versions/5.2.0/
+Ajustes:
+- Correção de bug: O campo de anotações da gaveta de tarefas (Notes) mostrava "[object Object]". Isso ocorria pois a propriedade "notes" estava sendo re-declarada acidentalmente no componente como um array de comentários.
+
+=============================================================================
+
+v5.1.0 — 25/08/2026
+Pasta: /versions/5.1.0/
+Ajustes:
+- Implementado "Vitórias Rápidas (Quick Wins)" de verdade — antes só existia o
+  toggle no modal, sem nenhuma detecção ou lugar pra aparecer:
+  - Novo banner no mesmo slot do banner de Gargalos (logo abaixo de <main>), que só
+    aparece quando o board fica 4h consecutivas sem nenhuma mudança (nova
+    lastActivityAt, atualizada em updateTask/criação rápida/criação completa de
+    tarefa) — não existia noção de "tempo desde a última atividade" no app antes
+    disso.
+  - Candidatas = tarefas TODO com estimativa <= 15 min (campo já existente no
+    drawer da tarefa, `estimatedMinutes`) ou Prioridade Baixa (P4); lista até 3,
+    priorizando quem tem estimativa explícita. Cada uma tem um botão de concluir
+    inline e abre o detalhe da tarefa ao clicar no título.
+  - Corrigido o texto do card no modal, que prometia uma etiqueta "Rápido" que não
+    existe em lugar nenhum da UI (não há como criar/editar tags no app) — agora
+    descreve o critério real (estimativa ou P4).
+  - Quando o banner de Gargalos está ativo, ele tem prioridade sobre o de Vitórias
+    Rápidas (não competem pelo mesmo espaço ao mesmo tempo); "Ignorar" esconde só
+    pelo resto do dia, mesmo padrão do banner de Gargalos.
+- APP_VERSION -> 5.1.0 em Foccus.dc.html (Foccus_Template não foi tocado).
+-----------------------------------------------------------------------------
+
+v5.0.0 — 25/08/2026
+Pasta: /versions/5.0.0/
+Ajustes:
+- Correções de acessibilidade e estado nos Toggle Switches do modal "Configurações
+  do Assistente Inteligente" (Destruidor de Gargalos, Vitórias Rápidas, Ritual de
+  Fechamento, Limpeza de Primavera):
+  - O checkbox real é escondido com opacity:0, o que também apagava o outline de
+    *:focus-visible ao navegar por teclado; adicionada a regra
+    `input[type="checkbox"]:focus-visible + span` para redirecionar o indicador de
+    foco ao "trilho" visual do switch.
+  - Adicionado aria-label em cada um dos 4 checkboxes (não tinham nome acessível
+    para leitor de tela).
+  - Corrigida closure obsoleta nos 4 handlers de toggle (usavam o `s` capturado no
+    render em vez do `setState(st => ...)` funcional já usado no resto do arquivo).
+  - Removida a regra `button:focus-visible` redundante com `*:focus-visible`.
+  - Uniformizado o blur do overlay do modal do assistente (5px -> 3px, igual aos
+    demais modais do app).
+  - `handleEscape()` agora fecha também `showAssistantModal` e o novo
+    `showFechamentoModal` (o modal do assistente tinha ficado de fora do atalho Esc
+    já usado por todos os outros modais).
+- Banner "Destruidor de Gargalos" deixou de ser decorativo/mock e passou a refletir
+  o estado real do board:
+  - Contagem e nome de coluna reais (antes citava uma coluna "Revisão" que não
+    existe no modelo de dados do Foccus — os status reais são
+    TODO/WAITING/IN_PROGRESS/BLOCKED/DONE).
+  - Só aparece quando "Destruidor de Gargalos" está ativo E o nº de tarefas em
+    "Em Progresso" ultrapassa o limite configurado no modal; some sozinho quando a
+    coluna volta a ficar dentro do limite.
+  - Botão de ação leva ao Kanban agrupado por status (coluna do gargalo); "Ignorar"
+    esconde o banner só pelo resto do dia.
+  - "Combo de Fluxo": resolver o gargalo no mesmo dia (via updateTask, cobre drag no
+    Kanban e demais fluxos de mudança de status) soma um combo e dispara um toast de
+    comemoração — no máximo 1x por dia.
+- "Ritual de Fechamento" deixou de ser só configuração e passou a disparar de
+  verdade: checagem a cada 1 min contra o horário configurado, com novo modal
+  mostrando tarefas concluídas no dia e o "Nível de Foco" (dias seguidos fazendo o
+  ritual). Dispara no máximo 1x por dia e não interrompe se outro modal já estiver
+  aberto.
+- Modal "Configurações do Assistente Inteligente" ampliado para também ser o lugar
+  de consulta/explicação dos mecanismos: nova barra com estatísticas reais (Combos
+  de Fluxo acumulados, Nível de Foco), descrições dos cards reescritas para explicar
+  o "porquê" de cada mecanismo, e status ao vivo (contagem atual x limite) no card
+  de Gargalos.
+- Toda a configuração do assistente (toggles, limites, horário, combos e streak)
+  passou a ser persistida em localStorage (antes resetava a cada F5, já que o bloco
+  salvo só incluía tasks/projects/people/projectNotes/theme).
+- "Vitórias Rápidas" e "Limpeza de Primavera" permanecem apenas configuráveis nesta
+  versão (sem motor de detecção real) — fora de escopo aqui; "Agrupamento de
+  Contexto" foi explicitamente excluído do escopo desta versão.
+- APP_VERSION -> 5.0.0 em Foccus.dc.html (Foccus_Template não foi tocado: essas
+  features do Assistente não existem lá).
+-----------------------------------------------------------------------------
+
+v4.5.0 — 24/08/2026
+Pasta: /versions/4.5.0/
+Ajustes:
+- Sincronização e atualização completa do Foccus_Template (Foccus_Template.dc.html
+  e Foccus_Template/support.js):
+  - Portado todo o Design System "Vidro Total" (v4.0 a v4.2): cartões individuais
+    translúcidos (--pb-glass-card e --pb-glass-strong-card), bordas aprimoradas,
+    degradê reforçado no tema escuro e contraste aperfeiçoado para painéis
+    aninhados (subtarefas, comentários) e drawer de detalhes da tarefa.
+  - Atualizada a barra lateral para o padrão moderno retrátil com animação suave
+    e dados de rodapé (data atual + versão).
+  - Incluídas correções recentes de edição rápida de datas diretamente no final
+    da tarefa e exibição do ícone único com tooltip para tarefas em status
+    "Aguardando".
+  - Preservados os dados genéricos de seed (projetos, pessoas, tarefas de exemplo)
+    e o isolamento de armazenamento (STORAGE_KEY = 'foccus_template_state_v1').
+- APP_VERSION -> 4.5.0 em Foccus.dc.html e Foccus_Template/Foccus_Template.dc.html.
+-----------------------------------------------------------------------------
+
+v4.4.0 — 22/08/2026
+Pasta: /versions/4.4.0/
+Ajustes:
+- Criado Visao-Executiva.html — documento executivo de apresentação do
+  sistema, complementar ao Guia-de-Uso.html (manual do usuário) e ao
+  DOCUMENTACAO_TECNICA.md (referência para desenvolvedores). Estrutura
+  baseada em pesquisa do padrão de mercado para esse tipo de documento —
+  Product Vision Document (RUP) + Positioning Statement (Geoffrey Moore) +
+  Product Vision Board (persona/dor/proposta de valor/diferencial) — com
+  as seguintes seções: (1) O problema — 5 dores que o sistema resolve;
+  (2) Posicionamento — statement de uma frase (para quem / o que é /
+  diferencial); (3) Persona-alvo; (4) Funcionalidades organizadas por
+  OBJETIVO do usuário (não por tela, diferente do Guia-de-Uso); (5) Jornada
+  do usuário — narrativa de um dia de uso, do início ao fim; (6) Relação
+  entre as funcionalidades — diagrama mostrando a Tarefa como entidade
+  central da qual Projeto/Pessoa/Anotação derivam, e como cada tela é só
+  um recorte desse mesmo dado; (7) Tabela comparativa de diferenciais vs.
+  planilha e vs. suíte corporativa; (8) Trajetória resumida das versões
+  (linha do tempo em 5 marcos, não o changelog completo); (9) Limitações
+  conhecidas (sem colaboração multiusuário, sem sync entre dispositivos,
+  sem mobile, backup é responsabilidade do usuário) — incluída de propósito
+  para transparência executiva.
+- Mesma identidade visual dos outros dois documentos (glass cards,
+  teal/âmbar, Inter), com elementos novos: cartão de positioning statement
+  destacado, grade de "dores" (pain points), diagrama de relacionamento em
+  hub-and-spoke (CSS puro, sem lib de gráfico) e tabela comparativa de
+  diferenciais.
+- Nenhuma mudança de código/comportamento no app — Foccus.dc.html só teve
+  o APP_VERSION incrementado. Foccus_Template não foi tocado (segue em
+  3.9.0).
+- Versão dos dois documentos anteriores (Guia-de-Uso.html,
+  DOCUMENTACAO_TECNICA.md) atualizada para 4.4.0 por consistência, sem
+  alteração de conteúdo além disso.
+- Validado localmente (servidor estático + Playwright): sem erros no
+  console, documento conferido visualmente em claro e escuro.
+- APP_VERSION -> 4.4.0 em Foccus.dc.html.
+-----------------------------------------------------------------------------
+
+v4.3.0 — 22/08/2026
+Pasta: /versions/4.3.0/
+Ajustes:
+- Guia-de-Uso.html reescrito por completo: trocados os mockups ilustrativos
+  (CSS estático imitando a interface) por 28 capturas de tela reais do
+  sistema rodando na v4.2.0, tiradas via Playwright (servidor estático
+  local + navegador headless), guardadas em /guia-imagens/. Conteúdo
+  reorganizado em 19 seções com índice clicável, cobrindo cada botão,
+  campo e tela do sistema sem resumir informação — inclusive itens que o
+  guia anterior não detalhava (todos os campos do painel de detalhes da
+  tarefa, seleção múltipla e a barra de ações em lote, os 4 modos do
+  Dashboard, a diferença entre --pb-glass* nos temas claro/escuro,
+  atalhos de teclado em tabela). Escrito para leitura por alguém sem
+  nenhuma familiaridade prévia com informática ou com o sistema.
+- Criado DOCUMENTACAO_TECNICA.md — documento de referência técnica para
+  desenvolvedores, cobrindo: visão geral e estrutura de arquivos; como
+  rodar localmente; sintaxe do motor de template (.dc.html + support.js,
+  incluindo limitações como {{ }} não aceitar chamada de função); anatomia
+  da classe Component (state, renderVals(), ciclo de vida); modelo de
+  dados (Task/Project/Person/ProjectNote) inferido do seed; tabela de
+  constantes/enums; o sistema de tokens de tema (--pb-*/--db-*, incluindo
+  a hierarquia glass → glass-strong → glass-card → glass-strong-card
+  construída entre a v3.3.0 e a v4.2.0); mapa das telas (view) com linhas
+  aproximadas; inventário dos ~70 métodos da classe Component; as 3 chaves
+  de localStorage usadas (inclusive a pegadinha do foccus_theme, que é
+  escrito mas nunca lido); histórico resumido de todas as versões
+  2.0.0–4.3.0; uma lista de decisões de arquitetura e pegadinhas conhecidas
+  (STORAGE_KEY com nome legado, campos de dado sem UI, handlers de exclusão
+  de projeto sem botão conectado, risco de "vidro sobre vidro", diferenças
+  estruturais do Template); e o processo de teste/verificação usado nas
+  versões 4.x.
+- Nenhuma mudança de código/comportamento no app — Foccus.dc.html só teve
+  o APP_VERSION incrementado, sem outra alteração. Foccus_Template não foi
+  tocado (segue em 3.9.0).
+- APP_VERSION -> 4.3.0 em Foccus.dc.html.
+-----------------------------------------------------------------------------
+
+v4.2.0 — 22/08/2026 [EXPERIMENTAL]
+Pasta: /versions/4.2.0/
+Ajustes:
+- Corrige dois pontos apontados pelo usuário onde o vidro reforçado da
+  v4.0/v4.1 não tinha sido aplicado ou ficava invisível:
+  - Painéis aninhados dentro de um cartão de vidro (subtarefas expandidas
+    da Minha Lista, comentários expandidos do Aguardando) usavam
+    --pb-glass-strong puro, que no claro é 0.88 de opacidade — quase
+    idêntico a --pb-surface sólido, então o vidro não aparecia. Criado o
+    token --pb-glass-strong-card (mesma lógica do --pb-glass-card da v4.0:
+    no escuro é igual ao --pb-glass-strong normal; no claro ganha o mesmo
+    tingimento teal/âmbar, um pouco mais opaco que o --pb-glass-card pra
+    manter legibilidade do conteúdo aninhado). Aplicado nas 3 ocorrências:
+    Minha Lista ungrouped (subtarefas), Minha Lista grouped (subtarefas) e
+    Aguardando (comentários). Kanban avulso não foi tocado (fora do
+    escopo, mesmo motivo das versões anteriores).
+  - Painel lateral de Detalhes da Tarefa (aside, abre ao clicar numa
+    tarefa): estava em --pb-glass puro (0.66 no claro), mesmo problema de
+    baixo contraste contra fundo quase branco. Atualizado para
+    --pb-glass-card + borda em --pb-border-hover, mesmo tratamento do
+    resto do vidro reforçado.
+- Validado localmente (servidor estático + Playwright): sem erros no
+  console; subtarefas expandidas, comentários do Aguardando e o painel de
+  detalhes conferidos visualmente em claro e escuro.
+- APP_VERSION -> 4.2.0 em Foccus.dc.html (Foccus_Template não foi tocado
+  e continua em 3.9.0).
+-----------------------------------------------------------------------------
+
+v4.1.0 — 22/08/2026 [EXPERIMENTAL]
+Pasta: /versions/4.1.0/
+Ajustes:
+- Estende o "Vidro Total" da Minha Lista (v4.0.0) pro restante do
+  Foccus.dc.html. Telas que ainda tinham lista densa sólida
+  (--pb-surface + linhas coladas com border-bottom) passaram pro mesmo
+  padrão de cartão de vidro individual por linha, com espaçamento entre
+  elas — reaproveitando exatamente os tokens criados na v4.0
+  (--pb-glass-card, --pb-border-hover, mesma sombra):
+  - Aguardando (viewWaiting): grupo por pessoa e cada linha de tarefa
+    convertidos; painel de comentários expandido passou de
+    --pb-surface-subtle para --pb-glass-strong (mesmo tratamento dado às
+    subtarefas da Minha Lista); bolhas de comentário individuais
+    continuam sólidas (--pb-surface), evitando vidro-sobre-vidro; estado
+    vazio ganhou cartão de vidro (antes era só texto solto).
+  - Detalhe do Projeto (viewProjectDetail): mesma conversão; a linha
+    antes embutia "border-bottom" direto no estilo da própria linha
+    (row.rowStyle + sufixo), reestruturado pra usar um wrapper próprio
+    por linha, igual ao padrão da Minha Lista. Estado vazio também
+    ganhou cartão de vidro.
+  - Resultados de Busca (isSearching): mesma conversão; container e
+    linhas não tinham wrapper individual nenhum antes (rows soltas numa
+    caixa sólida única) — agora cada resultado é seu próprio cartão de
+    vidro. Estado vazio também ganhou cartão de vidro.
+- Upgrade de consistência (já eram vidro, só não usavam o token
+  reforçado --pb-glass-card / --pb-border-hover criado na v4.0): grid de
+  Projetos, grid de Pessoas, painel "Nova anotação" + cards de nota +
+  estado vazio de Anotações. Kanban avulso ficou de fora de propósito
+  (cards já são --pb-glass-strong dentro de coluna tingida; reforçar mais
+  arriscaria vidro-sobre-vidro).
+- Fonte unificada: removida a regra CSS .db-scope { font-family: Inter...
+  } — resto de quando só o Dashboard usava Inter, antes da v3.3.0
+  estender a fonte pro app inteiro; já era idêntica à do body, então a
+  remoção não muda nada visualmente, só limpa código morto/redundante.
+- Brilho de fundo do Dashboard ("Painel do Projeto") unificado com o
+  resto do app: o container .db-scope e seu overlay de gradiente
+  passaram a usar var(--pb-bg)/var(--pb-bg-gradient) direto (herdados do
+  wrapper raiz) em vez da receita própria antiga (--db-bg/--db-bg-gradient,
+  mais fraca e nunca reforçada) — dbVarsStyle não define mais essas duas
+  variáveis, que ficaram sem uso. Efeito visível nos dois temas, mas
+  mais notável no escuro, que já tinha sido reforçado na v4.0.
+- Segue de fora do escopo (mesmo motivo da v4.0): Kanban avulso (ver
+  acima), Dashboard como sistema de cores (--db-teal/--db-amber/etc.,
+  mantido — só o brilho de fundo foi unificado), modais e o drawer de
+  detalhe da tarefa (já eram --pb-glass, não upgradados pro
+  --pb-glass-card), e o Foccus_Template (segue em 3.9.0, sem nenhuma
+  destas mudanças).
+- Validado localmente (servidor estático + Playwright): sem erros no
+  console; Aguardando, Detalhe do Projeto, Busca, Projetos, Pessoas,
+  Anotações e Dashboard conferidos visualmente em claro e escuro.
+- APP_VERSION -> 4.1.0 em Foccus.dc.html (Foccus_Template não foi tocado
+  e continua em 3.9.0).
+-----------------------------------------------------------------------------
+
+v4.0.0 — 22/08/2026 [EXPERIMENTAL]
+Pasta: /versions/4.0.0/
+Ajustes:
+- Início da v4.0, marcada como experimental — testando a Opção A ("Vidro
+  Total") da proposta de identidade visual, aplicada por ora só na tela
+  Minha Lista (tela inicial do app), para avaliar como fica antes de decidir
+  se estende para as demais telas densas (Aguardando etc.).
+- Foccus.dc.html, tela Minha Lista: barra de métricas-resumo, campo de
+  tarefa rápida e os dois contêineres de lista (agrupada/não agrupada)
+  passaram de fundo sólido (--pb-surface) para vidro (--pb-glass) com
+  blur. Cada linha de tarefa virou um cartão de vidro individual, com
+  espaçamento entre elas, em vez de linhas coladas dentro de uma caixa
+  sólida única — mesmo tratamento visual já usado no Kanban/Projetos, mas
+  agora também no conteúdo tabular (o que a "Identidade Adaptada" da
+  v3.3-v3.9 evitava por legibilidade). Painel de subtarefas expandidas
+  passou a usar --pb-glass-strong; estado vazio ("Nenhuma tarefa
+  encontrada...") ganhou o mesmo cartão de vidro.
+- Não mexe no restante do app (Aguardando, Projetos, Kanban, Pessoas,
+  Anotações, Dashboard) nem no Foccus_Template — mudança restrita à tela
+  inicial do arquivo principal, a pedido, para teste isolado.
+- Reforço no tema claro: no modo escuro o vidro contrasta bem contra o
+  degradê de fundo, mas no claro o fundo (--pb-bg) já é quase branco, então
+  vidro puro (rgba branco 0.66) ficava indistinguível do --pb-surface sólido
+  anterior. Criado o token --pb-glass-card (calculado em themeTokens(), só
+  para os cartões desta tela): no escuro é idêntico a --pb-glass; no claro
+  usa mais transparência (rgba branco 0.4) com um tingimento teal/âmbar sutil
+  sobreposto — mesma técnica de gradiente que o Kanban já usa nas colunas
+  (colBg) — mais borda em --pb-border-hover e sombra leve, pra ficar visível
+  como vidro mesmo sem gradiente forte por trás. --pb-glass global (resto do
+  app) não foi alterado.
+- Degradê de fundo reforçado no tema escuro (a pedido, comparando com o
+  modelo de referência): themeTokens() dark.bgGradient aumentado de raios
+  1200x520/900x440 pra 1800x900/1300x750 e opacidade de 0.20/0.10 pra
+  0.34/0.16, fazendo a mancha teal (canto superior esquerdo) e o âmbar
+  (canto superior direito) se estenderem bem mais antes de esmaecer no
+  --pb-bg escuro (#0a1420) — antes o efeito só aparecia num respingo
+  pequeno nos cantos, quase imperceptível na área onde as tarefas ficam.
+  Esse token é da raiz do app (aplicado no wrapper que envolve todas as
+  telas), então o reforço vale pro app inteiro no escuro, não só Minha
+  Lista — não dava pra isolar por tela sem duplicar a estrutura de fundo.
+  Tema claro não foi tocado nesse ajuste.
+- Validado localmente (servidor estático + Playwright) em três rodadas: sem
+  erros no console, telas claro e escuro conferidas visualmente em cada uma.
+- APP_VERSION -> 4.0.0 em Foccus.dc.html (Foccus_Template não foi tocado
+  e continua em 3.9.0).
+-----------------------------------------------------------------------------
+
+v3.9.0 — 22/08/2026
+Pasta: /versions/3.9.0/
+Ajustes:
+- Adicionada a opção de renomear projetos, faltando na interface embora a
+  lógica (renameProject/modal "Editar Projeto") já existisse pronta no
+  código sem nenhum botão ligado a ela.
+- Foccus.dc.html: ícone de lápis em cada card da grade de Projetos (abre o
+  modal "Editar Projeto" já existente) e no título do Detalhe do Projeto
+  (clique no nome, mesmo padrão que "Lista de {{nome}}" já usa em Minha
+  Lista).
+- Foccus_Template/Foccus_Template.dc.html: o título do Detalhe do Projeto já
+  tinha esse recurso (clique para renomear via prompt do navegador); faltava
+  na lista de Projetos — adicionado o mesmo ícone de lápis ao lado do botão
+  de excluir em cada linha.
+- APP_VERSION -> 3.9.0 nos dois arquivos.
+-----------------------------------------------------------------------------
+
+v3.8.0 — 22/08/2026
+Pasta: /versions/3.8.0/
+Ajustes:
+- Todos os <select> de filtro/agrupamento (Projeto e Pessoa em Minha Lista,
+  Agrupar em Minha Lista e no Kanban, Consultar Projeto em Anotações) agora
+  seguem o mesmo modelo de pílula de vidro do seletor "Todos os Projetos" do
+  Dashboard: cápsula arredondada (border-radius:20px), fundo --pb-glass com
+  blur, texto em negrito. As opções da lista suspensa ganharam cor fixa
+  (texto escuro em fundo branco) para continuarem legíveis no tema escuro,
+  mesma correção já usada no seletor do Dashboard desde a v3.1.
+- Título das tarefas (Minha Lista, Aguardando, Detalhe de Projeto, Kanban
+  avulso) passou de peso 400 (regular) para 600 (semibold), igualando ao
+  peso já usado nos cards do Dashboard — tarefas concluídas (com
+  tachado) continuam em peso 400 para manter a distinção visual.
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html
+  (o Template não tem os filtros de Projeto/Pessoa em Minha Lista, então só
+  os 3 seletores que existem lá — Agrupar da Lista, Agrupar do Kanban e
+  Consultar Projeto — foram ajustados). APP_VERSION -> 3.8.0 nos dois
+  arquivos.
+-----------------------------------------------------------------------------
+
+v3.7.0 — 22/08/2026
+Pasta: /versions/3.7.0/
+Ajustes:
+- Kanban avulso (fora do Dashboard) redesenhado para seguir exatamente o
+  modelo visual do Kanban do "Painel do Projeto": colunas com gradiente
+  tintado na cor semântica (não mais cinza neutro), cabeçalho colorido com
+  ícone + contagem, cards com círculo-avatar colorido (iniciais da pessoa
+  aguardada ou do projeto) em vez do ícone de status solto, e chips de
+  prioridade/projeto/prazo/aguardando no mesmo estilo do Dashboard. Botões de
+  concluir/excluir foram mantidos (só reposicionados ao lado do título) para
+  não perder funcionalidade.
+- A tintagem agora se adapta a qualquer agrupamento do Kanban (Status/
+  Projeto/Urgência/Prazo), não só o agrupamento fixo de 3 colunas do
+  Dashboard: por status usa a cor semântica de cada status; por projeto usa a
+  cor do próprio projeto; por urgência usa a cor de cada prioridade; por
+  prazo usa vermelho (atrasado) / âmbar (hoje) / azul (futuro).
+- Novo token --pb-glass-strong (vidro mais opaco, paralelo ao --db-panel-strong
+  do Dashboard) para os cards dentro das colunas tintadas — mantém contraste
+  em relação à coluna sem cair no problema de "vidro sobre vidro" ilegível.
+- Abas de navegação secundária (Todas/Hoje/Concluídas em Minha Lista; filtros
+  de status em Projetos e, no Template, também em Pessoas) redesenhadas no
+  mesmo formato de cápsula segmentada do seletor Kanban/Gantt/Burndown/Visão
+  Geral do Dashboard — pílula ativa em teal sólido com texto branco, dentro
+  de um contêiner de vidro. Os filtros rápidos multi-seleção (P1/Aguardando/
+  Bloqueadas/Atrasadas) permanecem com o visual de chip individual, por serem
+  um padrão de interação diferente (múltipla escolha, não abas exclusivas).
+- Novos utilitários hexToRgb()/kanbanColTint() e mapas STATUS_TINT_HEX/
+  STATUS_TINT_VAR, reaproveitáveis para qualquer tintagem futura baseada em
+  cor semântica.
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html
+  (o Kanban avulso do Template não tem arrastar-e-soltar, então só o visual
+  foi replicado, sem handlers de drag). APP_VERSION -> 3.7.0 nos dois
+  arquivos.
+-----------------------------------------------------------------------------
+
+v3.6.0 — 22/08/2026
+Pasta: /versions/3.6.0/
+Ajustes:
+- Fecha o restante da identidade visual: drawer de detalhe da tarefa, barra de
+  ações em lote (seleção múltipla) e toasts de notificação — os únicos
+  elementos de moldura/overlay que ainda estavam sólidos após v3.3–v3.5 —
+  agora usam --pb-glass + blur, mesmo padrão dos modais/header/sidebar.
+- No Foccus.dc.html, a barra de ações em lote já tinha um backdrop-filter
+  declarado, mas o background continuava sólido (var(--pb-surface)), então o
+  blur nunca tinha efeito visível — corrigido para var(--pb-glass).
+- No Foccus_Template/Foccus_Template.dc.html, ajustado apenas o drawer de
+  detalhe da tarefa: a barra de ações em lote do Template é um banner inline
+  colorido (var(--pb-accent-bg)), não um elemento flutuante, então já estava
+  correta por design e não precisou mudar; Template não tem sistema de toast.
+- APP_VERSION -> 3.6.0 nos dois arquivos.
+-----------------------------------------------------------------------------
+
+v3.5.0 — 22/08/2026
+Pasta: /versions/3.5.0/
+Ajustes:
+- Fase 3 ("Telas de cartão") da identidade visual, fechando o plano original
+  de levar o vidro do Dashboard para o resto do app. Regra aplicada: vidro
+  (--pb-glass + blur) na MOLDURA/CONTAINER de cada tela de cartão; o CONTEÚDO
+  em si (linhas de tabela densa) continua sólido — mesmo princípio já usado
+  em v3.3/v3.4.
+- Foccus.dc.html: cards de Kanban avulso (coluna vira vidro, os cards dentro
+  da coluna continuam sólidos — evita "vidro sobre vidro" e mantém o texto
+  legível), grade de Projetos (cada card de projeto vira vidro), grade de
+  Pessoas (idem) e Anotações (painel "Nova anotação", cada nota e o estado
+  vazio viram vidro).
+- Foccus_Template/Foccus_Template.dc.html: aplicado o mesmo princípio, mas
+  respeitando a estrutura própria do Template — lá, Projetos e Pessoas são
+  listas densas (linhas, não grade de cards), então ficam sólidas como
+  Minha Lista; só a coluna do Kanban e os cards/painéis de Anotações
+  viraram vidro. Kanban e Anotações do Template ficam visualmente
+  equivalentes aos do arquivo principal.
+- APP_VERSION -> 3.5.0 nos dois arquivos.
+-----------------------------------------------------------------------------
+
+v3.4.0 — 22/08/2026
+Pasta: /versions/3.4.0/
+Ajustes:
+- Removida a opção "Inbox" do menu de navegação (nav item + tela dedicada +
+  fluxo de captura rápida "addInboxTaskInternal" removidos dos dois arquivos).
+  Como nenhuma outra tela exibia tarefas com status INBOX, os filtros que as
+  excluíam de "Minha Lista" (openTasks / getCurrentVisibleTasks) foram
+  ajustados para não mais excluí-las — nenhuma tarefa existente (nem as 3 de
+  seed) fica órfã/invisível; elas passam a aparecer em Minha Lista como
+  qualquer outra tarefa aberta. Tarefas de seed que usavam status INBOX
+  passaram para TODO.
+- Fase 2 ("Telas densas") da identidade visual: cor semântica nos 4 números
+  do resumo (Hoje/Atrasadas/Aguardando/Próximas) no topo de Minha Lista —
+  teal/vermelho/âmbar/azul, mesma lógica de destaque já usada no Dashboard.
+  Criados os tokens --pb-red/--pb-blue/--pb-green em themeTokens() (paralelos
+  aos já existentes de dbThemeTokens()) para reuso no app inteiro.
+- Cor "Aguardando" unificada: os badges/textos "⏳ Aguardando" espalhados por
+  Minha Lista, Kanban avulso, view Aguardando e modal de tarefa usavam um
+  oklch(62% 0.14 75) fixo (não se adaptava ao tema escuro); trocado por
+  var(--pb-yellow), já theme-aware.
+- Data de vencimento atrasada: cor fixa #800020 (baixo contraste no escuro)
+  trocada por var(--pb-red).
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html.
+  APP_VERSION -> 3.4.0 nos dois arquivos.
+-----------------------------------------------------------------------------
+
+v3.3.0 — 22/08/2026
+Pasta: /versions/3.3.0/
+Ajustes:
+- Fase 1 ("Fundação") da nova identidade visual única do Foccus: a paleta
+  teal/âmbar que antes só existia dentro do Dashboard ("Painel do Projeto")
+  passou a valer para o app inteiro. themeTokens() foi reescrita com os novos
+  valores (mesmos nomes de campo de sempre — bg/surface/accent/... — por isso
+  todo o app, que já consumia essas cores via var(--pb-*), herdou a nova
+  identidade sem precisar editar cada tela).
+- Tratamento "Identidade Adaptada": --pb-surface (tabelas, inputs, cards)
+  continua SÓLIDO, para manter a legibilidade em telas densas como Minha
+  Lista e Aguardando. Um token novo, --pb-glass (translúcido + blur), foi
+  criado à parte só para moldura/overlay — aplicado no header, na
+  sidebar/menu de navegação e nos 8 modais do sistema principal (3 do
+  Template), que agora têm efeito de vidro fosco sobre o fundo com gradiente
+  radial teal/âmbar.
+- Fonte Inter (já usada só no Dashboard) passou a ser a fonte global do app —
+  aplicada no body/wrapper raiz dos dois arquivos.
+- Cor de seleção de texto (::selection) e o box-shadow do botão "+ Tarefa"
+  trocados do indigo antigo (#4f46e5) para o teal da nova identidade.
+- Fases seguintes (não incluídas nesta versão): v3.4.0 aplica o mesmo
+  cuidado de legibilidade ao conteúdo interno de Minha Lista/Inbox/Aguardando;
+  v3.5.0 estende o vidro às telas de cartão (Kanban avulso, Projetos,
+  Pessoas, Anotações).
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html.
+  APP_VERSION -> 3.3.0 nos dois arquivos.
+-----------------------------------------------------------------------------
+
+v3.2.2 — 22/08/2026
+Pasta: /versions/3.2.2/
+Ajustes:
+- No Kanban do Dashboard, a coluna "Em Progresso" agrupa IN_PROGRESS, WAITING e
+  BLOCKED sem distinção nenhuma — tarefa cancelada não aparece em lugar nenhum do
+  Dashboard (fora do escopo, por design). Para deixar isso visível sem criar uma
+  4ª coluna, cada card agora ganha uma tag: "⛔ Bloqueada" (vermelho) ou
+  "⏳ Aguardando <pessoa>" (âmbar), conforme o status real da tarefa.
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html.
+-----------------------------------------------------------------------------
+
+v3.2.1 — 22/08/2026
+Pasta: /versions/3.2.1/
+Ajustes:
+- Na aba "Visão Geral" do Dashboard, o bloco "Velocidade — Tarefas Concluídas por
+  Semana" foi movido para cima de "Progresso por Projeto" (ordem: Velocidade →
+  Progresso por Projeto → Mapa de Calor).
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html.
+-----------------------------------------------------------------------------
+
+v3.2.0 — 22/08/2026
+Pasta: /versions/3.2.0/
+Ajustes:
+- Completa os 4 itens "fora da caixa" do spec original do Dashboard, adiados na v3.0:
+  - Nova aba "Visão Geral" no seletor de modo (Kanban/Gantt/Burndown/Visão Geral):
+    - Anéis de progresso radiais — um por projeto, com % concluído e tooltip com a
+      contagem por status ao passar o mouse.
+    - Mapa de calor (Projetos × Status): células com intensidade de cor proporcional
+      à quantidade de tarefas.
+    - Velocity chart: tarefas concluídas por semana (últimas 8 semanas), com badge
+      "Meta de velocidade atingida" quando a semana atual empata ou supera a média
+      das 7 semanas anteriores.
+  - Anéis e mapa de calor sempre comparam todos os projetos (ignoram o filtro de
+    projeto do Dashboard, que não faz sentido numa visão comparativa); o velocity
+    chart respeita o filtro, como as demais visualizações.
+  - Gamificação: badge "🏆 Sequência: N dias" ao lado do badge de previsão, calculado
+    a partir de dias consecutivos reais com pelo menos uma tarefa concluída (só
+    aparece a partir de 2 dias — sem dados fictícios).
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html.
+-----------------------------------------------------------------------------
+
+v3.1.0 — 22/08/2026
+Pasta: /versions/3.1.0/
+Ajustes:
+- Corrigido: o seletor de projeto do Painel do Projeto ficava com texto quase
+  ilegível (cinza-claro sobre fundo branco) ao abrir a lista suspensa no modo
+  escuro. Cada opção agora força cor escura sobre fundo branco, independente do
+  tema da página, já que o navegador renderiza a lista suspensa nativa com o
+  próprio fundo (nem sempre respeita o tema do site).
+- Burndown ganhou uma linha de Tendência: regressão linear sobre os dados reais
+  de tarefas restantes observados até hoje, estendida por todo o período — mostra
+  "se esse ritmo continuar", diferente da linha Ideal (meta) e da Previsão
+  (projeção de velocidade, só a partir de hoje). Aparece como uma quarta linha no
+  gráfico e uma nova entrada na legenda.
+- Layout do modo Kanban do Painel do Projeto ajustado para ficar o mais próximo
+  possível da referência visual enviada pelo usuário:
+  - Nova barra de estatísticas centralizada (Total de Tarefas, % de Conclusão,
+    anel de progresso maior e as 3 contagens por status coloridas) entre o
+    cabeçalho e o seletor de modo.
+  - Colunas reordenadas para Concluídas / Em Progresso / Futuras (igual à
+    referência) e cada uma ganhou fundo em vidro colorido de acordo com o status
+    (verde/teal/âmbar), em vez do painel neutro único de antes.
+  - Cartões de tarefa ganharam um avatar circular sempre visível: mostra a
+    inicial da pessoa aguardada (quando a tarefa está com esse dado) ou, como
+    alternativa honesta — o Foccus não tem "responsável" por tarefa —, a cor e
+    inicial do projeto.
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html.
+-----------------------------------------------------------------------------
+
+v3.0.0 — 22/08/2026
+Pasta: /versions/3.0.0/
+Ajustes:
+- Menu Dashboard reconstruído do zero como "Painel do Projeto": em vez das 4 colunas
+  fixas por status de prazo, agora tem um seletor de visualização com três modos —
+  Kanban, Gantt e Burndown — sobre o mesmo escopo de tarefas (Todos os Projetos /
+  Inbox / um projeto específico).
+- Identidade visual própria só para esta tela (não afeta o resto do app): paleta
+  teal/âmbar, fonte Inter (Google Fonts) e painéis em glass-morphism (fundo
+  borrado/translúcido), tanto no modo claro quanto no escuro.
+- KPI circular no topo (% concluído + total de tarefas do escopo filtrado) e um
+  badge de previsão de conclusão do backlog (ex: "Previsão: 13/02/2027"), calculado
+  pela velocidade real de conclusão dos últimos 14 dias — o Foccus não tem conceito
+  de sprint/pontos, então a previsão usa dados reais de tarefas concluídas, não
+  dados fictícios.
+- Modo Kanban: 3 colunas (Futuras / Em Progresso / Concluídas), com drag-and-drop
+  para mudar o status da tarefa arrastando entre colunas (compatível com
+  mouse/touch), separado do menu "Kanban" já existente (que continua como estava,
+  com seus agrupamentos por status/projeto/prioridade/prazo).
+- Modo Gantt: uma linha por projeto (quando "Todos os Projetos" está selecionado,
+  a barra é a extensão de todas as tarefas do projeto) ou uma linha por tarefa
+  (quando um projeto específico ou o Inbox está selecionado), com marcador de
+  "Hoje" e tooltip ao passar o mouse. Usa a data de criação e o prazo da tarefa
+  como início/fim da barra, já que o Foccus não tem um campo de "data de início".
+  Cores por status: verde (concluída), listrado animado (em andamento/aguardando),
+  vermelho (bloqueada), tracejado (a fazer).
+- Modo Burndown: gráfico de barras (real vs. ideal vs. previsão) mostrando a
+  quantidade de tarefas restantes ao longo do tempo, com a região de previsão
+  destacada em âmbar. Calculado com o campo de prazo e a data de conclusão de cada
+  tarefa (sem depender de sprint/pontos).
+- Correção de bug em navegador: atributos de geometria SVG (d/viewBox/x/y) com
+  {{ }} no valor são validados pelo navegador já durante o parse do template,
+  antes da interpolação acontecer, gerando erros falsos no console. O gráfico de
+  Burndown foi implementado com barras via CSS (mesma técnica já usada no Gantt)
+  para evitar esse problema por completo.
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html — no
+  Template, a exclusão de confirmação e o drag-and-drop do novo Kanban seguem o
+  padrão do próprio arquivo (sem o sistema de toast/modal do app principal).
+-----------------------------------------------------------------------------
+
+v2.1.0 — 22/08/2026
+Pasta: /versions/2.1.0/
+Ajustes:
+- Menu Anotações refeito para permitir registrar andamento de projeto mesmo
+  quando não vira tarefa: cada anotação agora tem Título, Descrição, Data do
+  registro (editável, antes era travada na data de criação) e Data de
+  referência (opcional).
+- Layout do menu Anotações trocado de grade de cards para lista empilhada,
+  agrupada por projeto com contador de anotações por grupo (ex: "SIMPLIFICA
+  (2)"), igual à referência fornecida pelo usuário.
+- Anotações vindas de tarefas (campo de notas da própria tarefa) continuam
+  aparecendo automaticamente aqui, agora com o título "Nota da atividade:
+  <título da tarefa>" e um link "Abrir tarefa" (antes era "Referência").
+- Exclusão de anotação de projeto passou a pedir confirmação antes de
+  apagar: no sistema principal (Foccus.dc.html), via o modal de confirmação
+  já usado para excluir Projeto/Pessoa; no Template, via confirm() nativo,
+  seguindo o padrão já usado ali para excluir tarefa/projeto/pessoa.
+- Corrigido: o projeto pré-selecionado no formulário de nova anotação vinha
+  vazio (""), fazendo a primeira anotação cadastrada na sessão falhar
+  silenciosamente — agora inicializa com o primeiro projeto da lista.
+- Aplicado em Foccus.dc.html e em Foccus_Template/Foccus_Template.dc.html.
+-----------------------------------------------------------------------------
+
+v2.0.0 — 22/08/2026
+Pasta: /versions/2.0.0/
+Ajustes:
+- Reconstrução completa do sistema principal (Foccus.dc.html): o arquivo estava
+  truncado e havia perdido diversas melhorias de uma sessão de trabalho anterior que
+  foi corrompida por outra ferramenta/IA.
+- Botão de concluir (✓, verde) e excluir (✕, vermelho) sem borda em todas as
+  listagens de tarefas (Lista, Kanban, Inbox, Detalhe de Projeto, Busca, Aguardando).
+- Ícone de status (badge) em cada linha de tarefa, sem caixa/borda.
+- Tela "Aguardando" reconstruída com comentários em thread (substituindo o campo de
+  follow-up único antigo), sincronizados com o campo de Anotações da tarefa.
+- Percentual do topo da tela alterado de "conclusão geral" para "eficiência diária".
+- Novo menu Dashboard: 4 colunas por projeto (Concluídas, Em dia, Atrasadas, Sem
+  data) com percentual comparativo por coluna e filtro por projeto.
+- Novo menu Anotações: cards agrupados por projeto, formulário de nova anotação,
+  integrado ao campo de notas da própria tarefa.
+- Correção dos handlers quebrados nos modais de Novo Projeto, Nova Pessoa, Editar
+  Usuário, Editar Projeto, Editar Pessoa e na barra de busca do topo.
+- Remoção dos botões "+ Nova Pessoa" duplicados (gaveta da tarefa e modal de nova
+  tarefa).
+- Correção de mojibake: acentos e ícones corrompidos por um comando PowerShell que
+  leu/regravou o arquivo com codificação errada em uma sessão anterior.
+- Menu lateral em formato mini-rail (56px colapsado / 200px expandido), com backdrop
+  translúcido ao expandir.
+- Sanitização de quebras de linha (\n) e espaços repetidos em títulos de tarefa
+  (ex: ao colar texto de outro app).
+- Percentual de andamento do projeto passou a ser ponderado: tarefas concluídas
+  contam 100%, tarefas em andamento/aguardando contam o percentual informado pelo
+  usuário na própria tarefa (novo campo), as demais contam 0%. Aplicado em
+  Projetos, Detalhe do Projeto e Dashboard.
+- Novo campo "% de conclusão desta tarefa", pedido ao usuário na gaveta lateral
+  sempre que o status da tarefa é "Em andamento" ou "Aguardando".
+- Menu Calendário removido por completo (nav, tela, cálculos e ícone).
+- Correção: o percentual de andamento não aparecia em Projetos — o template chamava
+  Math.round() dentro de {{ }}, e o motor de template deste app não suporta chamada
+  de função dentro de {{ }} (só leitura de caminho de propriedade); o cálculo foi
+  movido para o JavaScript antes de chegar ao template.
+- Correção: os ícones de status desapareciam quando a lista era agrupada (Agrupar
+  por Projeto/Prioridade/Prazo) — o bloco de "lista agrupada" não tinha o ícone de
+  status incluído, diferente do bloco de lista normal.
+- Todas as melhorias acima replicadas também no Foccus_Template (versão
+  compartilhável), sem os dados pessoais do usuário, adaptadas ao layout próprio do
+  template onde necessário.

@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoria UX/UI/Performance — Foccus v1.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d11;
+    --bg-card: #12141a;
+    --bg-card-alt: #161921;
+    --border: rgba(255,255,255,0.06);
+    --border-strong: rgba(255,255,255,0.1);
+    --text: #e8eaf0;
+    --text-muted: rgba(232,234,240,0.6);
+    --text-dim: rgba(232,234,240,0.38);
+    --accent: #6366f1;
+    --accent-bg: rgba(99,102,241,0.12);
+    --danger: #ef4444;
+    --danger-bg: rgba(239,68,68,0.1);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245,158,11,0.1);
+    --success: #10b981;
+    --success-bg: rgba(16,185,129,0.1);
+    --info: #3b82f6;
+    --info-bg: rgba(59,130,246,0.1);
+    --p0: #ef4444;
+    --p1: #f97316;
+    --p2: #eab308;
+    --p3: #22c55e;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(99,102,241,0.3); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Layout */
+  .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+  
+  /* Hero */
+  .hero {
+    position: relative;
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 600px;
+    background: radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #e8eaf0 0%, rgba(232,234,240,0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .hero-subtitle {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 600px;
+    line-height: 1.5;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .hero-meta-item strong { color: var(--text-muted); font-weight: 500; }
+
+  /* Score Ring */
+  .score-section {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .score-ring {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring-bg { fill: none; stroke: var(--border-strong); stroke-width: 6; }
+  .score-ring-val { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: 283; stroke-dashoffset: 127; transition: stroke-dashoffset 1s ease; }
+  .score-ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+  }
+  .score-ring-label small { font-size: 11px; font-weight: 500; color: var(--text-dim); margin-top: -2px; }
+  .score-details { display: flex; flex-direction: column; gap: 6px; }
+  .score-detail-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .score-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Section */
+  .section { padding: 48px 0; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    max-width: 700px;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: var(--shadow);
+  }
+  .stat-card-value { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .stat-card-label { font-size: 12px; font-weight: 500; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Priority badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .badge-p0 { color: #fff; background: var(--p0); }
+  .badge-p1 { color: #fff; background: var(--p1); }
+  .badge-p2 { color: #1a1a1a; background: var(--p2); }
+  .badge-p3 { color: #fff; background: var(--p3); }
+  .badge-sev1 { color: var(--text-muted); background: var(--bg-card-alt); border: 1px solid var(--border); }
+  .badge-sev2 { color: var(--warning); background: var(--warning-bg); border: 1px solid rgba(245,158,11,0.2); }
+  .badge-sev3 { color: var(--p1); background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.2); }
+  .badge-sev4 { color: var(--danger); background: var(--danger-bg); border: 1px solid rgba(239,68,68,0.2); }
+  .badge-cat {
+    color: var(--text-muted);
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .badge-effort-low { color: var(--success); background: var(--success-bg); border: 1px solid rgba(16,185,129,0.2); }
+  .badge-effort-med { color: var(--warning); background: var(--warning-bg); border: 1px solid rgba(245,158,11,0.2); }
+  .badge-effort-high { color: var(--danger); background: var(--danger-bg); border: 1px solid rgba(239,68,68,0.2); }
+
+  /* Issues List */
+  .issue-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+  .issue-card:hover { border-color: var(--border-strong); }
+  .issue-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .issue-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  .issue-id {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    width: 36px;
+  }
+  .issue-title-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .issue-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .issue-card-chevron {
+    color: var(--text-dim);
+    font-size: 10px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 4px;
+  }
+  .issue-card.open .issue-card-chevron { transform: rotate(90deg); }
+  .issue-card-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .issue-card.open .issue-card-body { display: block; padding-top: 16px; }
+  .issue-field { margin-bottom: 14px; }
+  .issue-field-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .issue-field-value { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+  .issue-steps { padding-left: 16px; }
+  .issue-steps li { margin-bottom: 2px; }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    background: var(--bg-card-alt);
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.015); }
+  .td-id { font-weight: 700; color: var(--text-dim); font-variant-numeric: tabular-nums; width: 40px; }
+
+  /* Top 10 */
+  .top-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: var(--shadow);
+  }
+  .top-rank {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .top-content { flex: 1; min-width: 0; }
+  .top-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .top-meta { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .top-desc { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+  .top-rec {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--accent);
+    padding: 8px 12px;
+    background: var(--accent-bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(99,102,241,0.15);
+  }
+  .top-rec strong { color: var(--accent); }
+
+  /* Quick Wins */
+  .qw-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+  }
+  .qw-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .qw-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--success-bg);
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .qw-text { flex: 1; }
+  .qw-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .qw-effort { font-size: 11px; color: var(--text-dim); }
+
+  /* Diagnosis */
+  .diag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .diag-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .diag-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .diag-card-title .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .diag-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .diag-list li {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-left: 14px;
+    position: relative;
+  }
+  .diag-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+
+  /* Sprint Plan */
+  .sprint-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .sprint-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .sprint-title { font-size: 15px; font-weight: 700; }
+  .sprint-timeline { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+  .sprint-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sprint-item {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  /* Note callout */
+  .callout {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout-warn { background: var(--warning-bg); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+  .callout-info { background: var(--info-bg); border: 1px solid rgba(59,130,246,0.2); color: #60a5fa; }
+  .callout-danger { background: var(--danger-bg); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+
+  /* App Map */
+  .map-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+  }
+  .map-root { display: flex; flex-direction: column; gap: 12px; }
+  .map-level { display: flex; gap: 8px; flex-wrap: wrap; }
+  .map-node {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .map-node.highlight {
+    background: var(--accent-bg);
+    border-color: rgba(99,102,241,0.25);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .map-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    margin: 32px 0;
+  }
+  .toc-title { font-size: 13px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+  .toc-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 24px; }
+  .toc-list li a {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    transition: color 0.1s;
+  }
+  .toc-list li a:hover { color: var(--accent); text-decoration: none; }
+  .toc-list li a .toc-num { color: var(--text-dim); font-weight: 600; font-variant-numeric: tabular-nums; width: 20px; }
+
+  /* Risk table */
+  .risk-high { color: var(--danger); font-weight: 600; }
+  .risk-med { color: var(--warning); font-weight: 600; }
+  .risk-certain { color: var(--danger); font-weight: 700; }
+
+  /* Footer */
+  .footer {
+    padding: 32px 0;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #111; font-size: 11px; }
+    .hero::before { display: none; }
+    .hero h1 { -webkit-text-fill-color: #111; }
+    .issue-card-body { display: block !important; }
+    .stat-card, .issue-card, .top-item, .qw-card, .diag-card, .sprint-card, .toc, .map-container, .table-wrap {
+      box-shadow: none; border-color: #ddd; break-inside: avoid;
+    }
+    .badge { border: 1px solid #ccc; }
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 26px; }
+    .hero { padding: 40px 0 32px; }
+    .section { padding: 32px 0; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .score-section { flex-direction: column; align-items: flex-start; }
+    .issue-card-badges { display: none; }
+    .top-item { flex-direction: column; }
+    .toc-list { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ██ HERO ██ -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-badge">📋 Relatório de Auditoria</div>
+    <h1>Auditoria UX · UI · Usabilidade<br>Performance · Acessibilidade</h1>
+    <p class="hero-subtitle">
+      Análise aprofundada do sistema <strong>Foccus v1.2</strong> — gestão de tarefas e projetos de TI. 
+      23 problemas identificados com evidências concretas, reprodução, impacto e recomendações acionáveis.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>Versão:</strong> v1.2</div>
+      <div class="hero-meta-item"><strong>Data:</strong> 21 de agosto de 2026</div>
+      <div class="hero-meta-item"><strong>Arquivo:</strong> Pauta.dc.html</div>
+      <div class="hero-meta-item"><strong>Runtime:</strong> dc-runtime (React)</div>
+      <div class="hero-meta-item"><strong>Linhas analisadas:</strong> 4.119</div>
+    </div>
+
+    <div class="score-section">
+      <div class="score-ring">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="score-ring-bg" cx="50" cy="50" r="45"/>
+          <circle class="score-ring-val" cx="50" cy="50" r="45"/>
+        </svg>
+        <div class="score-ring-label">5.5<small>/10</small></div>
+      </div>
+      <div class="score-details">
+        <div class="score-detail-row"><div class="score-dot" style="background:var(--p0)"></div> <span><strong>5</strong> problemas P0 (críticos)</span></div>
+        <div class="score-detail-row"><div class="score-dot" style="background:var(--p1)"></div> <span><strong>12</strong> problemas P1 (alto)</span></div>
+        <div class="score-detail-row"><div class="score-dot" style="background:var(--p2)"></div> <span><strong>5</strong> problemas P2 (médio)</span></div>
+        <div class="score-detail-row"><div class="score-dot" style="background:var(--p3)"></div> <span><strong>1</strong> problema P3 (baixo)</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ██ TOC ██ -->
+<nav class="toc">
+  <div class="toc-title">Índice</div>
+  <ol class="toc-list">
+    <li><a href="#reconhecimento"><span class="toc-num">01</span> Reconhecimento do Produto</a></li>
+    <li><a href="#resumo"><span class="toc-num">02</span> Resumo Quantitativo</a></li>
+    <li><a href="#matriz"><span class="toc-num">03</span> Matriz de Problemas</a></li>
+    <li><a href="#problemas"><span class="toc-num">04</span> Problemas Detalhados (23)</a></li>
+    <li><a href="#top10"><span class="toc-num">05</span> Top 10 Correções Prioritárias</a></li>
+    <li><a href="#quickwins"><span class="toc-num">06</span> Quick Wins</a></li>
+    <li><a href="#diagnostico"><span class="toc-num">07</span> Diagnóstico Geral</a></li>
+    <li><a href="#riscos"><span class="toc-num">08</span> Riscos</a></li>
+    <li><a href="#sprints"><span class="toc-num">09</span> Plano de Correção (Sprints)</a></li>
+    <li><a href="#reteste"><span class="toc-num">10</span> Plano de Reteste</a></li>
+  </ol>
+</nav>
+
+<!-- ██ RECONHECIMENTO ██ -->
+<section class="section" id="reconhecimento">
+  <div class="section-label">Fase 1</div>
+  <h2 class="section-title">Reconhecimento do Produto</h2>
+  <p class="section-desc">Mapa da aplicação, entidades, vistas e componentes identificados.</p>
+
+  <div class="map-container">
+    <div class="map-root">
+      <div>
+        <div class="map-label">Vistas Principais (7 + 2 sub-vistas)</div>
+        <div class="map-level">
+          <div class="map-node highlight">Minha Lista</div>
+          <div class="map-node">Inbox</div>
+          <div class="map-node">Projetos</div>
+          <div class="map-node">Detalhe Projeto</div>
+          <div class="map-node">Pessoas</div>
+          <div class="map-node">Detalhe Pessoa</div>
+          <div class="map-node">Aguardando</div>
+          <div class="map-node">Calendário</div>
+          <div class="map-node">Kanban</div>
+        </div>
+      </div>
+      <div>
+        <div class="map-label">Entidades</div>
+        <div class="map-level">
+          <div class="map-node">30 Tarefas (seed)</div>
+          <div class="map-node">7 Projetos</div>
+          <div class="map-node">9 Pessoas</div>
+          <div class="map-node">7 Status</div>
+          <div class="map-node">4 Prioridades</div>
+        </div>
+      </div>
+      <div>
+        <div class="map-label">Componentes Overlay</div>
+        <div class="map-level">
+          <div class="map-node">Task Detail Drawer</div>
+          <div class="map-node">Modal Nova Tarefa</div>
+          <div class="map-node">Modal Bulk Projeto</div>
+          <div class="map-node">Modal Bulk Prioridade</div>
+          <div class="map-node">Sidebar Menu</div>
+        </div>
+      </div>
+      <div>
+        <div class="map-label">Armazenamento</div>
+        <div class="map-level">
+          <div class="map-node" style="border-color:rgba(239,68,68,0.3);color:var(--danger)">⚠ localStorage apenas (sem backend)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ██ RESUMO QUANTITATIVO ██ -->
+<section class="section" id="resumo">
+  <div class="section-label">Visão Geral</div>
+  <h2 class="section-title">Resumo Quantitativo</h2>
+  <p class="section-desc">Distribuição dos 23 problemas por categoria, severidade, prioridade e esforço.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-value" style="color:var(--p0)">5</div>
+      <div class="stat-card-label">P0 — Críticos</div>
+      <div class="stat-card-sub">Impedem ou comprometem seriamente o uso</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value" style="color:var(--p1)">12</div>
+      <div class="stat-card-label">P1 — Altos</div>
+      <div class="stat-card-sub">Impacto significativo em produtividade</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value" style="color:var(--p2)">5</div>
+      <div class="stat-card-label">P2 — Médios</div>
+      <div class="stat-card-sub">Problemas relevantes, com workaround</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value" style="color:var(--p3)">1</div>
+      <div class="stat-card-label">P3 — Baixos</div>
+      <div class="stat-card-sub">Cosméticos ou de baixo impacto</div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-value">9</div>
+      <div class="stat-card-label">UX / Usabilidade</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value">5</div>
+      <div class="stat-card-label">Acessibilidade</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value">4</div>
+      <div class="stat-card-label">Performance</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value">3</div>
+      <div class="stat-card-label">UI / Consistência</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value">2</div>
+      <div class="stat-card-label">Navegação / Produtividade</div>
+    </div>
+  </div>
+
+  <div class="stats-grid" style="grid-template-columns: repeat(3,1fr);">
+    <div class="stat-card" style="border-left:3px solid var(--success)">
+      <div class="stat-card-value" style="color:var(--success)">10</div>
+      <div class="stat-card-label">Esforço Baixo</div>
+      <div class="stat-card-sub">Implementáveis em horas</div>
+    </div>
+    <div class="stat-card" style="border-left:3px solid var(--warning)">
+      <div class="stat-card-value" style="color:var(--warning)">9</div>
+      <div class="stat-card-label">Esforço Médio</div>
+      <div class="stat-card-sub">1-3 dias de desenvolvimento</div>
+    </div>
+    <div class="stat-card" style="border-left:3px solid var(--danger)">
+      <div class="stat-card-value" style="color:var(--danger)">4</div>
+      <div class="stat-card-label">Esforço Alto</div>
+      <div class="stat-card-sub">1+ semana de desenvolvimento</div>
+    </div>
+  </div>
+</section>
+
+<!-- ██ MATRIZ ██ -->
+<section class="section" id="matriz">
+  <div class="section-label">Todos os Problemas</div>
+  <h2 class="section-title">Matriz de Problemas</h2>
+  <p class="section-desc">Ordenados por prioridade. Clique em qualquer linha para ver detalhes na seção seguinte.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Problema</th>
+          <th>Categoria</th>
+          <th>Sev.</th>
+          <th>Prior.</th>
+          <th>Esforço</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-id">005</td><td>Ausência de sistema de comentários</td><td><span class="badge badge-cat">UX/Usabilidade</span></td><td><span class="badge badge-sev4">4</span></td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-effort-high">Alto</span></td></tr>
+        <tr><td class="td-id">006</td><td>Dados apenas em localStorage</td><td><span class="badge badge-cat">Escalabilidade</span></td><td><span class="badge badge-sev4">4</span></td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-effort-high">Alto</span></td></tr>
+        <tr><td class="td-id">003</td><td>Sem undo/redo após exclusão</td><td><span class="badge badge-cat">UX/Usabilidade</span></td><td><span class="badge badge-sev4">4</span></td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">001</td><td>Ausência total de feedback visual</td><td><span class="badge badge-cat">UX/Usabilidade</span></td><td><span class="badge badge-sev4">4</span></td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">002</td><td>Uso de prompt/confirm nativos</td><td><span class="badge badge-cat">UX/UI</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p0">P0</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">004</td><td>Navegação escondida em drawer</td><td><span class="badge badge-cat">Navegação</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">007</td><td>renderVals() monolítico</td><td><span class="badge badge-cat">Performance</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">008</td><td>Status não visível na lista</td><td><span class="badge badge-cat">UX/Produtividade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">009</td><td>Sem atalhos de teclado</td><td><span class="badge badge-cat">Usabilidade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">010</td><td>Zero media queries</td><td><span class="badge badge-cat">UI/Responsividade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">011</td><td>Sem loading states</td><td><span class="badge badge-cat">UX/UI</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">012</td><td>Contraste insuficiente</td><td><span class="badge badge-cat">Acessibilidade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">013</td><td>Sem drag-and-drop Kanban</td><td><span class="badge badge-cat">UX/Usabilidade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-high">Alto</span></td></tr>
+        <tr><td class="td-id">014</td><td>Progresso de projeto hardcoded</td><td><span class="badge badge-cat">UX/Usabilidade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">015</td><td>Foco não gerenciado em modais</td><td><span class="badge badge-cat">Acessibilidade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">021</td><td>Prioridade depende só de cor</td><td><span class="badge badge-cat">Acessibilidade</span></td><td><span class="badge badge-sev3">3</span></td><td><span class="badge badge-p1">P1</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">016</td><td>Busca sem debounce</td><td><span class="badge badge-cat">UX/Performance</span></td><td><span class="badge badge-sev2">2</span></td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">017</td><td>Filtros sem projeto/responsável</td><td><span class="badge badge-cat">UX/Produtividade</span></td><td><span class="badge badge-sev2">2</span></td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-effort-med">Médio</span></td></tr>
+        <tr><td class="td-id">019</td><td>Toggle subtarefas inconsistente</td><td><span class="badge badge-cat">UI/Consistência</span></td><td><span class="badge badge-sev2">2</span></td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">020</td><td>Calendário limitado a 4 dias</td><td><span class="badge badge-cat">UX/Usabilidade</span></td><td><span class="badge badge-sev2">2</span></td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-effort-high">Alto</span></td></tr>
+        <tr><td class="td-id">022</td><td>localStorage síncrono a cada change</td><td><span class="badge badge-cat">Performance</span></td><td><span class="badge badge-sev2">2</span></td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">023</td><td>Escape não fecha modais</td><td><span class="badge badge-cat">UX/Usabilidade</span></td><td><span class="badge badge-sev2">2</span></td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+        <tr><td class="td-id">018</td><td>Data hardcoded no sidebar</td><td><span class="badge badge-cat">UI</span></td><td><span class="badge badge-sev1">1</span></td><td><span class="badge badge-p3">P3</span></td><td><span class="badge badge-effort-low">Baixo</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ██ PROBLEMAS DETALHADOS ██ -->
+<section class="section" id="problemas">
+  <div class="section-label">Detalhamento</div>
+  <h2 class="section-title">Problemas Detalhados</h2>
+  <p class="section-desc">Cada problema com passos para reproduzir, evidência, impacto e recomendação. Clique para expandir.</p>
+
+  <!-- 001 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#001</span>
+        <span class="issue-title-text">Ausência total de feedback visual</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-sev4">Sev 4</span>
+        <span class="badge badge-effort-low">Baixo</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Categoria</div><div class="issue-field-value">UX / Usabilidade</div></div>
+      <div class="issue-field"><div class="issue-field-label">Tela / Fluxo</div><div class="issue-field-value">Todas as telas — criar, editar, excluir tarefa/projeto/pessoa</div></div>
+      <div class="issue-field"><div class="issue-field-label">Passos para reproduzir</div><div class="issue-field-value"><ol class="issue-steps"><li>Criar uma tarefa via quick add ou modal</li><li>Alterar status, prioridade ou prazo de uma tarefa</li><li>Excluir uma tarefa (após confirm)</li></ol></div></div>
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Nenhum feedback visual (toast, animação, snackbar). A ação é executada silenciosamente. Em caso de falha do localStorage, o usuário não é notificado.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Comportamento esperado</div><div class="issue-field-value">Toast/snackbar confirmando "Tarefa criada ✓", "Status alterado para Em andamento", "Tarefa excluída — Desfazer" etc.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">Usuário não sabe se a ação foi executada com sucesso. Incerteza constante na operação.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Evidência</div><div class="issue-field-value">Nenhuma chamada a componente de feedback em <code>updateTask()</code>, <code>submitNewTaskInternal()</code>, <code>deleteTask()</code>.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Implementar sistema de notificações toast com auto-dismiss (3s). Mensagens contextuais para cada ação. ~2h de trabalho.</div></div>
+    </div>
+  </div>
+
+  <!-- 002 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#002</span>
+        <span class="issue-title-text">Uso de prompt() e confirm() nativos do navegador</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-sev3">Sev 3</span>
+        <span class="badge badge-effort-med">Médio</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Tela / Fluxo</div><div class="issue-field-value">Criar projeto, criar pessoa, editar pessoa, renomear projeto, excluir tarefa/projeto/pessoa, alterar nome</div></div>
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Diálogos nativos do navegador são usados para TODAS operações de input e confirmação destrutiva. Impossível adicionar campos ricos, validação ou preview.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">UX incoerente com o design system. Criar projeto não permite definir prazo, status, prioridade ou cor. Em mobile, experiência especialmente ruim.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Evidência</div><div class="issue-field-value"><code>addProject()</code> usa <code>prompt('Nome do novo projeto:')</code>. <code>addPerson()</code> usa 2 prompts sequenciais. <code>deleteTask()</code> usa <code>confirm()</code>.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Substituir TODOS os prompt/confirm por modais customizados integrados ao design system, com campos adequados e validação.</div></div>
+    </div>
+  </div>
+
+  <!-- 003 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#003</span>
+        <span class="issue-title-text">Sem undo/redo após ações destrutivas</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-sev4">Sev 4</span>
+        <span class="badge badge-effort-med">Médio</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Exclusão de tarefa/projeto/pessoa é irreversível. <code>tasks.filter(t => t.id !== id)</code> remove permanentemente. Sem undo, lixeira ou soft-delete.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">Perda acidental de dados irreversível. Um clique errado pode destruir informações críticas do projeto.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Soft-delete com status 'DELETED' + toast com "Desfazer" por 5-10 segundos. Tarefas excluídas filtradas da exibição mas recuperáveis.</div></div>
+    </div>
+  </div>
+
+  <!-- 004 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#004</span>
+        <span class="issue-title-text">Navegação escondida em menu drawer</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-sev3">Sev 3</span>
+        <span class="badge badge-effort-med">Médio</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Toda a navegação (7 vistas) está em um drawer overlay. Cada troca de vista requer: abrir menu → clicar vista. +1 clique a cada operação. Vista ativa não indicada no header.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">Dezenas de cliques extras por dia. Usuário perde noção de onde está na aplicação.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Sidebar permanente em viewport >1024px com collapse. Menu drawer apenas em mobile. Indicador de vista ativa no header.</div></div>
+    </div>
+  </div>
+
+  <!-- 005 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#005</span>
+        <span class="issue-title-text">Ausência de sistema de comentários</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-sev4">Sev 4</span>
+        <span class="badge badge-effort-high">Alto</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">O drawer tem "Descrição", "Anotações", "Checklist", "Histórico" — mas nenhum sistema de comentários para comunicação de equipe. O modelo de dados não tem array de comments.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">Em sistema B2B de gestão de projetos, comunicação contextual sobre tarefas é fundamental. Equipes forçadas a usar canais externos.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Implementar comentários com timeline, autor, data/hora, edição e exclusão.</div></div>
+    </div>
+  </div>
+
+  <!-- 006 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#006</span>
+        <span class="issue-title-text">Dados armazenados apenas em localStorage</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p0">P0</span>
+        <span class="badge badge-sev4">Sev 4</span>
+        <span class="badge badge-effort-high">Alto</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Todo o estado é armazenado em <code>localStorage('pauta_app_state_v1')</code>. Sem backend, API, banco de dados, autenticação ou sincronização. Limite ~5-10MB.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">Perda total ao limpar cache. Sem multi-dispositivo. Sem colaboração. Impossível uso corporativo real.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Backend com API REST ou Firebase. Medida intermediária: export/import JSON + indicador "Dados salvos localmente".</div></div>
+    </div>
+  </div>
+
+  <!-- 007 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#007</span>
+        <span class="issue-title-text">renderVals() monolítico — recalcula tudo</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-sev3">Sev 3</span>
+        <span class="badge badge-effort-med">Médio</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value"><code>renderVals()</code> (~500 linhas) calcula TODAS as vistas (lista, kanban, waiting, calendar, stats, projetos, pessoas) a cada <code>setState()</code>. Cada keystroke na busca dispara recálculo completo.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">Com 100+ tarefas, delay perceptível. Com 1000+, inutilizável. buildRow() cria closures novas a cada render (pressão GC).</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Early-returns por vista ativa. Memoizar cálculos caros. Debounce na busca (300ms).</div></div>
+    </div>
+  </div>
+
+  <!-- 008 -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left">
+        <span class="issue-id">#008</span>
+        <span class="issue-title-text">Status da tarefa não visível na lista principal</span>
+      </div>
+      <div class="issue-card-badges">
+        <span class="badge badge-p1">P1</span>
+        <span class="badge badge-sev3">Sev 3</span>
+        <span class="badge badge-effort-low">Baixo</span>
+      </div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Na lista, apenas ⏳ (Aguardando) e ⛔ (Bloqueada) têm indicação visual. "A Fazer" e "Em andamento" são indistinguíveis. Status real requer abrir drawer.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Impacto</div><div class="issue-field-value">Impossível scanear rapidamente a lista e identificar o estágio de cada tarefa.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Badge compacto de status na row (ex: "Em andamento" em azul, "A Fazer" em cinza).</div></div>
+    </div>
+  </div>
+
+  <!-- 009-023 (collapsed summaries) -->
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#009</span><span class="issue-title-text">Ausência total de atalhos de teclado</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-med">Médio</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Nenhum atalho de teclado (exceto Enter em inputs). Sem /, Ctrl+K, Escape, N, J/K, Ctrl+Z.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Sistema de atalhos com overlay de referência. Priorizar: Escape, / para busca, N para nova tarefa.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#010</span><span class="issue-title-text">Nenhuma media query — responsividade precária</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-med">Médio</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Zero @media queries. Responsividade depende de min(), flex e overflow-x:auto. Sem tratamento para mobile: fontes, touch targets, layout.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Breakpoints para tablet (768px) e mobile (480px). Reorganizar header, stack filtros, aumentar touch targets.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#011</span><span class="issue-title-text">Sem loading states em nenhuma operação</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Nenhum estado loading, spinner ou skeleton. Botões não desabilitam durante processamento. Preparação para backend inexistente.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Loading states nos botões de submit + disabled state durante operações.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#012</span><span class="issue-title-text">Contraste insuficiente em textos secundários</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">--pb-text-dim com opacidade 38-40% produz contraste ~2.3-3.0:1. WCAG AA exige 4.5:1 para texto normal.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Aumentar opacidade para 0.55+ (claro) e 0.50+ (escuro). Alterar 2 valores no themeTokens().</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#013</span><span class="issue-title-text">Sem drag-and-drop no Kanban</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-high">Alto</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Cards do Kanban não suportam arraste. Para mover entre colunas, precisa abrir drawer e alterar select. O Kanban é apenas visualização passiva.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">HTML5 Drag API ou SortableJS para drag-and-drop entre colunas. Essencial para valor operacional.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#014</span><span class="issue-title-text">Progresso do projeto calculado incorretamente</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Campo <code>progress</code> é valor estático do seed (ex: "67%"). Concluir tarefas NÃO atualiza a barra. Indicador enganoso.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Calcular dinamicamente: <code>(done / total) × 100</code> em renderVals(). ~10 linhas de código.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#015</span><span class="issue-title-text">Foco não gerenciado em modais/drawers</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-med">Médio</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Modais e drawers sem focus trap, sem role="dialog", sem aria-modal="true". Tab pode sair para elementos por trás do overlay.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Adicionar role="dialog", aria-modal="true", focus trap via JS, e handler de Escape.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#016</span><span class="issue-title-text">Busca sem debounce e sem indicador de limpar</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p2">P2</span><span class="badge badge-sev2">Sev 2</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Cada keystroke dispara re-render completo. Sem botão "×" para limpar. Sem contagem de resultados. Sem highlight do termo.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Debounce de 200-300ms + botão limpar + contagem de resultados.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#017</span><span class="issue-title-text">Filtros não incluem projeto nem responsável</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p2">P2</span><span class="badge badge-sev2">Sev 2</span><span class="badge badge-effort-med">Médio</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Quick filters apenas: P1, Aguardando, Bloqueadas, Atrasadas. Sem filtro por projeto específico, pessoa ou range de datas.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Dropdowns de filtro por projeto e por responsável na barra de filtros.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#018</span><span class="issue-title-text">Data hardcoded no sidebar</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p3">P3</span><span class="badge badge-sev1">Sev 1</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">"17 de agosto de 2026" fixo na linha 133 do HTML. Não atualiza com data real.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Renderizar data dinamicamente em renderVals(). ~15min.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#019</span><span class="issue-title-text">Toggle de subtarefas inconsistente</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p2">P2</span><span class="badge badge-sev2">Sev 2</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Lista não agrupada: botão com fundo e borda, texto ▼/▶. Lista agrupada: botão transparente sem borda, SVG colorido. Estilos diferentes para mesma função.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Unificar componente usando um único estilo (preferencialmente SVG).</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#020</span><span class="issue-title-text">Calendário mostra apenas 4 dias fixos</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p2">P2</span><span class="badge badge-sev2">Sev 2</span><span class="badge badge-effort-high">Alto</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Mostra apenas hoje + 3 dias. Sem navegação. Inclui eventos hardcoded. Tarefas com prazo em D+4 ou mais não aparecem.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Calendário navegável com visão semanal. Remover eventos hardcoded.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#021</span><span class="issue-title-text">Prioridade depende exclusivamente de cor</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p1">P1</span><span class="badge badge-sev3">Sev 3</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Ícone ⚑ idêntico para P1-P4. Diferenciação puramente cromática. 8% da população masculina é daltônica.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Adicionar texto descritivo ou ícones distintos por nível de prioridade.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#022</span><span class="issue-title-text">localStorage síncrono a cada mudança de state</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p2">P2</span><span class="badge badge-sev2">Sev 2</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value"><code>componentDidUpdate</code> chama <code>JSON.stringify() + localStorage.setItem()</code> a CADA setState (incluindo busca, filtros, scroll). Síncrono no main thread.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Debounce de 500ms via requestIdleCallback. Separar state transitório de persistente.</div></div>
+    </div>
+  </div>
+
+  <div class="issue-card" onclick="this.classList.toggle('open')">
+    <div class="issue-card-header">
+      <div class="issue-card-left"><span class="issue-id">#023</span><span class="issue-title-text">Escape não fecha modais/drawers</span></div>
+      <div class="issue-card-badges"><span class="badge badge-p2">P2</span><span class="badge badge-sev2">Sev 2</span><span class="badge badge-effort-low">Baixo</span></div>
+      <span class="issue-card-chevron">▶</span>
+    </div>
+    <div class="issue-card-body">
+      <div class="issue-field"><div class="issue-field-label">Comportamento observado</div><div class="issue-field-value">Nenhum modal ou drawer responde à tecla Escape. Fechamento só via "✕" ou click no overlay.</div></div>
+      <div class="issue-field"><div class="issue-field-label">Recomendação</div><div class="issue-field-value">Event listener global para Escape que fecha drawer/modal ativo. ~10 linhas de código.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ██ TOP 10 ██ -->
+<section class="section" id="top10">
+  <div class="section-label">Priorização</div>
+  <h2 class="section-title">Top 10 Correções Prioritárias</h2>
+  <p class="section-desc">Ordenadas por relação impacto × esforço. Comece por aqui.</p>
+
+  <div class="top-item">
+    <div class="top-rank">1</div>
+    <div class="top-content">
+      <div class="top-title">[001] Feedback Visual (Toasts)</div>
+      <div class="top-meta"><span class="badge badge-p0">P0</span><span class="badge badge-effort-low">Baixo</span></div>
+      <div class="top-desc">Nenhuma ação produz feedback. Implementar toasts com auto-dismiss para criar, editar, excluir. Impacto imediato na confiança do usuário.</div>
+      <div class="top-rec"><strong>⚡ Quick win:</strong> ~2h de trabalho. Componente reutilizável para toda a aplicação.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">2</div>
+    <div class="top-content">
+      <div class="top-title">[014] Progresso Dinâmico dos Projetos</div>
+      <div class="top-meta"><span class="badge badge-p1">P1</span><span class="badge badge-effort-low">Baixo</span></div>
+      <div class="top-desc">Barras de progresso mostram valores estáticos. Concluir tarefas não atualiza %. Indicador principal enganoso.</div>
+      <div class="top-rec"><strong>⚡ Quick win:</strong> ~30 min. 10 linhas: <code>(done/total) × 100</code> em renderVals().</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">3</div>
+    <div class="top-content">
+      <div class="top-title">[008] Status Visível na Lista</div>
+      <div class="top-meta"><span class="badge badge-p1">P1</span><span class="badge badge-effort-low">Baixo</span></div>
+      <div class="top-desc">"A Fazer" e "Em andamento" indistinguíveis na lista. Badge compacto de status melhora drasticamente a scanability.</div>
+      <div class="top-rec"><strong>⚡ Quick win:</strong> ~1h. Adicionar statusBadge no buildRow.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">4</div>
+    <div class="top-content">
+      <div class="top-title">[012] Corrigir Contraste de Textos</div>
+      <div class="top-meta"><span class="badge badge-p1">P1</span><span class="badge badge-effort-low">Baixo</span></div>
+      <div class="top-desc">--pb-text-dim falha WCAG AA. Alterar 2 valores de opacidade em themeTokens().</div>
+      <div class="top-rec"><strong>⚡ Quick win:</strong> ~15 min. Aumentar opacidade para 0.55+.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">5</div>
+    <div class="top-content">
+      <div class="top-title">[021] Prioridade com Indicador além de Cor</div>
+      <div class="top-meta"><span class="badge badge-p1">P1</span><span class="badge badge-effort-low">Baixo</span></div>
+      <div class="top-desc">Prioridades P1-P4 diferenciadas APENAS por cor — inacessível para daltônicos (8% da pop. masculina).</div>
+      <div class="top-rec"><strong>⚡ Quick win:</strong> ~30 min. Adicionar texto descritivo ou ícones distintos.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">6</div>
+    <div class="top-content">
+      <div class="top-title">[023] Escape fecha Modais/Drawers</div>
+      <div class="top-meta"><span class="badge badge-p2">P2</span><span class="badge badge-effort-low">Baixo</span></div>
+      <div class="top-desc">Padrão de interação universal violado. ~10 linhas de código para listener global de Escape.</div>
+      <div class="top-rec"><strong>⚡ Quick win:</strong> ~20 min. Verificar state de modais/drawers abertos e fechar.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">7</div>
+    <div class="top-content">
+      <div class="top-title">[003] Undo após Exclusão</div>
+      <div class="top-meta"><span class="badge badge-p0">P0</span><span class="badge badge-effort-med">Médio</span></div>
+      <div class="top-desc">Exclusão irreversível. Implementar soft-delete + toast com botão "Desfazer" por 5-10 segundos.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">8</div>
+    <div class="top-content">
+      <div class="top-title">[002] Substituir prompt/confirm por Modais</div>
+      <div class="top-meta"><span class="badge badge-p0">P0</span><span class="badge badge-effort-med">Médio</span></div>
+      <div class="top-desc">Diálogos nativos para operações críticas. Criar modais customizados com campos ricos e validação.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">9</div>
+    <div class="top-content">
+      <div class="top-title">[004] Sidebar Permanente em Desktop</div>
+      <div class="top-meta"><span class="badge badge-p1">P1</span><span class="badge badge-effort-med">Médio</span></div>
+      <div class="top-desc">Navegação escondida = dezenas de cliques extras/dia. Sidebar colapsável em desktop, drawer em mobile.</div>
+    </div>
+  </div>
+
+  <div class="top-item">
+    <div class="top-rank">10</div>
+    <div class="top-content">
+      <div class="top-title">[007] Otimizar renderVals()</div>
+      <div class="top-meta"><span class="badge badge-p1">P1</span><span class="badge badge-effort-med">Médio</span></div>
+      <div class="top-desc">Função monolítica recalcula tudo a cada interação. Lazy computation por vista + debounce na busca.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ██ QUICK WINS ██ -->
+<section class="section" id="quickwins">
+  <div class="section-label">Alto Impacto, Baixo Esforço</div>
+  <h2 class="section-title">Quick Wins</h2>
+  <p class="section-desc">10 melhorias implementáveis em 1-2 dias com impacto imediato na experiência.</p>
+
+  <div class="qw-grid">
+    <div class="qw-card"><div class="qw-icon">🔔</div><div class="qw-text"><div class="qw-title">Toasts de feedback para todas as ações</div><div class="qw-effort">~2h · Impacto muito alto</div></div></div>
+    <div class="qw-card"><div class="qw-icon">📊</div><div class="qw-text"><div class="qw-title">Calcular progresso de projetos dinamicamente</div><div class="qw-effort">~30 min · Impacto alto</div></div></div>
+    <div class="qw-card"><div class="qw-icon">🏷️</div><div class="qw-text"><div class="qw-title">Badge de status visível na lista</div><div class="qw-effort">~1h · Impacto alto</div></div></div>
+    <div class="qw-card"><div class="qw-icon">🎨</div><div class="qw-text"><div class="qw-title">Corrigir contraste de textos secundários</div><div class="qw-effort">~15 min · Impacto alto (WCAG)</div></div></div>
+    <div class="qw-card"><div class="qw-icon">⎋</div><div class="qw-text"><div class="qw-title">Escape fecha modais e drawers</div><div class="qw-effort">~20 min · Impacto médio</div></div></div>
+    <div class="qw-card"><div class="qw-icon">⏱️</div><div class="qw-text"><div class="qw-title">Debounce na barra de busca</div><div class="qw-effort">~30 min · Impacto médio</div></div></div>
+    <div class="qw-card"><div class="qw-icon">📅</div><div class="qw-text"><div class="qw-title">Data dinâmica no sidebar</div><div class="qw-effort">~15 min · Impacto baixo</div></div></div>
+    <div class="qw-card"><div class="qw-icon">🔄</div><div class="qw-text"><div class="qw-title">Unificar toggle de subtarefas</div><div class="qw-effort">~30 min · Impacto baixo (consistência)</div></div></div>
+    <div class="qw-card"><div class="qw-icon">💾</div><div class="qw-text"><div class="qw-title">Debounce no localStorage.setItem</div><div class="qw-effort">~30 min · Impacto médio (perf)</div></div></div>
+    <div class="qw-card"><div class="qw-icon">✕</div><div class="qw-text"><div class="qw-title">Botão "×" para limpar barra de busca</div><div class="qw-effort">~20 min · Impacto médio</div></div></div>
+  </div>
+</section>
+
+<!-- ██ DIAGNÓSTICO ██ -->
+<section class="section" id="diagnostico">
+  <div class="section-label">Resultado Final</div>
+  <h2 class="section-title">Diagnóstico Geral</h2>
+  <p class="section-desc">Avaliação por área do produto.</p>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <div>O <strong>Foccus v1.2</strong> é um protótipo funcional com identidade visual coesa e escopo abrangente (7 vistas, Kanban, filtros, busca, ações bulk). O design é limpo e moderno. Porém, limitações arquiteturais (localStorage-only), ausência de padrões básicos de UX (sem feedback, sem undo) e problemas de acessibilidade impedem o uso como ferramenta B2B profissional. <strong>Nota: 5.5/10</strong></div>
+  </div>
+
+  <div class="diag-grid">
+    <div class="diag-card">
+      <div class="diag-card-title"><div class="dot" style="background:var(--danger)"></div> UX</div>
+      <ul class="diag-list">
+        <li>Nenhum feedback visual após ações</li>
+        <li>Sem undo/redo</li>
+        <li>Sem sistema de comentários</li>
+        <li>Navegação escondida em drawer</li>
+        <li>Sem atalhos de teclado</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="diag-card-title"><div class="dot" style="background:var(--warning)"></div> UI</div>
+      <ul class="diag-list">
+        <li>Toggle subtarefas inconsistente</li>
+        <li>Zero media queries</li>
+        <li>Data hardcoded no sidebar</li>
+        <li>Status não visível na lista</li>
+        <li>Prioridade diferenciada só por cor</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="diag-card-title"><div class="dot" style="background:var(--p1)"></div> Performance</div>
+      <ul class="diag-list">
+        <li>renderVals() monolítico (~500 linhas)</li>
+        <li>localStorage.setItem síncrono a cada change</li>
+        <li>Sem virtualização de lista</li>
+        <li>Closures criadas em cada render</li>
+        <li>Busca sem debounce</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="diag-card-title"><div class="dot" style="background:var(--accent)"></div> Acessibilidade</div>
+      <ul class="diag-list">
+        <li>Contraste insuficiente em textos dim</li>
+        <li>Foco não gerenciado em modais</li>
+        <li>Prioridades diferenciadas só por cor</li>
+        <li>Emojis sem aria-hidden</li>
+        <li>Sem skip-link</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="diag-card-title"><div class="dot" style="background:var(--danger)"></div> Escalabilidade</div>
+      <ul class="diag-list">
+        <li>localStorage como único storage (~5-10MB)</li>
+        <li>Sem backend/API (impossível multiusuário)</li>
+        <li>Sem paginação ou virtualização</li>
+        <li>Progresso de projeto hardcoded</li>
+        <li>Sem sincronização multi-dispositivo</li>
+      </ul>
+    </div>
+    <div class="diag-card">
+      <div class="diag-card-title"><div class="dot" style="background:var(--success)"></div> Pontos Positivos</div>
+      <ul class="diag-list">
+        <li>Design visual limpo e coeso</li>
+        <li>Sistema de cores bem estruturado</li>
+        <li>Escopo rico (7 vistas, Kanban, filtros)</li>
+        <li>Ações bulk implementadas</li>
+        <li>Histórico automático por tarefa</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ██ RISCOS ██ -->
+<section class="section" id="riscos">
+  <div class="section-label">Análise de Risco</div>
+  <h2 class="section-title">Principais Riscos</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Risco</th><th>Probabilidade</th><th>Impacto</th></tr></thead>
+      <tbody>
+        <tr><td>Perda total de dados (limpar cache do navegador)</td><td class="risk-high">Alta</td><td class="risk-high">Crítico</td></tr>
+        <tr><td>Lentidão com >200 tarefas</td><td class="risk-high">Alta</td><td class="risk-high">Alto</td></tr>
+        <tr><td>Impossibilidade de uso colaborativo</td><td class="risk-certain">Certa</td><td class="risk-high">Bloqueante</td></tr>
+        <tr><td>Falha silenciosa ao estourar localStorage</td><td class="risk-med">Média</td><td class="risk-high">Alto</td></tr>
+        <tr><td>Dados inconsistentes sem undo</td><td class="risk-high">Alta</td><td class="risk-med">Médio</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-danger" style="margin-top:20px">
+    <span class="callout-icon">⚠️</span>
+    <div>A arquitetura atual (localStorage-only, sem backend) torna <strong>impossível</strong> o uso colaborativo, persistência confiável e qualquer cenário corporativo real. Este é um <strong>risco arquitetural fundamental</strong> que precisa ser endereçado antes de qualquer adoção em produção.</div>
+  </div>
+</section>
+
+<!-- ██ SPRINTS ██ -->
+<section class="section" id="sprints">
+  <div class="section-label">Plano de Correção</div>
+  <h2 class="section-title">Roadmap de Sprints</h2>
+  <p class="section-desc">Organização sugerida das correções em sprints progressivas.</p>
+
+  <div class="sprint-card" style="border-left: 3px solid var(--success)">
+    <div class="sprint-header">
+      <div class="sprint-title">🟢 Sprint 1 — Quick Wins</div>
+      <div class="sprint-timeline">1-2 dias</div>
+    </div>
+    <div class="sprint-items">
+      <div class="sprint-item">#001 Toasts</div>
+      <div class="sprint-item">#014 Progresso dinâmico</div>
+      <div class="sprint-item">#008 Status na lista</div>
+      <div class="sprint-item">#012 Contraste</div>
+      <div class="sprint-item">#021 Prioridade acessível</div>
+      <div class="sprint-item">#023 Escape</div>
+      <div class="sprint-item">#018 Data dinâmica</div>
+      <div class="sprint-item">#016 Debounce busca</div>
+      <div class="sprint-item">#022 Debounce storage</div>
+    </div>
+  </div>
+
+  <div class="sprint-card" style="border-left: 3px solid var(--warning)">
+    <div class="sprint-header">
+      <div class="sprint-title">🟡 Sprint 2 — Fundamentos</div>
+      <div class="sprint-timeline">3-5 dias</div>
+    </div>
+    <div class="sprint-items">
+      <div class="sprint-item">#003 Undo/Redo</div>
+      <div class="sprint-item">#002 Modais customizados</div>
+      <div class="sprint-item">#004 Sidebar desktop</div>
+      <div class="sprint-item">#015 Focus trap</div>
+      <div class="sprint-item">#019 Toggle consistente</div>
+    </div>
+  </div>
+
+  <div class="sprint-card" style="border-left: 3px solid var(--p1)">
+    <div class="sprint-header">
+      <div class="sprint-title">🟠 Sprint 3 — Evolução</div>
+      <div class="sprint-timeline">1-2 semanas</div>
+    </div>
+    <div class="sprint-items">
+      <div class="sprint-item">#007 Otimizar renderVals</div>
+      <div class="sprint-item">#009 Atalhos de teclado</div>
+      <div class="sprint-item">#010 Media queries</div>
+      <div class="sprint-item">#017 Filtros avançados</div>
+      <div class="sprint-item">#013 DnD Kanban</div>
+      <div class="sprint-item">#005 Comentários</div>
+    </div>
+  </div>
+
+  <div class="sprint-card" style="border-left: 3px solid var(--danger)">
+    <div class="sprint-header">
+      <div class="sprint-title">🔴 Sprint 4+ — Arquitetura</div>
+      <div class="sprint-timeline">3+ semanas</div>
+    </div>
+    <div class="sprint-items">
+      <div class="sprint-item">#006 Backend/API</div>
+      <div class="sprint-item">#020 Calendário navegável</div>
+      <div class="sprint-item">Virtualização de lista</div>
+      <div class="sprint-item">Sincronização multi-dispositivo</div>
+      <div class="sprint-item">Autenticação</div>
+    </div>
+  </div>
+</section>
+
+<!-- ██ RETESTE ██ -->
+<section class="section" id="reteste">
+  <div class="section-label">Pós-Correção</div>
+  <h2 class="section-title">Plano de Reteste</h2>
+  <p class="section-desc">Testes a executar após cada sprint para garantir ausência de regressões.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Correção</th><th>Reteste Necessário</th></tr></thead>
+      <tbody>
+        <tr><td>Toasts de feedback</td><td>Verificar toast em: criar, editar, excluir tarefa/projeto/pessoa</td></tr>
+        <tr><td>Progresso dinâmico</td><td>Concluir tarefas e verificar se % atualiza na lista e detalhe</td></tr>
+        <tr><td>Status na lista</td><td>Verificar que TODO, IN_PROGRESS são visualmente distintos</td></tr>
+        <tr><td>Contraste</td><td>Validar com Lighthouse ou axe-core (WCAG AA pass)</td></tr>
+        <tr><td>Escape</td><td>Testar Escape em: drawer, modal nova tarefa, modais bulk</td></tr>
+        <tr><td>Undo</td><td>Excluir → toast → undo → verificar restauração</td></tr>
+        <tr><td>Modais customizados</td><td>Criar projeto/pessoa — verificar campos, validação, UX</td></tr>
+        <tr><td>Sidebar</td><td>Verificar em 1440px (sidebar visível) e 768px (drawer)</td></tr>
+        <tr><td>Focus trap</td><td>Tab cycling em modais, verificar que foco não escapa</td></tr>
+        <tr><td>DnD Kanban</td><td>Arrastar cards, verificar atualização de atributo</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-warn" style="margin-top:20px">
+    <span class="callout-icon">⚡</span>
+    <div><strong>Teste de volume</strong> (100, 1.000, 10.000 tarefas) deve ser executado após cada sprint para garantir que correções não introduzam regressões de performance.</div>
+  </div>
+</section>
+
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>Relatório gerado automaticamente — Auditoria UX/UI/Performance do Foccus v1.2</p>
+    <p>23 problemas · 17 fases de análise · 4.119 linhas de código auditadas</p>
+    <p style="margin-top:8px;color:var(--text-dim)">21 de agosto de 2026</p>
+  </div>
+</footer>
+
+</body>
+</html>

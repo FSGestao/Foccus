@@ -1,0 +1,13 @@
+# Este .gitignore cobre a raiz do repo. Cada subprojeto Node (hoje só Foccus.web/)
+# também tem o seu próprio .gitignore, que o git já respeita normalmente.
+
+# Dependências do tooling de teste do app legado (Playwright), na raiz
+/node_modules/
+
+# Artefatos de SO/editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Configuração local do Claude Code (pessoal, não compartilhada)
+.claude/settings.local.json

@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  },
+  "scripts": {
+    "test:ui": "playwright test",
+    "test": "npm run test:ui"
+  }
+}
