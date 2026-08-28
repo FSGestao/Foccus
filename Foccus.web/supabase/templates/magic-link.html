@@ -1,0 +1,29 @@
+<!--
+  Template de e-mail "Magic Link" do Supabase Auth, usado tanto pelo login por
+  código (signInWithOtp) quanto pelo clique no link mágico (fallback em
+  src/app/auth/callback/route.ts). O código de 6 dígitos ({{ .Token }}) fica em
+  destaque porque é a via principal — funciona em qualquer dispositivo, sem
+  depender de o link abrir no mesmo aparelho onde o app está rodando.
+
+  Colar isto em: Supabase Dashboard → Authentication → Email Templates → Magic Link
+-->
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #18181b;">
+  <h2 style="font-size: 18px; font-weight: 600; margin: 0 0 8px;">Seu código de acesso ao Foccus</h2>
+  <p style="font-size: 14px; color: #52525b; margin: 0 0 24px;">
+    Digite o código abaixo na tela de login para entrar na sua conta.
+  </p>
+
+  <div style="background: #f4f4f5; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 24px;">
+    <span style="font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #18181b;">{{ .Token }}</span>
+  </div>
+
+  <p style="font-size: 13px; color: #71717a; margin: 0 0 24px;">
+    O código expira em alguns minutos. Se preferir, também pode
+    <a href="{{ .ConfirmationURL }}" style="color: #6366f1;">clicar aqui para entrar direto</a>
+    — mas só funciona se abrir no mesmo computador onde você pediu o acesso.
+  </p>
+
+  <p style="font-size: 12px; color: #a1a1aa; margin: 0;">
+    Se você não pediu esse código, pode ignorar este e-mail com segurança.
+  </p>
+</div>
