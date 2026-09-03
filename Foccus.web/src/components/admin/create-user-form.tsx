@@ -2,11 +2,11 @@
 
 import { useActionState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createUserAction } from "@/lib/actions/admin-users";
+import { inviteUserAction } from "@/lib/actions/admin-users";
 
 export function CreateUserForm() {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(createUserAction, null);
+  const [state, formAction, pending] = useActionState(inviteUserAction, null);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -44,13 +44,17 @@ export function CreateUserForm() {
         />
       </div>
       {state && !state.success && <p className="text-sm text-red-600">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">Usuário criado com sucesso.</p>}
+      {state?.success && (
+        <p className="text-sm text-green-600">
+          Convite criado. A conta é ativada no primeiro login dessa pessoa com Google.
+        </p>
+      )}
       <button
         type="submit"
         disabled={pending}
         className="bg-foreground text-background rounded-md py-2 text-sm font-medium disabled:opacity-50"
       >
-        {pending ? "Criando..." : "Criar usuário"}
+        {pending ? "Convidando..." : "Convidar usuário"}
       </button>
     </form>
   );

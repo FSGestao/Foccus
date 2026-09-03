@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,5 +22,121 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Era "Arial, Helvetica, sans-serif" (sobra do boilerplate do create-next-app)
+     — isso ignorava a fonte Inter carregada em layout.tsx (--font-inter) e
+     fazia o app inteiro renderizar em Arial, que é visivelmente mais "pesada"
+     que a Inter nos mesmos pesos. */
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Tokens de cor do Foccus (--pb-*), portados de themeTokens() em
+   Foccus.dc.html:1738-1816 — mesmos valores hex/rgba do sistema legado, só
+   reescritos como CSS custom properties em vez de objeto JS. Usados só dentro
+   do shell/telas do app (src/components/shell, src/components/tasks) — o
+   restante do site (login, admin) continua com --background/--foreground
+   padrão acima, sem essa paleta. */
+:root {
+  --pb-bg: #eef6f7;
+  --pb-bg-gradient: radial-gradient(1200px 520px at 15% -10%, rgba(14, 154, 167, 0.13), transparent),
+    radial-gradient(900px 440px at 100% 0%, rgba(255, 166, 0, 0.1), transparent);
+  --pb-surface: #ffffff;
+  --pb-surface-subtle: #eef5f6;
+  --pb-glass: rgba(255, 255, 255, 0.66);
+  --pb-glass-strong: rgba(255, 255, 255, 0.88);
+  --pb-glass-card: linear-gradient(165deg, rgba(14, 154, 167, 0.14), rgba(255, 166, 0, 0.06)), rgba(255, 255, 255, 0.4);
+  --pb-glass-strong-card: linear-gradient(165deg, rgba(14, 154, 167, 0.1), rgba(255, 166, 0, 0.04)), rgba(255, 255, 255, 0.55);
+  --pb-border: rgba(14, 100, 110, 0.16);
+  --pb-border-hover: rgba(14, 100, 110, 0.28);
+  --pb-text: #0b2530;
+  --pb-text-rgb: 11, 37, 48;
+  --pb-text-muted: rgba(11, 37, 48, 0.64);
+  --pb-text-dim: rgba(11, 37, 48, 0.44);
+  --pb-accent: #0a7a85;
+  --pb-accent-bg: rgba(14, 154, 167, 0.12);
+  --pb-on-accent: #ffffff;
+  --pb-hover: rgba(14, 154, 167, 0.06);
+  --pb-hover-strong: rgba(14, 154, 167, 0.12);
+  --pb-yellow: #b56400;
+  --pb-yellow-bg: rgba(255, 166, 0, 0.14);
+  --pb-yellow-text: #b56400;
+  --pb-on-yellow: #ffffff;
+  --pb-red: #dc2626;
+  --pb-blue: #0369a1;
+  --pb-green: #15803d;
+  --pb-calendar-filter: invert(0);
+}
+
+:root[data-theme="dark"] {
+  --pb-bg: #0a1420;
+  --pb-bg-gradient: radial-gradient(1800px 900px at 8% -15%, rgba(14, 154, 167, 0.34), transparent 62%),
+    radial-gradient(1300px 750px at 102% -8%, rgba(255, 166, 0, 0.16), transparent 60%);
+  --pb-surface: #101d29;
+  --pb-surface-subtle: #0c1620;
+  --pb-glass: rgba(255, 255, 255, 0.055);
+  --pb-glass-strong: rgba(255, 255, 255, 0.09);
+  --pb-glass-card: rgba(255, 255, 255, 0.055);
+  --pb-glass-strong-card: rgba(255, 255, 255, 0.09);
+  --pb-border: rgba(255, 255, 255, 0.12);
+  --pb-border-hover: rgba(255, 255, 255, 0.22);
+  --pb-text: #eef6f7;
+  --pb-text-rgb: 238, 246, 247;
+  --pb-text-muted: rgba(238, 246, 247, 0.64);
+  --pb-text-dim: rgba(238, 246, 247, 0.42);
+  --pb-accent: #12a3b0;
+  --pb-accent-bg: rgba(18, 163, 176, 0.2);
+  --pb-on-accent: #ffffff;
+  --pb-hover: rgba(255, 255, 255, 0.05);
+  --pb-hover-strong: rgba(255, 255, 255, 0.09);
+  --pb-yellow: #ffa600;
+  --pb-yellow-bg: rgba(255, 166, 0, 0.18);
+  --pb-yellow-text: #ffc966;
+  --pb-on-yellow: #241200;
+  --pb-red: #f87171;
+  --pb-blue: #38bdf8;
+  --pb-green: #4ade80;
+  --pb-calendar-filter: invert(1);
+}
+
+/* Tokens do "Painel do Projeto" (Dashboard, --db-*), portados de
+   dbThemeTokens() em Foccus.dc.html:1820-1837 — sistema de cor próprio,
+   deliberadamente separado do resto do app (ver DOCUMENTACAO_TECNICA.md
+   seção 8). Usado só em src/app/(app)/dashboard. */
+:root {
+  --db-bg: #eef6f7;
+  --db-bg-gradient: radial-gradient(1200px 500px at 15% -10%, rgba(14, 154, 167, 0.12), transparent),
+    radial-gradient(900px 420px at 100% 0%, rgba(255, 166, 0, 0.1), transparent);
+  --db-panel: rgba(255, 255, 255, 0.62);
+  --db-panel-strong: rgba(255, 255, 255, 0.85);
+  --db-border: rgba(14, 100, 110, 0.14);
+  --db-border-strong: rgba(14, 100, 110, 0.24);
+  --db-text: #0b2530;
+  --db-text-muted: rgba(11, 37, 48, 0.64);
+  --db-text-dim: rgba(11, 37, 48, 0.42);
+  --db-teal: #0e9aa7;
+  --db-teal-soft: #3d8b96;
+  --db-amber: #b56400;
+  --db-amber-bg: rgba(255, 166, 0, 0.16);
+  --db-green: #15803d;
+  --db-blue: #0369a1;
+  --db-red: #dc2626;
+}
+
+:root[data-theme="dark"] {
+  --db-bg: #0a1420;
+  --db-bg-gradient: radial-gradient(1200px 500px at 15% -10%, rgba(14, 154, 167, 0.2), transparent),
+    radial-gradient(900px 420px at 100% 0%, rgba(255, 166, 0, 0.1), transparent);
+  --db-panel: rgba(255, 255, 255, 0.045);
+  --db-panel-strong: rgba(255, 255, 255, 0.075);
+  --db-border: rgba(255, 255, 255, 0.1);
+  --db-border-strong: rgba(255, 255, 255, 0.18);
+  --db-text: #eef6f7;
+  --db-text-muted: rgba(238, 246, 247, 0.64);
+  --db-text-dim: rgba(238, 246, 247, 0.4);
+  --db-teal: #0e9aa7;
+  --db-teal-soft: #58a4b0;
+  --db-amber: #ffa600;
+  --db-amber-bg: rgba(255, 166, 0, 0.16);
+  --db-green: #22c55e;
+  --db-blue: #38bdf8;
+  --db-red: #f87171;
 }

@@ -24,16 +24,23 @@ async function assertCallerIsAdmin() {
   if (profile?.role !== "admin") {
     throw new Error("Apenas administradores podem gerenciar usuários.");
   }
+
+  return user;
 }
 
-export async function createUserAction(
+// Convida um e-mail (allowlist), não cria mais a conta na hora — login é
+// Google, então o Supabase gera o auth.users sozinho no primeiro login. A
+// conta de verdade (auth.users + profiles) só nasce quando esse e-mail loga
+// com Google pela primeira vez (ver src/app/auth/callback/route.ts), que
+// confere esta allowlist antes de deixar a conta existir.
+export async function inviteUserAction(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    await assertCallerIsAdmin();
+    const caller = await assertCallerIsAdmin();
 
-    const email = String(formData.get("email") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const userName = String(formData.get("userName") ?? "").trim();
 
     if (!email) {
@@ -44,27 +51,22 @@ export async function createUserAction(
     // server-only, nunca chega ao navegador.
     const admin = createAdminClient();
 
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email,
-      email_confirm: true,
-    });
+    // upsert (não insert): reconvidar um e-mail que já existe na allowlist reseta
+    // consumed_at pra null, mesmo que já tivesse sido usado antes — cobre o caso de
+    // um admin apagar a conta de alguém (Authentication > Users) e querer liberar o
+    // acesso de novo, sem precisar mexer no SQL Editor.
+    const { error: inviteError } = await admin.from("allowed_emails").upsert(
+      {
+        email,
+        user_name: userName,
+        invited_by: caller.id,
+        consumed_at: null,
+      },
+      { onConflict: "email" },
+    );
 
-    if (createError || !created.user) {
-      return {
-        success: false,
-        error: createError?.message ?? "Falha ao criar o usuário no Supabase Auth.",
-      };
-    }
-
-    const { error: profileError } = await admin.from("profiles").insert({
-      id: created.user.id,
-      email,
-      role: "user",
-      user_name: userName,
-    });
-
-    if (profileError) {
-      return { success: false, error: `Usuário criado, mas falhou ao gravar o perfil: ${profileError.message}` };
+    if (inviteError) {
+      return { success: false, error: inviteError.message };
     }
 
     return { success: true };
