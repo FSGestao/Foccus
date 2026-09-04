@@ -1,8 +1,11 @@
-# Este .gitignore cobre a raiz do repo. Cada subprojeto Node (hoje só Foccus.web/)
-# também tem o seu próprio .gitignore, que o git já respeita normalmente.
+# Este .gitignore cobre a raiz do repo. Foccus.web/ tem o seu próprio
+# .gitignore, que o git já respeita normalmente.
 
-# Dependências do tooling de teste do app legado (Playwright), na raiz
-/node_modules/
+# Foccus.dc roda só na máquina do usuário — de propósito, não entra no
+# controle de versão remoto (os arquivos existem localmente em Foccus.dc/,
+# só não são rastreados pelo git). Foccus.web/ é o único projeto deste repo
+# que segue com commits/push/deploy.
+/Foccus.dc/
 
 # Artefatos de SO/editor
 .DS_Store
