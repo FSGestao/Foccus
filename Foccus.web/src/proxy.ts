@@ -33,12 +33,29 @@ export async function proxy(request: NextRequest) {
   const claims = data?.claims;
 
   const { pathname } = request.nextUrl;
-  const isPublicPath = pathname.startsWith("/login") || pathname.startsWith("/auth");
+  const isPublicPath =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/privacy") ||
+    pathname.startsWith("/terms");
 
   if (!claims && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
+  }
+
+  // Acesso revogado (ver 0010_deactivate_users.sql) — o claim vem do hook de
+  // JWT, então não precisa de consulta extra ao banco aqui.
+  if (claims && !isPublicPath) {
+    const disabled = (claims.app_metadata as { user_disabled?: boolean } | undefined)?.user_disabled;
+    if (disabled) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("error", "account_disabled");
+      return NextResponse.redirect(url);
+    }
   }
 
   if (pathname.startsWith("/admin")) {

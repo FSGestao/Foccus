@@ -74,3 +74,46 @@ export async function inviteUserAction(
     return { success: false, error: e instanceof Error ? e.message : "Erro desconhecido." };
   }
 }
+
+// Revoga (ou devolve) o acesso de alguém sem apagar a conta — os dados
+// (tarefas, projetos etc.) continuam intactos. Bloqueia login pelo claim
+// `app_metadata.user_disabled` do hook de JWT (0010_deactivate_users.sql),
+// verificado no proxy.ts.
+export async function setUserDisabledAction(userId: string, disabled: boolean): Promise<ActionResult> {
+  try {
+    const caller = await assertCallerIsAdmin();
+
+    if (userId === caller.id && disabled) {
+      return { success: false, error: "Você não pode desativar a própria conta." };
+    }
+
+    const admin = createAdminClient();
+    const { error } = await admin.from("profiles").update({ disabled }).eq("id", userId);
+    if (error) return { success: false, error: error.message };
+
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : "Erro desconhecido." };
+  }
+}
+
+// Cancela um convite ainda não usado (remove da allowlist antes do primeiro
+// login). Convite já consumido não aparece mais na lista de pendentes, então
+// não tem como ser cancelado por aqui — nesse caso é `setUserDisabledAction`.
+export async function cancelInviteAction(email: string): Promise<ActionResult> {
+  try {
+    await assertCallerIsAdmin();
+
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("allowed_emails")
+      .delete()
+      .eq("email", email)
+      .is("consumed_at", null);
+    if (error) return { success: false, error: error.message };
+
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : "Erro desconhecido." };
+  }
+}

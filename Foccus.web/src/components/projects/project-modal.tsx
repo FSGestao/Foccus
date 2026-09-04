@@ -13,6 +13,7 @@ export function ProjectModal({
   project,
   onClose,
   onSubmit,
+  onDelete,
 }: {
   project?: Project;
   onClose: () => void;
@@ -23,6 +24,7 @@ export function ProjectModal({
     status?: ProjectStatus;
     due_date?: string | null;
   }) => void;
+  onDelete?: () => void;
 }) {
   const [name, setName] = useState(project?.name ?? "");
   const [color, setColor] = useState(project?.color ?? PROJECT_COLOR_SWATCHES[0]);
@@ -145,18 +147,32 @@ export function ProjectModal({
           </>
         )}
 
-        <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="text-sm px-3 py-2">
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={submit}
-            className="rounded-md px-3 py-2 text-sm font-medium"
-            style={{ background: "var(--pb-accent)", color: "var(--pb-on-accent)" }}
-          >
-            {project ? "Salvar" : "Criar projeto"}
-          </button>
+        <div className="flex items-center justify-between gap-2 pt-2">
+          {project && onDelete ? (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="text-sm px-3 py-2"
+              style={{ color: "var(--pb-red)" }}
+            >
+              Excluir projeto
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex gap-2">
+            <button type="button" onClick={onClose} className="text-sm px-3 py-2">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={submit}
+              className="rounded-md px-3 py-2 text-sm font-medium"
+              style={{ background: "var(--pb-accent)", color: "var(--pb-on-accent)" }}
+            >
+              {project ? "Salvar" : "Criar projeto"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

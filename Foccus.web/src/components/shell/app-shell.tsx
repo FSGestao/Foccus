@@ -347,6 +347,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         <div style={{ fontSize: 11.5, color: "var(--pb-text-muted)", marginTop: 2 }}>{email}</div>
                       )}
                     </div>
+                    <Link
+                      href="/account"
+                      onClick={() => setAvatarMenuOpen(false)}
+                      style={{
+                        cursor: "pointer",
+                        textAlign: "left",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: "var(--pb-text)",
+                        borderRadius: 6,
+                        padding: "6px 8px",
+                      }}
+                    >
+                      Minha conta
+                    </Link>
                     <button
                       type="button"
                       onClick={handleSignOut}

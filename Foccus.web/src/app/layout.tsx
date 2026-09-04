@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
+import { ErrorReporter } from "@/components/shell/error-reporter";
 import "./globals.css";
 
 // Mesma fonte do sistema legado (Foccus.dc.html, via <link> do Google Fonts
@@ -25,7 +26,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt-BR"
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ErrorReporter />
+        {children}
+      </body>
     </html>
   );
 }

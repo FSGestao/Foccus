@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 // Segunda camada de proteção além do proxy.ts — se algum dia o proxy for
@@ -21,8 +22,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen">
-      <header className="border-b px-6 py-4">
+      <header className="border-b px-6 py-4 flex items-center gap-6">
         <h1 className="text-lg font-semibold">Administração — Foccus</h1>
+        <nav className="flex gap-4 text-sm">
+          <Link href="/admin/users" className="underline">
+            Usuários
+          </Link>
+          <Link href="/admin/errors" className="underline">
+            Erros
+          </Link>
+        </nav>
       </header>
       <main className="px-6 py-8">{children}</main>
     </div>

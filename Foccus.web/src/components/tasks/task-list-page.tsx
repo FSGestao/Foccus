@@ -4,18 +4,15 @@ import { useEffect, useState } from "react";
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
-import { useProfileStore } from "@/lib/stores/profile-store";
 import { sortTasks } from "@/lib/tasks/sort";
 import { relevantDateFor, isOverdueDate, dateLabelFor } from "@/lib/tasks/list-filters";
-import { computeGargaloBreach, computeQuickWinCandidates } from "@/lib/assistant/compute";
 import { useMarqueeSelection } from "@/lib/hooks/use-marquee-selection";
 import { useDisplayName } from "@/lib/hooks/use-display-name";
 import type { Priority, Task } from "@/lib/tasks/types";
 import { TaskRow } from "./task-row";
 import { TaskDetailPanel } from "./task-detail-panel";
 import { BulkActionBar } from "./bulk-action-bar";
-import { GargaloBanner } from "@/components/assistant/gargalo-banner";
-import { QuickWinBanner } from "@/components/assistant/quick-win-banner";
+import { AssistantBanners } from "@/components/assistant/assistant-banners";
 
 type Tab = "all" | "today" | "done";
 const TAB_DEFS: { key: Tab; label: string }[] = [
@@ -90,7 +87,6 @@ export function TaskListPage() {
   const projects = useProjectsStore((s) => s.projects);
   const initProjects = useProjectsStore((s) => s.init);
   const people = usePeopleStore((s) => s.people);
-  const profile = useProfileStore();
   const { firstName: userFirstName } = useDisplayName();
 
   // Controles de visualização (Foccus.dc.html:1884-1893) — só desta tela, por
@@ -344,24 +340,6 @@ export function TaskListPage() {
     setSelectedTaskIds([]);
   }
 
-  // Assistente (Foccus.dc.html:2980-2997): banners exibidos na Minha Lista,
-  // tela de entrada do sistema. Gargalo tem prioridade sobre Vitórias
-  // Rápidas — os dois nunca aparecem juntos.
-  const { count: emProgressoCount, breach: gargaloBreach } = computeGargaloBreach(
-    tasks,
-    profile.asstGargaloAtivo,
-    profile.asstGargaloLimite,
-  );
-  const showGargaloBanner = profile.loaded && gargaloBreach && profile.assistantBannerDismissedDate !== today;
-  const quickWinCandidates = computeQuickWinCandidates(tasks);
-  const showQuickWinBanner =
-    profile.loaded &&
-    !showGargaloBanner &&
-    profile.asstQuickwinAtivo &&
-    profile.quickWinBannerActive &&
-    quickWinCandidates.length > 0 &&
-    profile.quickWinDismissedDate !== today;
-
   function handleQuickAddSubmit() {
     if (!quickTitle.trim()) return;
     quickAdd(quickTitle);
@@ -390,8 +368,7 @@ export function TaskListPage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-5 px-4 py-8">
-      {showGargaloBanner && <GargaloBanner emProgressoCount={emProgressoCount} />}
-      {showQuickWinBanner && <QuickWinBanner candidates={quickWinCandidates} />}
+      <AssistantBanners />
 
       <div className="flex flex-wrap items-center justify-between gap-3.5">
         <div>

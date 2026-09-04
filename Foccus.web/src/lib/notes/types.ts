@@ -15,4 +15,5 @@ export type NewNoteInput = {
   text: string;
   project_id: string | null;
   reference_date?: string | null;
+  recorded_at?: string;
 };

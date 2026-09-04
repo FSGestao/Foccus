@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# cache local do CLI do Supabase (npx supabase ...), não é código do projeto
+/supabase/.temp/

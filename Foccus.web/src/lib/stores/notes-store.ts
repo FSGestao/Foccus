@@ -43,7 +43,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     set({ notes: (data ?? []) as ProjectNote[], userId: user.id, loading: false, error: null });
   },
 
-  createNote: async ({ title, text, project_id, reference_date }) => {
+  createNote: async ({ title, text, project_id, reference_date, recorded_at }) => {
     const { userId } = get();
     if (!userId) return;
     const supabase = createClient();
@@ -56,7 +56,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
         text: text.trim(),
         project_id,
         reference_date: reference_date || null,
-        recorded_at: new Date().toISOString(),
+        recorded_at: recorded_at || new Date().toISOString(),
       })
       .select()
       .single();

@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateUserForm } from "@/components/admin/create-user-form";
+import { ToggleUserDisabledButton, CancelInviteButton } from "@/components/admin/user-row-actions";
 
 export default async function AdminUsersPage() {
   // Lista todo mundo — precisa do client privilegiado porque não existe (e não deve
@@ -7,7 +8,7 @@ export default async function AdminUsersPage() {
   const admin = createAdminClient();
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, email, user_name, role, created_at")
+    .select("id, email, user_name, role, disabled, created_at")
     .order("created_at", { ascending: false });
 
   const { data: invites } = await admin
@@ -34,6 +35,7 @@ export default async function AdminUsersPage() {
               <th className="py-2 pr-4">E-mail</th>
               <th className="py-2 pr-4">Nome</th>
               <th className="py-2 pr-4">Convidado em</th>
+              <th className="py-2 pr-4">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -44,11 +46,14 @@ export default async function AdminUsersPage() {
                 <td className="py-2 pr-4">
                   {new Date(i.created_at).toLocaleDateString("pt-BR")}
                 </td>
+                <td className="py-2 pr-4">
+                  <CancelInviteButton email={i.email} />
+                </td>
               </tr>
             ))}
             {(!invites || invites.length === 0) && (
               <tr>
-                <td colSpan={3} className="py-4 text-zinc-500">
+                <td colSpan={4} className="py-4 text-zinc-500">
                   Nenhum convite pendente.
                 </td>
               </tr>
@@ -65,6 +70,8 @@ export default async function AdminUsersPage() {
               <th className="py-2 pr-4">E-mail</th>
               <th className="py-2 pr-4">Nome</th>
               <th className="py-2 pr-4">Papel</th>
+              <th className="py-2 pr-4">Status</th>
+              <th className="py-2 pr-4">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -73,11 +80,21 @@ export default async function AdminUsersPage() {
                 <td className="py-2 pr-4">{p.email}</td>
                 <td className="py-2 pr-4">{p.user_name || "—"}</td>
                 <td className="py-2 pr-4">{p.role}</td>
+                <td className="py-2 pr-4">
+                  {p.disabled ? (
+                    <span className="text-red-600">Desativado</span>
+                  ) : (
+                    <span className="text-green-600">Ativo</span>
+                  )}
+                </td>
+                <td className="py-2 pr-4">
+                  <ToggleUserDisabledButton userId={p.id} disabled={p.disabled} />
+                </td>
               </tr>
             ))}
             {(!profiles || profiles.length === 0) && (
               <tr>
-                <td colSpan={3} className="py-4 text-zinc-500">
+                <td colSpan={5} className="py-4 text-zinc-500">
                   Nenhum usuário cadastrado ainda.
                 </td>
               </tr>
