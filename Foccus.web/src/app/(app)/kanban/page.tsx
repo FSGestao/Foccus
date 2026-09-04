@@ -4,35 +4,73 @@ import { useEffect, useMemo, useState } from "react";
 import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProjectsStore } from "@/lib/stores/projects-store";
-import { STATUS_LABEL, STATUS_OPTIONS, PRIORITY_OPTIONS, PRIORITY_COLOR } from "@/lib/tasks/constants";
+import { usePeopleStore } from "@/lib/stores/people-store";
+import { STATUS_LABEL, STATUS_OPTIONS, STATUS_ICON, STATUS_TINT_HEX, PRIORITY_OPTIONS, PRIORITY_COLOR } from "@/lib/tasks/constants";
 import { relevantDateFor, fmtDateShort } from "@/lib/tasks/list-filters";
 import type { Task, TaskStatus, Priority } from "@/lib/tasks/types";
+import type { Project } from "@/lib/projects/types";
 import { KanbanColumn } from "@/components/kanban/kanban-column";
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel";
+import { AssistantBanners } from "@/components/assistant/assistant-banners";
 
 type GroupBy = "status" | "project" | "priority" | "due";
+
+const PRIORITY_ICON: Record<Priority, string> = { P1: "❶", P2: "❷", P3: "❸", P4: "❹" };
+const KANBAN_COLORED_KEY = "foccus_web_kanban_colored";
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Kanban avulso (Foccus.dc.html: viewKanban).
+// Kanban avulso (Foccus.dc.html: viewKanban) — "com cores"/"sem cores" é uma
+// opção nova (o legado só tem o modo colorido); alterna o tint das colunas e
+// a cor do avatar dos cards, mantendo layout e funcionalidades iguais nos
+// dois modos.
 export default function KanbanPage() {
-  const { tasks, selectedTaskId, init, updateTask, deleteTask, openTask } = useTasksStore();
+  const { tasks, selectedTaskId, init, updateTask, deleteTask, toggleDone, openTask } = useTasksStore();
   const { projects, init: initProjects } = useProjectsStore();
+  const { people, init: initPeople } = usePeopleStore();
   const [groupBy, setGroupBy] = useState<GroupBy>("status");
+  // Começa sem cores (igual ao server-rendered e ao comportamento de antes
+  // desta opção existir) e só aplica a preferência salva depois de montado —
+  // ler localStorage já no useState quebraria a hidratação (SSR não tem
+  // acesso a ele, o HTML gerado no build sempre seria "sem cores").
+  const [colored, setColored] = useState(false);
 
   useEffect(() => {
     init();
     initProjects();
+    initPeople();
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza com localStorage (sistema externo), só roda uma vez ao montar
+      setColored(localStorage.getItem(KANBAN_COLORED_KEY) === "1");
+    } catch {
+      // localStorage indisponível (ex.: navegação privada) — segue sem cores
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handleToggleColored(next: boolean) {
+    setColored(next);
+    try {
+      localStorage.setItem(KANBAN_COLORED_KEY, next ? "1" : "0");
+    } catch {
+      // segue sem persistir
+    }
+  }
+
+  const projectById = useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
+  const personById = useMemo(() => new Map(people.map((p) => [p.id, p])), [people]);
+  const projectOf = (t: Task): Project | null => (t.project_id ? (projectById.get(t.project_id) ?? null) : null);
+  const personOf = (t: Task) => (t.waiting_for ? (personById.get(t.waiting_for) ?? null) : null);
 
   const columns = useMemo(() => {
     if (groupBy === "status") {
       return STATUS_OPTIONS.map((s) => ({
         id: s.value,
-        label: s.label,
+        label: STATUS_LABEL[s.value],
+        icon: STATUS_ICON[s.value],
+        tintHex: STATUS_TINT_HEX[s.value],
         tasks: tasks.filter((t) => t.status === s.value),
       }));
     }
@@ -40,7 +78,8 @@ export default function KanbanPage() {
       return PRIORITY_OPTIONS.map((p) => ({
         id: p,
         label: p,
-        accent: PRIORITY_COLOR[p],
+        icon: PRIORITY_ICON[p],
+        tintHex: PRIORITY_COLOR[p],
         tasks: tasks.filter((t) => t.priority === p),
       }));
     }
@@ -64,20 +103,22 @@ export default function KanbanPage() {
       const dateCols = [...dateMap.keys()].sort().map((d) => ({
         id: d,
         label: `${d < today ? "⚠️" : "🗓"} ${fmtDateShort(d)}`,
-        accent: d < today ? "var(--pb-red)" : d === today ? "var(--pb-yellow)" : "var(--pb-blue)",
+        icon: undefined as string | undefined,
+        tintHex: d < today ? STATUS_TINT_HEX.BLOCKED : d === today ? STATUS_TINT_HEX.WAITING : STATUS_TINT_HEX.TODO,
         tasks: dateMap.get(d)!,
       }));
-      return [...dateCols, { id: "none", label: "· Sem Prazo", accent: "var(--pb-text-dim)", tasks: noDate }];
+      return [...dateCols, { id: "none", label: "· Sem Prazo", icon: undefined, tintHex: undefined, tasks: noDate }];
     }
     // project
     const cols = projects.map((p) => ({
       id: p.id,
       label: p.name,
-      accent: p.color,
+      icon: "📁",
+      tintHex: p.color,
       tasks: tasks.filter((t) => t.project_id === p.id),
     }));
     return [
-      { id: "none", label: "Inbox", tasks: tasks.filter((t) => !t.project_id) },
+      { id: "none", label: "Inbox", icon: "📁", tintHex: "#94a3b8", tasks: tasks.filter((t) => !t.project_id) },
       ...cols,
     ];
   }, [groupBy, tasks, projects]);
@@ -103,37 +144,100 @@ export default function KanbanPage() {
     }
   }
 
+  function handleToggleDone(task: Task) {
+    toggleDone(task.id);
+  }
+
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) ?? null;
 
   return (
     <div className="flex flex-col gap-4 px-4 py-8">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between">
-        <h1 className="text-xl font-semibold" style={{ color: "var(--pb-text)" }}>
-          Kanban
-        </h1>
-        <select
-          value={groupBy}
-          onChange={(e) => setGroupBy(e.target.value as GroupBy)}
-          className="rounded-md px-2 py-1.5 text-sm"
-          style={{ border: "1px solid var(--pb-border)", background: "var(--pb-surface)" }}
-        >
-          <option value="status">Agrupar por status</option>
-          <option value="project">Agrupar por projeto</option>
-          <option value="priority">Agrupar por prioridade</option>
-          <option value="due">Agrupar por prazo</option>
-        </select>
+      <div className="mx-auto w-full max-w-5xl">
+        <AssistantBanners />
+      </div>
+
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3.5">
+        <div>
+          <h1 className="text-xl font-semibold" style={{ color: "var(--pb-text)" }}>
+            Kanban
+          </h1>
+          <div className="mt-0.5 text-[12.5px]" style={{ color: "var(--pb-text-muted)" }}>
+            Organize suas tarefas visualmente em cards
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <div
+            className="inline-flex gap-0.5 rounded-full p-0.5"
+            style={{
+              background: "var(--pb-glass)",
+              backdropFilter: "blur(10px) saturate(150%)",
+              WebkitBackdropFilter: "blur(10px) saturate(150%)",
+              border: "1px solid var(--pb-border)",
+            }}
+          >
+            {[
+              { value: false, label: "Sem cores" },
+              { value: true, label: "Com cores" },
+            ].map((opt) => (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => handleToggleColored(opt.value)}
+                title={opt.value ? "Colunas e avatares coloridos, como no Foccus.dc" : "Visual neutro, sem cores de destaque"}
+                className="rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-all"
+                style={{
+                  background: colored === opt.value ? "var(--pb-accent)" : "transparent",
+                  color: colored === opt.value ? "var(--pb-on-accent)" : "var(--pb-text-muted)",
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <label className="whitespace-nowrap text-[11.5px] font-medium" style={{ color: "var(--pb-text-dim)" }}>
+              Agrupar:
+            </label>
+            <select
+              value={groupBy}
+              onChange={(e) => setGroupBy(e.target.value as GroupBy)}
+              title="Agrupar colunas do Kanban"
+              className="rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold"
+              style={{
+                background: "var(--pb-glass)",
+                backdropFilter: "blur(10px) saturate(150%)",
+                WebkitBackdropFilter: "blur(10px) saturate(150%)",
+                border: "1px solid var(--pb-border)",
+                color: "var(--pb-text)",
+              }}
+            >
+              <option value="status">Status</option>
+              <option value="project">Projeto</option>
+              <option value="priority">Urgência</option>
+              <option value="due">Prazo</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <DndContext onDragEnd={handleDragEnd}>
-        <div className="mx-auto flex w-full max-w-5xl gap-3 overflow-x-auto pb-2">
+        <div role="region" aria-label="Quadro Kanban" className="mx-auto flex w-full max-w-5xl items-start gap-4 overflow-x-auto pb-4">
           {columns.map((col) => (
             <KanbanColumn
               key={col.id}
               id={col.id}
               label={col.label}
-              accent={"accent" in col ? col.accent : undefined}
+              icon={col.icon}
+              tintHex={col.tintHex}
+              colored={colored}
               tasks={col.tasks}
+              projectOf={projectOf}
+              personOf={personOf}
               onOpenTask={openTask}
+              onToggleDone={handleToggleDone}
+              onDeleteTask={deleteTask}
             />
           ))}
         </div>

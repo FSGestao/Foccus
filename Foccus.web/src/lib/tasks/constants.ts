@@ -44,6 +44,19 @@ export const STATUS_COLOR: Record<TaskStatus, string> = {
   CANCELLED: "var(--pb-text-dim)",
 };
 
+// Cor sólida (hex) por status, usada só pro tint das colunas do Kanban "com
+// cores" (Foccus.dc.html: STATUS_TINT_HEX) — precisa ser hex de verdade (não
+// var(--pb-*)) porque vira rgba() pro degradê de fundo da coluna.
+export const STATUS_TINT_HEX: Record<TaskStatus, string> = {
+  INBOX: "#94a3b8",
+  TODO: "#38bdf8",
+  IN_PROGRESS: "#0e9aa7",
+  WAITING: "#ffa600",
+  BLOCKED: "#ef4444",
+  DONE: "#22c55e",
+  CANCELLED: "#94a3b8",
+};
+
 // INBOX fica de fora das opções do select — igual ao legado desde a v3.4.0
 // (DOCUMENTACAO_TECNICA.md v3.4.0), tarefas novas já nascem TODO.
 export const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
