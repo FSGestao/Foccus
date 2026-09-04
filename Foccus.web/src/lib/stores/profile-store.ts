@@ -9,6 +9,10 @@ import { nextFechamentoStreak, shouldTriggerFechamento, todayISO } from "@/lib/a
 type ProfileState = {
   loaded: boolean;
   userId: string | null;
+  // Nome informado pelo admin no convite (profiles.user_name) — a fonte de
+  // verdade pro nome de exibição, distinta do nome da conta Google usada só
+  // como reserva quando isso ainda não foi preenchido.
+  userName: string;
 
   asstGargaloAtivo: boolean;
   asstGargaloLimite: number;
@@ -55,6 +59,7 @@ let lastActivityPersistAt = 0;
 export const useProfileStore = create<ProfileState>((set, get) => ({
   loaded: false,
   userId: null,
+  userName: "",
 
   asstGargaloAtivo: true,
   asstGargaloLimite: 10,
@@ -92,6 +97,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     set({
       loaded: true,
       userId: user.id,
+      userName: data.user_name ?? "",
       asstGargaloAtivo: data.asst_gargalo_ativo,
       asstGargaloLimite: data.asst_gargalo_limite,
       asstQuickwinAtivo: data.asst_quickwin_ativo,

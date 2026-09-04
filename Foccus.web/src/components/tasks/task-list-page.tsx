@@ -8,9 +8,12 @@ import { useProfileStore } from "@/lib/stores/profile-store";
 import { sortTasks } from "@/lib/tasks/sort";
 import { relevantDateFor, isOverdueDate, dateLabelFor } from "@/lib/tasks/list-filters";
 import { computeGargaloBreach, computeQuickWinCandidates } from "@/lib/assistant/compute";
-import type { Task } from "@/lib/tasks/types";
+import { useMarqueeSelection } from "@/lib/hooks/use-marquee-selection";
+import { useDisplayName } from "@/lib/hooks/use-display-name";
+import type { Priority, Task } from "@/lib/tasks/types";
 import { TaskRow } from "./task-row";
 import { TaskDetailPanel } from "./task-detail-panel";
+import { BulkActionBar } from "./bulk-action-bar";
 import { GargaloBanner } from "@/components/assistant/gargalo-banner";
 import { QuickWinBanner } from "@/components/assistant/quick-win-banner";
 
@@ -77,6 +80,9 @@ export function TaskListPage() {
     deleteTask,
     dismissToast,
     openTask,
+    bulkUpdate,
+    bulkDelete,
+    showInfoToast,
   } = useTasksStore();
 
   const [quickTitle, setQuickTitle] = useState("");
@@ -85,6 +91,7 @@ export function TaskListPage() {
   const initProjects = useProjectsStore((s) => s.init);
   const people = usePeopleStore((s) => s.people);
   const profile = useProfileStore();
+  const { firstName: userFirstName } = useDisplayName();
 
   // Controles de visualização (Foccus.dc.html:1884-1893) — só desta tela, por
   // isso ficam em estado local em vez de num store compartilhado.
@@ -96,6 +103,21 @@ export function TaskListPage() {
   const [filterProject, setFilterProject] = useState("all");
   const [filterPerson, setFilterPerson] = useState("all");
   const [groupBy, setGroupBy] = useState<GroupBy>("none");
+
+  // Seleção múltipla (Foccus.dc.html:2148-2291) + checklist expansível na
+  // linha (:2538-2543) — estado local, só existe na Minha Lista.
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
+  const [lastSelectedTaskId, setLastSelectedTaskId] = useState<string | null>(null);
+  const [expandedTaskIds, setExpandedTaskIds] = useState<string[]>([]);
+  const { marqueeBox, justFinishedRef } = useMarqueeSelection(setSelectedTaskIds);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setSelectedTaskIds([]);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const quickFilterState: Record<QuickFilterKey, [boolean, (v: boolean) => void]> = {
     filterP1: [filterP1, setFilterP1],
@@ -239,6 +261,89 @@ export function TaskListPage() {
     if (noDateRows.length > 0) groups.push({ label: "Sem prazo", rows: noDateRows });
   }
 
+  // Ordem visível "achatada" (Foccus.dc.html: getCurrentVisibleTasks) — usada
+  // só pro Shift+clique calcular o intervalo entre a última tarefa clicada e
+  // a atual, seja a lista agrupada ou não.
+  const flatVisibleIds = groupBy === "none" ? sortedPool.map((t) => t.id) : groups.flatMap((g) => g.rows.map((t) => t.id));
+
+  function toggleSelect(taskId: string) {
+    setSelectedTaskIds((prev) => (prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId]));
+    setLastSelectedTaskId(taskId);
+  }
+
+  function handleRowClick(taskId: string, e: React.MouseEvent) {
+    if (justFinishedRef.current) return;
+
+    if (e.shiftKey && lastSelectedTaskId) {
+      const idx1 = flatVisibleIds.indexOf(lastSelectedTaskId);
+      const idx2 = flatVisibleIds.indexOf(taskId);
+      if (idx1 !== -1 && idx2 !== -1) {
+        const start = Math.min(idx1, idx2);
+        const end = Math.max(idx1, idx2);
+        const range = flatVisibleIds.slice(start, end + 1);
+        setSelectedTaskIds((prev) => Array.from(new Set([...prev, ...range])));
+        setLastSelectedTaskId(taskId);
+        return;
+      }
+    }
+
+    if (e.ctrlKey || e.metaKey) {
+      toggleSelect(taskId);
+      return;
+    }
+
+    if (selectedTaskIds.length > 0) {
+      toggleSelect(taskId);
+      return;
+    }
+
+    openTask(taskId);
+  }
+
+  function toggleExpand(taskId: string) {
+    setExpandedTaskIds((prev) => (prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId]));
+  }
+
+  function toggleSubtask(task: Task, itemId: string) {
+    const next = (task.checklist ?? []).map((c) => (c.id === itemId ? { ...c, done: !c.done } : c));
+    updateTask(task.id, { checklist: next });
+  }
+
+  // Ações em massa (Foccus.dc.html: applyBulkProjectValue/applyBulkPriorityValue/
+  // applyBulkComplete/applyBulkDelete) — reaproveitam bulkUpdate/bulkDelete do
+  // store, que por sua vez reaproveitam updateTask/deleteTask por id.
+  function bulkAssignProject(projectId: string | null) {
+    if (!selectedTaskIds.length) return;
+    const project = projects.find((p) => p.id === projectId);
+    const projName = project ? project.name : "Inbox (sem projeto)";
+    const count = selectedTaskIds.length;
+    bulkUpdate(selectedTaskIds, { project_id: projectId }, `Projeto alterado em lote para ${projName}`).then(() => {
+      showInfoToast(`Projeto "${projName}" atribuído a ${count} tarefa(s)!`);
+    });
+    setSelectedTaskIds([]);
+  }
+
+  function bulkSetPriority(priority: Priority) {
+    if (!selectedTaskIds.length) return;
+    const count = selectedTaskIds.length;
+    bulkUpdate(selectedTaskIds, { priority }, `Prioridade alterada em lote para ${priority}`).then(() => {
+      showInfoToast(`Prioridade ${priority} definida para ${count} tarefa(s)!`);
+    });
+    setSelectedTaskIds([]);
+  }
+
+  function bulkComplete() {
+    if (!selectedTaskIds.length) return;
+    bulkUpdate(selectedTaskIds, { status: "DONE", completed_at: new Date().toISOString() }, "Concluída em lote");
+    setSelectedTaskIds([]);
+  }
+
+  function bulkDeleteSelected() {
+    if (!selectedTaskIds.length) return;
+    bulkDelete(selectedTaskIds);
+    setSelectedTaskIds([]);
+  }
+
   // Assistente (Foccus.dc.html:2980-2997): banners exibidos na Minha Lista,
   // tela de entrada do sistema. Gargalo tem prioridade sobre Vitórias
   // Rápidas — os dois nunca aparecem juntos.
@@ -268,13 +373,17 @@ export function TaskListPage() {
       <TaskRow
         key={task.id}
         task={task}
-        onOpen={() => openTask(task.id)}
+        isSelected={selectedTaskIds.includes(task.id)}
+        isExpanded={expandedTaskIds.includes(task.id)}
+        onRowClick={(e) => handleRowClick(task.id, e)}
+        onToggleExpand={() => toggleExpand(task.id)}
         onToggleDone={() => toggleDone(task.id)}
         onChangePriority={(priority) => updateTask(task.id, { priority })}
         onChangeDate={(date) =>
           updateTask(task.id, task.status === "WAITING" ? { follow_up_date: date } : { due_date: date })
         }
         onDelete={() => deleteTask(task.id)}
+        onToggleSubtask={(itemId) => toggleSubtask(task, itemId)}
       />
     );
   }
@@ -287,7 +396,7 @@ export function TaskListPage() {
       <div className="flex flex-wrap items-center justify-between gap-3.5">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: "var(--pb-text)" }}>
-            Minha Lista
+            Lista de {userFirstName}
           </h1>
           <div className="mt-0.5 text-xs" style={{ color: "var(--pb-text-muted)" }}>
             Visualização operacional de tarefas e compromissos
@@ -474,6 +583,33 @@ export function TaskListPage() {
             ✕
           </button>
         </div>
+      )}
+
+      {selectedTaskIds.length > 0 && (
+        <BulkActionBar
+          count={selectedTaskIds.length}
+          projects={projects}
+          onClear={() => setSelectedTaskIds([])}
+          onAssignProject={bulkAssignProject}
+          onSetPriority={bulkSetPriority}
+          onComplete={bulkComplete}
+          onDelete={bulkDeleteSelected}
+        />
+      )}
+
+      {marqueeBox.active && (
+        <div
+          className="pointer-events-none fixed rounded"
+          style={{
+            left: marqueeBox.left,
+            top: marqueeBox.top,
+            width: marqueeBox.width,
+            height: marqueeBox.height,
+            border: "1.5px dashed var(--pb-accent)",
+            background: "rgba(14,154,167,0.15)",
+            zIndex: 9999,
+          }}
+        />
       )}
     </div>
   );

@@ -19,6 +19,15 @@
   }
 }
 
+html {
+  /* Base de escala de todo o sistema: os tamanhos em rem (text-sm, text-xs
+     etc., usados nas tarefas e no restante das telas) partem daqui. Padrão
+     do navegador é 16px (12pt); ajustado para 11pt a pedido do usuário —
+     encolhe a fonte do app inteiro proporcionalmente num só lugar, em vez de
+     editar cada componente. */
+  font-size: 14.67px;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

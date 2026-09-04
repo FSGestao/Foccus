@@ -5,7 +5,7 @@ import type { ChecklistItem, Comment, Task } from "@/lib/tasks/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/tasks/constants";
 import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
-import { createClient } from "@/lib/supabase/client";
+import { useDisplayName } from "@/lib/hooks/use-display-name";
 import { Checklist } from "./checklist";
 
 export function TaskDetailPanel({
@@ -28,17 +28,12 @@ export function TaskDetailPanel({
   const initProjects = useProjectsStore((s) => s.init);
   const people = usePeopleStore((s) => s.people);
   const initPeople = usePeopleStore((s) => s.init);
-  const [authorLabel, setAuthorLabel] = useState("Você");
+  const { fullName: authorLabel } = useDisplayName();
   const [noteDraft, setNoteDraft] = useState("");
 
   useEffect(() => {
     initProjects();
     initPeople();
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const name = (user?.user_metadata?.full_name as string | undefined) || user?.email;
-      if (name) setAuthorLabel(name);
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -58,6 +53,14 @@ export function TaskDetailPanel({
     onChange({ checklist: items });
   }
 
+  const isDone = task.status === "DONE";
+  function toggleDone() {
+    onChange(
+      { status: isDone ? "TODO" : "DONE", completed_at: isDone ? null : new Date().toISOString() },
+      isDone ? "Conclusão desfeita" : "Tarefa concluída",
+    );
+  }
+
   // Anotações (Foccus.dc.html: addWaitingComment) — mesmo campo `comments`
   // usado na thread de Aguardando, mas disponível em qualquer tarefa aqui no
   // painel de detalhe, não só nas que estão aguardando alguém.
@@ -73,6 +76,7 @@ export function TaskDetailPanel({
     <div
       className="fixed inset-0 z-40 flex justify-end bg-black/30"
       onClick={onClose}
+      title="Clique fora para fechar o painel"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -97,98 +101,91 @@ export function TaskDetailPanel({
           <button
             type="button"
             onClick={onClose}
-            className="text-sm"
-            style={{ color: "var(--pb-text-muted)" }}
+            aria-label="Fechar"
+            title="Fechar painel (Atalho: Esc)"
+            className="shrink-0 rounded px-1.5 py-0.5 text-lg leading-none"
+            style={{ color: "var(--pb-text-dim)", background: "transparent", border: "none" }}
           >
-            fechar
+            ✕
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Status</label>
-            <select
-              value={task.status}
-              onChange={(e) => onChange({ status: e.target.value as Task["status"] })}
-              className="w-full rounded-md px-2 py-1.5 text-sm"
-              style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+        {/* Properties Grid (Foccus.dc.html:1101-1190) — Projeto+Prioridade
+            numa dupla, Status+Prazo noutra (cada par no seu próprio grid de 2
+            colunas, não um grid contínuo de 6 células), depois os blocos de
+            largura cheia (% conclusão, Aguardando, Estimativa). */}
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--pb-text-dim)" }}>Projeto</label>
+              <select
+                value={task.project_id ?? ""}
+                onChange={(e) => onChange({ project_id: e.target.value || null })}
+                className="w-full rounded-md px-2 py-1.5 text-sm"
+                style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+              >
+                <option value="">Inbox (sem projeto)</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--pb-text-dim)" }}>Prioridade</label>
+              <select
+                value={task.priority}
+                onChange={(e) => onChange({ priority: e.target.value as Task["priority"] })}
+                className="w-full rounded-md px-2 py-1.5 text-sm"
+                style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+              >
+                {PRIORITY_OPTIONS.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Prioridade</label>
-            <select
-              value={task.priority}
-              onChange={(e) => onChange({ priority: e.target.value as Task["priority"] })}
-              className="w-full rounded-md px-2 py-1.5 text-sm"
-              style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-            >
-              {PRIORITY_OPTIONS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--pb-text-dim)" }}>Status</label>
+              <select
+                value={task.status}
+                onChange={(e) => onChange({ status: e.target.value as Task["status"] })}
+                className="w-full rounded-md px-2 py-1.5 text-sm"
+                style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+              >
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Prazo</label>
-            <input
-              type="date"
-              value={task.due_date ?? ""}
-              onChange={(e) => onChange({ due_date: e.target.value || null })}
-              className="w-full rounded-md px-2 py-1.5 text-sm"
-              style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-            />
-          </div>
-
-          <div className="col-span-2 flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Projeto</label>
-            <select
-              value={task.project_id ?? ""}
-              onChange={(e) => onChange({ project_id: e.target.value || null })}
-              className="w-full rounded-md px-2 py-1.5 text-sm"
-              style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-            >
-              <option value="">Inbox (sem projeto)</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Estimativa (min)</label>
-            <input
-              type="number"
-              min={0}
-              value={task.estimated_minutes ?? ""}
-              onChange={(e) =>
-                onChange({
-                  estimated_minutes: e.target.value ? Number(e.target.value) : null,
-                })
-              }
-              className="w-full rounded-md px-2 py-1.5 text-sm"
-              style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-            />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--pb-text-dim)" }}>Prazo</label>
+              <input
+                type="date"
+                value={task.due_date ?? ""}
+                onChange={(e) => onChange({ due_date: e.target.value || null })}
+                className="w-full rounded-md px-2 py-1.5 text-sm"
+                style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+              />
+            </div>
           </div>
 
           {showProgress && (
             <div
-              className="col-span-2 rounded-md p-2.5"
+              className="rounded-md p-2.5"
               style={{ background: "var(--pb-accent-bg)", border: "1px solid var(--pb-accent)" }}
             >
               <label
@@ -217,54 +214,73 @@ export function TaskDetailPanel({
               </div>
             </div>
           )}
-        </div>
 
-        {isWaiting && (
-          <div
-            className="flex flex-col gap-3 rounded-md p-3"
-            style={{ background: "var(--pb-yellow-bg)", border: "1px solid var(--pb-border)" }}
-          >
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Aguardando quem</label>
-              <select
-                value={task.waiting_for ?? ""}
-                onChange={(e) => onChange({ waiting_for: e.target.value || null })}
-                className="w-full rounded-md px-2 py-1.5 text-sm"
-              style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-              >
-                <option value="">Ninguém selecionado</option>
-                {people.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+          {isWaiting && (
+            <div
+              className="flex flex-col gap-3 rounded-md p-3"
+              style={{ background: "var(--pb-yellow-bg)", border: "1px solid var(--pb-border)" }}
+            >
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--pb-text-dim)" }}>Aguardando quem</label>
+                <select
+                  value={task.waiting_for ?? ""}
+                  onChange={(e) => onChange({ waiting_for: e.target.value || null })}
+                  className="w-full rounded-md px-2 py-1.5 text-sm"
+                style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+                >
+                  <option value="">Ninguém selecionado</option>
+                  {people.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--pb-text-dim)" }}>Motivo</label>
+                <input
+                  type="text"
+                  value={task.waiting_reason ?? ""}
+                  onChange={(e) => onChange({ waiting_reason: e.target.value })}
+                  className="w-full rounded-md px-2 py-1.5 text-sm"
+                style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--pb-text-dim)" }}>Retorno esperado</label>
+                <input
+                  type="date"
+                  value={task.follow_up_date ?? ""}
+                  onChange={(e) => onChange({ follow_up_date: e.target.value || null })}
+                  className="w-full rounded-md px-2 py-1.5 text-sm"
+                style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Motivo</label>
-              <input
-                type="text"
-                value={task.waiting_reason ?? ""}
-                onChange={(e) => onChange({ waiting_reason: e.target.value })}
-                className="w-full rounded-md px-2 py-1.5 text-sm"
+          )}
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-semibold uppercase tracking-wide"
+              style={{ color: "var(--pb-text-dim)" }}>Estimativa (minutos)</label>
+            <input
+              type="number"
+              min={0}
+              step={5}
+              placeholder="Ex: 30"
+              value={task.estimated_minutes ?? ""}
+              onChange={(e) =>
+                onChange({
+                  estimated_minutes: e.target.value ? Number(e.target.value) : null,
+                })
+              }
+              className="w-full rounded-md px-2 py-1.5 text-sm"
               style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wide"
-              style={{ color: "var(--pb-text-dim)" }}>Retorno esperado</label>
-              <input
-                type="date"
-                value={task.follow_up_date ?? ""}
-                onChange={(e) => onChange({ follow_up_date: e.target.value || null })}
-                className="w-full rounded-md px-2 py-1.5 text-sm"
-              style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
-              />
-            </div>
+            />
           </div>
-        )}
+        </div>
 
         <div className="flex flex-col gap-1.5">
           <label className="text-[11px] font-semibold uppercase tracking-wide"
@@ -359,14 +375,31 @@ export function TaskDetailPanel({
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={onDelete}
-          className="mt-auto self-start text-sm font-medium"
-          style={{ color: "#ef4444" }}
-        >
-          Excluir tarefa
-        </button>
+        <div className="mt-auto flex items-center gap-2 pt-3.5" style={{ borderTop: "1px solid var(--pb-border)" }}>
+          <button
+            type="button"
+            onClick={toggleDone}
+            title="Alternar status de conclusão"
+            className="flex-1 rounded-md px-3.5 py-2 text-sm font-medium"
+            style={{
+              cursor: "pointer",
+              color: isDone ? "var(--pb-text)" : "#fff",
+              background: isDone ? "transparent" : "#10b981",
+              border: isDone ? "1px solid var(--pb-border)" : "1px solid transparent",
+            }}
+          >
+            {isDone ? "Desfazer conclusão" : "Concluir tarefa"}
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            title="Excluir tarefa"
+            className="rounded-md px-3 py-2 text-sm font-medium"
+            style={{ cursor: "pointer", color: "#ef4444", background: "transparent", border: "1px solid rgba(239,68,68,0.3)" }}
+          >
+            Excluir
+          </button>
+        </div>
       </div>
     </div>
   );

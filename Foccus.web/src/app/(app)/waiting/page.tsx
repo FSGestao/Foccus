@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
-import { createClient } from "@/lib/supabase/client";
+import { useDisplayName } from "@/lib/hooks/use-display-name";
 import type { Comment } from "@/lib/tasks/types";
 import { WaitingCard } from "@/components/waiting/waiting-card";
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel";
@@ -13,16 +13,11 @@ import { TaskDetailPanel } from "@/components/tasks/task-detail-panel";
 export default function WaitingPage() {
   const { tasks, selectedTaskId, init, updateTask, deleteTask, openTask } = useTasksStore();
   const { people, init: initPeople } = usePeopleStore();
-  const [authorLabel, setAuthorLabel] = useState("Você");
+  const { fullName: authorLabel } = useDisplayName();
 
   useEffect(() => {
     init();
     initPeople();
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const name = (user?.user_metadata?.full_name as string | undefined) || user?.email;
-      if (name) setAuthorLabel(name);
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

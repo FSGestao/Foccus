@@ -13,6 +13,7 @@ import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
 import { useProfileStore } from "@/lib/stores/profile-store";
 import { computeDailyEfficiency, computeEmProgressoCount, QUICK_WIN_IDLE_MS } from "@/lib/assistant/compute";
+import { useDisplayName } from "@/lib/hooks/use-display-name";
 import { NavIcon, type NavKey } from "./nav-icons";
 import { SearchOverlay } from "./search-overlay";
 import { ShortcutsModal } from "./shortcuts-modal";
@@ -47,7 +48,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const profile = useProfileStore();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [userLabel, setUserLabel] = useState<{ initials: string; name: string } | null>(null);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const { fullName, firstName: userFirstName, initials, email } = useDisplayName();
 
   useEffect(() => {
     initTheme();
@@ -58,19 +60,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     initProjects();
     initPeople();
     useProfileStore.getState().init();
-
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
-      const name =
-        (user.user_metadata?.full_name as string | undefined) || user.email || "?";
-      const parts = name.trim().split(/\s+/);
-      const initials =
-        parts.length > 1
-          ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-          : name[0]?.toUpperCase() ?? "?";
-      setUserLabel({ initials, name });
-    });
 
     // Atalhos de teclado (Foccus.dc.html:1860-1880): Esc fecha modais e
     // desseleciona a tarefa aberta; `/` foca a busca; `N` abre Nova Tarefa;
@@ -135,8 +124,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sidebarWidth = menuOpen ? 200 : 56;
   const emProgressoCount = computeEmProgressoCount(tasks);
   const { progressPct, doneTasks, totalTasks } = computeDailyEfficiency(tasks);
-  const userFirstName = userLabel?.name.split(" ")[0] ?? "Você";
   const doneTasksToday = tasks.filter((t) => t.status === "DONE" && t.completed_at?.slice(0, 10) === new Date().toISOString().slice(0, 10)).length;
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    // Navegação forçada (não router.push): reseta todas as stores Zustand em
+    // memória (tasks/projects/people/profile ficariam com dados do usuário
+    // anterior se a SPA continuasse viva) — intencional, não um descuido.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.href = "/login";
+  }
 
   return (
     <div
@@ -295,15 +293,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               {theme === "dark" ? "Modo claro" : "Modo escuro"}
             </button>
-            {userLabel && (
-              <div
-                title={userLabel.name}
+            <div style={{ position: "relative" }}>
+              <button
+                type="button"
+                onClick={() => setAvatarMenuOpen((v) => !v)}
+                title={`${fullName} (clique para opções da conta)`}
                 style={{
+                  cursor: "pointer",
                   width: 28,
                   height: 28,
                   borderRadius: 14,
                   background: "var(--pb-accent)",
                   color: "#fff",
+                  border: "none",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -311,9 +313,61 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   fontSize: 12,
                 }}
               >
-                {userLabel.initials}
-              </div>
-            )}
+                {initials}
+              </button>
+
+              {avatarMenuOpen && (
+                <>
+                  <div
+                    onClick={() => setAvatarMenuOpen(false)}
+                    style={{ position: "fixed", inset: 0, zIndex: 29 }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      zIndex: 30,
+                      minWidth: 200,
+                      background: "var(--pb-glass-strong)",
+                      backdropFilter: "blur(18px) saturate(160%)",
+                      WebkitBackdropFilter: "blur(18px) saturate(160%)",
+                      border: "1px solid var(--pb-border)",
+                      borderRadius: 10,
+                      boxShadow: "0 12px 36px rgba(0,0,0,0.15)",
+                      padding: 8,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    <div style={{ padding: "4px 8px 8px", borderBottom: "1px solid var(--pb-border)" }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--pb-text)" }}>{fullName}</div>
+                      {email && (
+                        <div style={{ fontSize: 11.5, color: "var(--pb-text-muted)", marginTop: 2 }}>{email}</div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      style={{
+                        cursor: "pointer",
+                        textAlign: "left",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: "#ef4444",
+                        background: "transparent",
+                        border: "none",
+                        borderRadius: 6,
+                        padding: "6px 8px",
+                      }}
+                    >
+                      Sair
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
         {/* Global Progress Bar — eficiência diária (Foccus.dc.html:90-93) */}
@@ -363,30 +417,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           overflowY: "auto",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: menuOpen ? "flex-start" : "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 5,
-                background: "var(--pb-accent)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontWeight: 700,
-                fontSize: 11,
-                flexShrink: 0,
-              }}
-            >
-              F
-            </div>
-            {menuOpen && <span style={{ fontWeight: 600, fontSize: 14, whiteSpace: "nowrap" }}>Navegação</span>}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        {/* Um único bloco (Foccus.dc.html: sidebarActionStyle) — antes cada
+            botão vivia num wrapper à parte, somando o gap do aside a mais um
+            padding/borda individuais e deixando o rail "esticado". */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            paddingBottom: 8,
+            borderBottom: "1px solid var(--pb-border)",
+            marginBottom: 4,
+          }}
+        >
           <button
             type="button"
             onClick={ui.openNewTaskModal}
@@ -410,32 +453,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 600 }}>+</span>
             {menuOpen && <span>Tarefa</span>}
           </button>
-        </div>
 
-        <Link
-          href="/people"
-          title="Ir para Pessoas (cadastrar por lá)"
-          style={{
-            fontWeight: 500,
-            fontSize: 13,
-            color: "var(--pb-text)",
-            background: "var(--pb-surface-subtle)",
-            border: "1px solid var(--pb-border)",
-            borderRadius: 6,
-            padding: "8px 10px",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            justifyContent: menuOpen ? "flex-start" : "center",
-            marginBottom: 2,
-            paddingBottom: 6,
-            borderBottom: "1px solid var(--pb-border)",
-            textDecoration: "none",
-          }}
-        >
-          <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 600 }}>+</span>
-          {menuOpen && <span>Pessoa</span>}
-        </Link>
+          <Link
+            href="/people"
+            title="Ir para Pessoas (cadastrar por lá)"
+            style={{
+              fontWeight: 500,
+              fontSize: 13,
+              color: "var(--pb-text)",
+              background: "var(--pb-surface-subtle)",
+              border: "1px solid var(--pb-border)",
+              borderRadius: 6,
+              padding: "8px 10px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              justifyContent: menuOpen ? "flex-start" : "center",
+              textDecoration: "none",
+            }}
+          >
+            <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 600 }}>+</span>
+            {menuOpen && <span>Pessoa</span>}
+          </Link>
+        </div>
 
         {menuOpen && (
           <div

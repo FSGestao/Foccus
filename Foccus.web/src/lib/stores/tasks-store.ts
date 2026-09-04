@@ -27,6 +27,9 @@ type TasksState = {
   dismissToast: () => void;
   openTask: (id: string | null) => void;
   showComboToast: () => void;
+  showInfoToast: (message: string) => void;
+  bulkUpdate: (ids: string[], patch: Partial<Task>, note?: string) => Promise<void>;
+  bulkDelete: (ids: string[]) => Promise<void>;
 };
 
 let toastCounter = 0;
@@ -143,12 +146,62 @@ export const useTasksStore = create<TasksState>((set, get) => ({
   },
 
   showComboToast: () => {
+    get().showInfoToast('🎉 Combo de Fluxo! Você limpou o gargalo de "Em Progresso" hoje.');
+  },
+
+  showInfoToast: (message) => {
     const thisToastId = ++toastCounter;
     if (toastTimer) clearTimeout(toastTimer);
-    set({ toast: { id: thisToastId, message: '🎉 Combo de Fluxo! Você limpou o gargalo de "Em Progresso" hoje.' } });
+    set({ toast: { id: thisToastId, message } });
     toastTimer = setTimeout(() => {
       set((state) => (state.toast?.id === thisToastId ? { toast: null } : {}));
     }, 4000);
+  },
+
+  // Ações em massa (Foccus.dc.html: applyBulkProjectValue/applyBulkPriorityValue/
+  // applyBulkComplete) — reaproveita updateTask por id, que já cuida do
+  // otimista + histórico + rollback individualmente; N updates em paralelo é
+  // rápido o bastante pra escala de uma lista pessoal.
+  bulkUpdate: async (ids, patch, note) => {
+    await Promise.all(ids.map((id) => get().updateTask(id, patch, note)));
+  },
+
+  // Diferente de deleteTask (1 toast por chamada): aqui é 1 toast só pro lote
+  // inteiro, com "Desfazer" reinserindo todas as linhas de uma vez.
+  bulkDelete: async (ids) => {
+    if (!ids.length) return;
+    const supabase = createClient();
+    const snapshots = get().tasks.filter((t) => ids.includes(t.id));
+    if (!snapshots.length) return;
+
+    set((state) => ({
+      tasks: state.tasks.filter((t) => !ids.includes(t.id)),
+      selectedTaskId: state.selectedTaskId && ids.includes(state.selectedTaskId) ? null : state.selectedTaskId,
+    }));
+
+    const { error } = await supabase.from("tasks").delete().in("id", ids);
+    if (error) {
+      set((state) => ({ tasks: [...snapshots, ...state.tasks], error: error.message }));
+      return;
+    }
+
+    const thisToastId = ++toastCounter;
+    if (toastTimer) clearTimeout(toastTimer);
+    set({
+      toast: {
+        id: thisToastId,
+        message: `${snapshots.length} tarefa(s) excluída(s).`,
+        onUndo: async () => {
+          const { error: reinsertError } = await supabase.from("tasks").insert(snapshots);
+          if (!reinsertError) {
+            set((state) => ({ tasks: [...snapshots, ...state.tasks], toast: null }));
+          }
+        },
+      },
+    });
+    toastTimer = setTimeout(() => {
+      set((state) => (state.toast?.id === thisToastId ? { toast: null } : {}));
+    }, 6000);
   },
 
   toggleDone: async (id) => {

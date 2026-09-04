@@ -5,16 +5,18 @@ import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProjectsStore } from "@/lib/stores/projects-store";
 import { STATUS_LABEL, STATUS_OPTIONS, PRIORITY_OPTIONS, PRIORITY_COLOR } from "@/lib/tasks/constants";
+import { relevantDateFor, fmtDateShort } from "@/lib/tasks/list-filters";
 import type { Task, TaskStatus, Priority } from "@/lib/tasks/types";
 import { KanbanColumn } from "@/components/kanban/kanban-column";
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel";
 
-type GroupBy = "status" | "project" | "priority";
+type GroupBy = "status" | "project" | "priority" | "due";
 
-// Kanban avulso (Foccus.dc.html: viewKanban). Agrupamento por prazo/urgência do
-// legado fica de fora desta fatia — arrastar um card pra uma faixa de data
-// ("Atrasada"/"Hoje"/...) não mapeia pra um valor único de due_date, então essa
-// visão exigiria um desenho à parte (provavelmente sem drag-and-drop).
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// Kanban avulso (Foccus.dc.html: viewKanban).
 export default function KanbanPage() {
   const { tasks, selectedTaskId, init, updateTask, deleteTask, openTask } = useTasksStore();
   const { projects, init: initProjects } = useProjectsStore();
@@ -42,6 +44,31 @@ export default function KanbanPage() {
         tasks: tasks.filter((t) => t.priority === p),
       }));
     }
+    if (groupBy === "due") {
+      // Uma coluna por data (dueDate, ou followUpDate se Aguardando) presente
+      // entre as tarefas + "Sem Prazo" no fim (Foccus.dc.html:3529-3582) — cada
+      // coluna tem uma data única e bem definida, então soltar um card nela
+      // grava esse due_date exato (ou limpa, na coluna "Sem Prazo").
+      const kbTasks = tasks.filter((t) => t.status !== "INBOX" && t.status !== "CANCELLED");
+      const today = todayISO();
+      const dateMap = new Map<string, Task[]>();
+      const noDate: Task[] = [];
+      for (const t of kbTasks) {
+        const d = relevantDateFor(t);
+        if (!d) noDate.push(t);
+        else {
+          if (!dateMap.has(d)) dateMap.set(d, []);
+          dateMap.get(d)!.push(t);
+        }
+      }
+      const dateCols = [...dateMap.keys()].sort().map((d) => ({
+        id: d,
+        label: `${d < today ? "⚠️" : "🗓"} ${fmtDateShort(d)}`,
+        accent: d < today ? "var(--pb-red)" : d === today ? "var(--pb-yellow)" : "var(--pb-blue)",
+        tasks: dateMap.get(d)!,
+      }));
+      return [...dateCols, { id: "none", label: "· Sem Prazo", accent: "var(--pb-text-dim)", tasks: noDate }];
+    }
     // project
     const cols = projects.map((p) => ({
       id: p.id,
@@ -68,6 +95,9 @@ export default function KanbanPage() {
       updateTask(taskId, patch, `Movida para ${STATUS_LABEL[status]} pelo Kanban`);
     } else if (groupBy === "priority") {
       updateTask(taskId, { priority: targetColId as Priority });
+    } else if (groupBy === "due") {
+      const date = targetColId === "none" ? null : targetColId;
+      updateTask(taskId, { due_date: date }, date ? `Prazo alterado para ${fmtDateShort(date)}` : "Prazo removido");
     } else {
       updateTask(taskId, { project_id: targetColId === "none" ? null : targetColId });
     }
@@ -90,6 +120,7 @@ export default function KanbanPage() {
           <option value="status">Agrupar por status</option>
           <option value="project">Agrupar por projeto</option>
           <option value="priority">Agrupar por prioridade</option>
+          <option value="due">Agrupar por prazo</option>
         </select>
       </div>
 
