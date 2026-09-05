@@ -40,6 +40,17 @@
   color-scheme: light;
 }
 
+/* Reforço explícito além do color-scheme acima: nem toda combinação de
+   navegador/config respeita o popup nativo do <select> só com color-scheme,
+   e como quase todo <select> do app herda `color: var(--pb-text)` (claro no
+   tema escuro) sem setar um fundo próprio nas <option>, o popup pode manter
+   o fundo branco padrão do navegador — texto claro sobre fundo claro,
+   ilegível. Isso força fundo/texto certos em qualquer navegador. */
+select option {
+  background-color: var(--pb-surface);
+  color: var(--pb-text);
+}
+
 /* Ícone do <input type="date"> (o botão "Mostrar seletor de datas") — some
    dado por padrão do Chromium é preto e fica imperceptível sobre o fundo
    escuro dos inputs no tema dark. --pb-calendar-filter já existia definido

@@ -84,9 +84,9 @@ export function KanbanCard({
           aria-label="Concluir"
           title="Marcar como concluída"
           className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[15px] leading-none"
-          // Mesmo ajuste de task-row.tsx: verde suave antes de concluída, em
-          // vez de cinza neutro, pra deixar mais claro que é o botão de concluir.
-          style={{ color: task.status === "DONE" ? "#10b981" : "rgba(16, 185, 129, 0.55)", background: "transparent" }}
+          // Mesmo ajuste de task-row.tsx: verde bem visível antes de concluída,
+          // em vez de cinza neutro, pra deixar mais claro que é o botão de concluir.
+          style={{ color: task.status === "DONE" ? "#10b981" : "#34d399", background: "transparent" }}
         >
           ✓
         </button>
