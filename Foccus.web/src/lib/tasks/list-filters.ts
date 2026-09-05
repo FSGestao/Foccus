@@ -7,8 +7,10 @@
 
 import type { Task } from "./types";
 
+// Data local, não UTC — ver mesma correção em lib/assistant/compute.ts.
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export function relevantDateFor(task: Task): string | null {

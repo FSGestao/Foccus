@@ -9,7 +9,7 @@ type PeopleState = {
   userId: string | null;
 
   init: () => Promise<void>;
-  createPerson: (input: NewPersonInput) => Promise<void>;
+  createPerson: (input: NewPersonInput) => Promise<Person | null>;
   updatePerson: (id: string, patch: Partial<Person>) => Promise<void>;
   togglePersonStatus: (id: string) => Promise<void>;
   deletePerson: (id: string) => Promise<void>;
@@ -46,7 +46,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
 
   createPerson: async ({ name, role }) => {
     const { userId } = get();
-    if (!userId) return;
+    if (!userId) return null;
     const supabase = createClient();
 
     const { data, error } = await supabase
@@ -57,9 +57,10 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
 
     if (error || !data) {
       set({ error: error?.message ?? "Falha ao cadastrar pessoa." });
-      return;
+      return null;
     }
     set((state) => ({ people: [data as Person, ...state.people] }));
+    return data as Person;
   },
 
   updatePerson: async (id, patch) => {

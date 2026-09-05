@@ -7,12 +7,15 @@ import { create } from "zustand";
 // Lista.
 type UiState = {
   newTaskModalOpen: boolean;
+  newPersonModalOpen: boolean;
   shortcutsModalOpen: boolean;
   assistantModalOpen: boolean;
   fechamentoModalOpen: boolean;
 
   openNewTaskModal: () => void;
   closeNewTaskModal: () => void;
+  openNewPersonModal: () => void;
+  closeNewPersonModal: () => void;
   toggleShortcutsModal: () => void;
   closeShortcutsModal: () => void;
   openAssistantModal: () => void;
@@ -25,12 +28,15 @@ type UiState = {
 
 export const useUiStore = create<UiState>((set, get) => ({
   newTaskModalOpen: false,
+  newPersonModalOpen: false,
   shortcutsModalOpen: false,
   assistantModalOpen: false,
   fechamentoModalOpen: false,
 
   openNewTaskModal: () => set({ newTaskModalOpen: true }),
   closeNewTaskModal: () => set({ newTaskModalOpen: false }),
+  openNewPersonModal: () => set({ newPersonModalOpen: true }),
+  closeNewPersonModal: () => set({ newPersonModalOpen: false }),
   toggleShortcutsModal: () => set((s) => ({ shortcutsModalOpen: !s.shortcutsModalOpen })),
   closeShortcutsModal: () => set({ shortcutsModalOpen: false }),
   openAssistantModal: () => set({ assistantModalOpen: true }),
@@ -40,8 +46,16 @@ export const useUiStore = create<UiState>((set, get) => ({
 
   anyModalOpen: () => {
     const s = get();
-    return s.newTaskModalOpen || s.shortcutsModalOpen || s.assistantModalOpen || s.fechamentoModalOpen;
+    return (
+      s.newTaskModalOpen || s.newPersonModalOpen || s.shortcutsModalOpen || s.assistantModalOpen || s.fechamentoModalOpen
+    );
   },
   closeAllModals: () =>
-    set({ newTaskModalOpen: false, shortcutsModalOpen: false, assistantModalOpen: false, fechamentoModalOpen: false }),
+    set({
+      newTaskModalOpen: false,
+      newPersonModalOpen: false,
+      shortcutsModalOpen: false,
+      assistantModalOpen: false,
+      fechamentoModalOpen: false,
+    }),
 }));

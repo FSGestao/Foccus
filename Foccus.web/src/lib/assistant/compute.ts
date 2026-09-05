@@ -6,8 +6,21 @@
 
 import type { Task } from "@/lib/tasks/types";
 
+// Data local (nunca UTC) — .toISOString() usa UTC, então da meia-noite até o
+// fuso "voltar" pro dia anterior (ex.: 21h-23h59 no Brasil, UTC-3) ele já
+// aponta pro dia seguinte, fazendo tarefas concluídas à noite sumirem da
+// contagem de "hoje" (Ritual de Fechamento, eficiência diária).
 export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// completed_at é timestamp completo em UTC (`new Date().toISOString()`) —
+// precisa virar data local antes de comparar com `today` (que já é local),
+// senão volta o mesmo problema de UTC vs. local perto da virada do dia.
+function localDateFromISO(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function isOpenTask(t: Task): boolean {
@@ -48,7 +61,7 @@ export function computeQuickWinCandidates(tasks: Task[]): QuickWinCandidate[] {
 
 export function computeDoneTasksToday(tasks: Task[]): number {
   const today = todayISO();
-  return tasks.filter((t) => t.status === "DONE" && t.completed_at?.slice(0, 10) === today).length;
+  return tasks.filter((t) => t.status === "DONE" && t.completed_at && localDateFromISO(t.completed_at) === today).length;
 }
 
 // Eficiência diária: % das tarefas com prazo/follow-up hoje (ou concluídas
@@ -58,10 +71,14 @@ export function computeDailyEfficiency(tasks: Task[]): { doneTasks: number; tota
   const dueToday = tasks.filter(
     (t) =>
       t.status !== "CANCELLED" &&
-      (t.due_date === today || t.follow_up_date === today || t.completed_at?.slice(0, 10) === today),
+      (t.due_date === today ||
+        t.follow_up_date === today ||
+        (t.completed_at && localDateFromISO(t.completed_at) === today)),
   );
   const totalTasks = dueToday.length;
-  const doneTasks = dueToday.filter((t) => t.status === "DONE" && t.completed_at?.slice(0, 10) === today).length;
+  const doneTasks = dueToday.filter(
+    (t) => t.status === "DONE" && t.completed_at && localDateFromISO(t.completed_at) === today,
+  ).length;
   const progressPct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
   return { doneTasks, totalTasks, progressPct };
 }

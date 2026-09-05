@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
 import type { NewProjectInput, Project } from "@/lib/projects/types";
+import { sortProjectsByPriority } from "@/lib/projects/sort";
 
 type ProjectsState = {
   projects: Project[];
@@ -41,7 +42,12 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
       set({ loading: false, error: error.message });
       return;
     }
-    set({ projects: (data ?? []) as Project[], userId: user.id, loading: false, error: null });
+    set({
+      projects: sortProjectsByPriority((data ?? []) as Project[]),
+      userId: user.id,
+      loading: false,
+      error: null,
+    });
   },
 
   createProject: async ({ name, color, priority }) => {
@@ -59,7 +65,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
       set({ error: error?.message ?? "Falha ao criar projeto." });
       return;
     }
-    set((state) => ({ projects: [data as Project, ...state.projects] }));
+    set((state) => ({ projects: sortProjectsByPriority([data as Project, ...state.projects]) }));
   },
 
   updateProject: async (id, patch) => {
@@ -69,13 +75,13 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
 
     const fullPatch = { ...patch, updated_at: new Date().toISOString() };
     set((state) => ({
-      projects: state.projects.map((p) => (p.id === id ? { ...p, ...fullPatch } : p)),
+      projects: sortProjectsByPriority(state.projects.map((p) => (p.id === id ? { ...p, ...fullPatch } : p))),
     }));
 
     const { error } = await supabase.from("projects").update(fullPatch).eq("id", id);
     if (error) {
       set((state) => ({
-        projects: state.projects.map((p) => (p.id === id ? current : p)),
+        projects: sortProjectsByPriority(state.projects.map((p) => (p.id === id ? current : p))),
         error: error.message,
       }));
     }

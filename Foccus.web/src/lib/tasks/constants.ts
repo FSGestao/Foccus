@@ -2,13 +2,16 @@ import type { Priority, TaskStatus } from "./types";
 
 export const PRIORITY_OPTIONS: Priority[] = ["P1", "P2", "P3", "P4"];
 
-// Mesmas cores do legado (Foccus.dc.html, PRIORITY_COLOR) — mantidas como
-// referência visual reconhecível pra quem já usa o sistema atual.
+// Paleta de prioridade a pedido do usuário (2026-09-04): P1 vermelho, P2
+// amarelo escuro (o amarelo claro/vibrante do legado cansa a vista), P3 azul,
+// P4 verde. Precisa continuar em hex literal (não var(--pb-*)) porque
+// kanban/page.tsx usa PRIORITY_COLOR como tintHex, convertido pra rgba() no
+// degradê de fundo da coluna colorida (mesma razão de STATUS_TINT_HEX acima).
 export const PRIORITY_COLOR: Record<Priority, string> = {
   P1: "#ef4444",
-  P2: "#f97316",
-  P3: "#eab308",
-  P4: "#6b7280",
+  P2: "#b45309",
+  P3: "#3b82f6",
+  P4: "#22c55e",
 };
 
 export const STATUS_LABEL: Record<TaskStatus, string> = {

@@ -6,8 +6,10 @@ import { computeGargaloBreach, computeQuickWinCandidates } from "@/lib/assistant
 import { GargaloBanner } from "./gargalo-banner";
 import { QuickWinBanner } from "./quick-win-banner";
 
+// Data local, não UTC — ver mesma correção em lib/assistant/compute.ts.
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 // Assistente proativo (Foccus.dc.html:154-160): o banner fica acima do

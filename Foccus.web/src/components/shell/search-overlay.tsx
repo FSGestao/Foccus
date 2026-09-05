@@ -48,12 +48,14 @@ export function SearchOverlay() {
     <div
       className="absolute left-0 right-0 top-full z-30 mx-auto max-w-[440px] rounded-b-md p-3 text-sm"
       style={{
-        background: "var(--pb-glass-strong)",
-        backdropFilter: "blur(18px) saturate(160%)",
-        WebkitBackdropFilter: "blur(18px) saturate(160%)",
+        // Fundo sólido (era --pb-glass-strong, translúcido) — o efeito vidro
+        // se misturava com o conteúdo da página passando atrás dele (borrado
+        // atrás de borrado), confuso pra distinguir onde termina o resultado
+        // da busca. Mantém a mesma superfície opaca dos cards/modais do app.
+        background: "var(--pb-surface)",
         border: "1px solid var(--pb-border)",
         borderTop: "none",
-        boxShadow: "0 12px 36px rgba(0,0,0,0.15)",
+        boxShadow: "0 12px 36px rgba(0,0,0,0.25)",
         color: "var(--pb-text)",
       }}
     >

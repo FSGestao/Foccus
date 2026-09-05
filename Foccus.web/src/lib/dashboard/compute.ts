@@ -7,8 +7,24 @@ import type { Task } from "@/lib/tasks/types";
 import type { Project } from "@/lib/projects/types";
 import { PRIORITY_COLOR } from "@/lib/tasks/constants";
 
+// Data local (nunca UTC) — .toISOString() usa UTC, então da meia-noite até o
+// fuso "voltar" pro dia anterior (ex.: 21h-23h59 no Brasil, UTC-3) ele já
+// aponta pro dia seguinte. Isso fazia tarefas concluídas à noite sumirem das
+// contagens de "hoje" (streak do dashboard, Ritual de Fechamento etc.).
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDateISO(new Date());
+}
+
+function localDateISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// completed_at é timestamp completo (gravado com `new Date().toISOString()`,
+// UTC) — precisa converter pra data local antes de comparar com TODAY/
+// windowStart/etc. (esses já são datas locais, ver todayISO acima). Um
+// `.slice(0, 10)` direto no timestamp pegaria a data em UTC, mesmo problema.
+function localDateFromISO(iso: string): string {
+  return localDateISO(new Date(iso));
 }
 
 function addDaysStr(base: string, days: number): string {
@@ -56,9 +72,11 @@ export function computeForecast(scopeTasks: Task[]): Forecast {
     return { hasForecast: false, allDone: true, forecastDateIso: null, dateLabel: "", velocityLabel: "" };
   }
   const windowStart = addDaysStr(TODAY, -14);
-  const doneInWindow = scopeTasks.filter(
-    (t) => t.status === "DONE" && t.completed_at && t.completed_at.slice(0, 10) >= windowStart && t.completed_at.slice(0, 10) <= TODAY,
-  ).length;
+  const doneInWindow = scopeTasks.filter((t) => {
+    if (t.status !== "DONE" || !t.completed_at) return false;
+    const doneDate = localDateFromISO(t.completed_at);
+    return doneDate >= windowStart && doneDate <= TODAY;
+  }).length;
   const velocityPerDay = doneInWindow / 14;
   if (velocityPerDay <= 0) {
     return {
@@ -84,7 +102,7 @@ export function computeForecast(scopeTasks: Task[]): Forecast {
 // ---------- Sequência (gamificação) ----------
 export function computeStreak(scopeTasks: Task[]) {
   const completedDates = new Set(
-    scopeTasks.filter((t) => t.status === "DONE" && t.completed_at).map((t) => t.completed_at!.slice(0, 10)),
+    scopeTasks.filter((t) => t.status === "DONE" && t.completed_at).map((t) => localDateFromISO(t.completed_at!)),
   );
   let streak = 0;
   let cursor = completedDates.has(TODAY) ? TODAY : addDaysStr(TODAY, -1);
@@ -225,7 +243,7 @@ export function buildBurndown(scopeTasks: Task[], forecast: Forecast) {
   const todayOffset = Math.max(0, Math.min(totalDays, diffDaysStr(rangeStart, TODAY)));
 
   const remainingAt = (dateIso: string) =>
-    scopeTasks.filter((t) => !(t.status === "DONE" && t.completed_at && t.completed_at.slice(0, 10) <= dateIso)).length;
+    scopeTasks.filter((t) => !(t.status === "DONE" && t.completed_at && localDateFromISO(t.completed_at) <= dateIso)).length;
   const idealAt = (d: number) => Math.max(0, totalCount * (1 - d / totalDays));
   const remainingAtToday = remainingAt(addDaysStr(rangeStart, todayOffset));
 
@@ -347,9 +365,11 @@ export function buildOverview(allTasks: Task[], projects: Project[], scopeTasksF
   for (let w = 7; w >= 0; w--) {
     const weekEnd = addDaysStr(TODAY, -7 * w);
     const weekStart = addDaysStr(weekEnd, -6);
-    const count = scopeTasksForVelocity.filter(
-      (t) => t.status === "DONE" && t.completed_at && t.completed_at.slice(0, 10) >= weekStart && t.completed_at.slice(0, 10) <= weekEnd,
-    ).length;
+    const count = scopeTasksForVelocity.filter((t) => {
+      if (t.status !== "DONE" || !t.completed_at) return false;
+      const doneDate = localDateFromISO(t.completed_at);
+      return doneDate >= weekStart && doneDate <= weekEnd;
+    }).length;
     weeks.push({ label: fmtDate(weekEnd), count, isCurrent: w === 0 });
   }
   const maxVelocity = Math.max(1, ...weeks.map((w) => w.count));

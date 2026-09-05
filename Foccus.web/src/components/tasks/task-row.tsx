@@ -77,7 +77,10 @@ export function TaskRow({
             onToggleDone();
           }}
           className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded p-0 text-[15px] leading-none"
-          style={{ background: "transparent", border: "none", color: done ? "#10b981" : "var(--pb-text-dim)" }}
+          // Antes de concluída, um verde suave (era var(--pb-text-dim), cinza
+          // neutro) — deixa mais claro que esse botão é o de concluir, sem
+          // se confundir com o verde vivo (#10b981) de quando já concluída.
+          style={{ background: "transparent", border: "none", color: done ? "#10b981" : "rgba(16, 185, 129, 0.55)" }}
         >
           ✓
         </button>

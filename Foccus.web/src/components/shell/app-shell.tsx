@@ -12,7 +12,12 @@ import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
 import { useProfileStore } from "@/lib/stores/profile-store";
-import { computeDailyEfficiency, computeEmProgressoCount, QUICK_WIN_IDLE_MS } from "@/lib/assistant/compute";
+import {
+  computeDailyEfficiency,
+  computeDoneTasksToday,
+  computeEmProgressoCount,
+  QUICK_WIN_IDLE_MS,
+} from "@/lib/assistant/compute";
 import { useDisplayName } from "@/lib/hooks/use-display-name";
 import { NavIcon, type NavKey } from "./nav-icons";
 import { SearchOverlay } from "./search-overlay";
@@ -20,6 +25,7 @@ import { ShortcutsModal } from "./shortcuts-modal";
 import { AssistantModal } from "./assistant-modal";
 import { FechamentoModal } from "./fechamento-modal";
 import { NewTaskModal } from "@/components/tasks/new-task-modal";
+import { PersonModal } from "@/components/people/person-modal";
 
 // Header + sidebar mini-rail, portados de Foccus.dc.html:49-150 (mesma paleta,
 // mesma largura de rail 56/200px). Itens com `href: null` ainda não têm tela
@@ -45,6 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const createTask = useTasksStore((s) => s.createTask);
   const initProjects = useProjectsStore((s) => s.init);
   const initPeople = usePeopleStore((s) => s.init);
+  const createPerson = usePeopleStore((s) => s.createPerson);
   const profile = useProfileStore();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -124,7 +131,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sidebarWidth = menuOpen ? 200 : 56;
   const emProgressoCount = computeEmProgressoCount(tasks);
   const { progressPct, doneTasks, totalTasks } = computeDailyEfficiency(tasks);
-  const doneTasksToday = tasks.filter((t) => t.status === "DONE" && t.completed_at?.slice(0, 10) === new Date().toISOString().slice(0, 10)).length;
+  const doneTasksToday = computeDoneTasksToday(tasks);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -469,10 +476,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {menuOpen && <span>Tarefa</span>}
           </button>
 
-          <Link
-            href="/people"
-            title="Ir para Pessoas (cadastrar por lá)"
+          <button
+            type="button"
+            onClick={ui.openNewPersonModal}
+            title="Cadastrar nova pessoa"
             style={{
+              cursor: "pointer",
               fontWeight: 500,
               fontSize: 13,
               color: "var(--pb-text)",
@@ -484,12 +493,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               alignItems: "center",
               gap: 8,
               justifyContent: menuOpen ? "flex-start" : "center",
-              textDecoration: "none",
+              width: "100%",
             }}
           >
             <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 600 }}>+</span>
             {menuOpen && <span>Pessoa</span>}
-          </Link>
+          </button>
         </div>
 
         {menuOpen && (
@@ -565,6 +574,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             createTask({ title, priority, project_id })
           }
         />
+      )}
+      {ui.newPersonModalOpen && (
+        <PersonModal onClose={ui.closeNewPersonModal} onSubmit={(patch) => createPerson(patch)} />
       )}
       {ui.shortcutsModalOpen && <ShortcutsModal onClose={ui.closeShortcutsModal} />}
       {ui.assistantModalOpen && <AssistantModal onClose={ui.closeAssistantModal} emProgressoCount={emProgressoCount} />}

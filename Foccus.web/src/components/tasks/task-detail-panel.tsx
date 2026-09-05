@@ -7,6 +7,9 @@ import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
 import { useDisplayName } from "@/lib/hooks/use-display-name";
 import { Checklist } from "./checklist";
+import { PersonModal } from "@/components/people/person-modal";
+
+const NEW_PERSON_VALUE = "__new__";
 
 export function TaskDetailPanel({
   task,
@@ -28,8 +31,10 @@ export function TaskDetailPanel({
   const initProjects = useProjectsStore((s) => s.init);
   const people = usePeopleStore((s) => s.people);
   const initPeople = usePeopleStore((s) => s.init);
+  const createPerson = usePeopleStore((s) => s.createPerson);
   const { fullName: authorLabel } = useDisplayName();
   const [noteDraft, setNoteDraft] = useState("");
+  const [showNewPersonModal, setShowNewPersonModal] = useState(false);
 
   useEffect(() => {
     initProjects();
@@ -73,6 +78,7 @@ export function TaskDetailPanel({
   }
 
   return (
+    <>
     <div
       className="fixed inset-0 z-40 flex justify-end bg-black/30"
       onClick={onClose}
@@ -225,7 +231,13 @@ export function TaskDetailPanel({
                 style={{ color: "var(--pb-text-dim)" }}>Aguardando quem</label>
                 <select
                   value={task.waiting_for ?? ""}
-                  onChange={(e) => onChange({ waiting_for: e.target.value || null })}
+                  onChange={(e) => {
+                    if (e.target.value === NEW_PERSON_VALUE) {
+                      setShowNewPersonModal(true);
+                      return;
+                    }
+                    onChange({ waiting_for: e.target.value || null });
+                  }}
                   className="w-full rounded-md px-2 py-1.5 text-sm"
                 style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
                 >
@@ -235,6 +247,7 @@ export function TaskDetailPanel({
                       {p.name}
                     </option>
                   ))}
+                  <option value={NEW_PERSON_VALUE}>+ Nova pessoa...</option>
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -402,5 +415,16 @@ export function TaskDetailPanel({
         </div>
       </div>
     </div>
+
+    {showNewPersonModal && (
+      <PersonModal
+        onClose={() => setShowNewPersonModal(false)}
+        onSubmit={async (patch) => {
+          const created = await createPerson(patch);
+          if (created) onChange({ waiting_for: created.id });
+        }}
+      />
+    )}
+    </>
   );
 }

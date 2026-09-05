@@ -31,17 +31,30 @@ export default function AccountPage() {
           Baixa um arquivo com o seu perfil, tarefas, projetos, pessoas e anotações — tudo que
           é seu no sistema.
         </p>
-        <a
-          href="/api/account/export"
-          className="self-start rounded-md px-4 py-2 text-sm font-medium"
-          style={{
-            background: "var(--pb-glass-strong)",
-            border: "1px solid var(--pb-border)",
-            color: "var(--pb-text)",
-          }}
-        >
-          Baixar meus dados (.json)
-        </a>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="/api/account/export"
+            className="self-start rounded-md px-4 py-2 text-sm font-medium"
+            style={{
+              background: "var(--pb-glass-strong)",
+              border: "1px solid var(--pb-border)",
+              color: "var(--pb-text)",
+            }}
+          >
+            Baixar meus dados (.json)
+          </a>
+          <a
+            href="/api/account/export/xlsx"
+            className="self-start rounded-md px-4 py-2 text-sm font-medium"
+            style={{
+              background: "var(--pb-glass-strong)",
+              border: "1px solid var(--pb-border)",
+              color: "var(--pb-text)",
+            }}
+          >
+            Baixar meus dados (.xlsx)
+          </a>
+        </div>
       </section>
 
       <section

@@ -19,6 +19,35 @@
   }
 }
 
+/* `color-scheme` avisa o navegador qual chrome nativo usar (lista aberta de
+   <select>, indicador de <input type="date">, etc.) — sem isso o texto claro
+   dos temas escuros (--pb-text) fica sobre um fundo de popup que o navegador
+   mantém branco por padrão, ilegível. Casa com o data-theme setado por
+   theme-store.ts; a media query cobre a primeira renderização (antes da
+   hidratação aplicar o atributo), igual ao fallback --background acima. */
+:root {
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Ícone do <input type="date"> (o botão "Mostrar seletor de datas") — some
+   dado por padrão do Chromium é preto e fica imperceptível sobre o fundo
+   escuro dos inputs no tema dark. --pb-calendar-filter já existia definido
+   (invert(0) claro / invert(1) escuro) mas nunca tinha sido aplicado. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: var(--pb-calendar-filter, invert(0));
+}
+
 html {
   /* Base de escala de todo o sistema: os tamanhos em rem (text-sm, text-xs
      etc., usados nas tarefas e no restante das telas) partem daqui. Padrão
