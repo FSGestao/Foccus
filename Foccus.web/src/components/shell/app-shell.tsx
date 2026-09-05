@@ -336,12 +336,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       right: 0,
                       zIndex: 30,
                       minWidth: 200,
-                      background: "var(--pb-glass-strong)",
-                      backdropFilter: "blur(18px) saturate(160%)",
-                      WebkitBackdropFilter: "blur(18px) saturate(160%)",
+                      // Fundo sólido (era --pb-glass-strong, translúcido com
+                      // blur) — mesmo ajuste do search-overlay.tsx: o vidro se
+                      // misturava com o conteúdo da página atrás, confuso.
+                      background: "var(--pb-surface)",
                       border: "1px solid var(--pb-border)",
                       borderRadius: 10,
-                      boxShadow: "0 12px 36px rgba(0,0,0,0.15)",
+                      boxShadow: "0 12px 36px rgba(0,0,0,0.25)",
                       padding: 8,
                       display: "flex",
                       flexDirection: "column",

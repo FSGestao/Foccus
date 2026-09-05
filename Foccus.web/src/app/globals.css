@@ -51,12 +51,23 @@ select option {
   color: var(--pb-text);
 }
 
-/* Ícone do <input type="date"> (o botão "Mostrar seletor de datas") — some
-   dado por padrão do Chromium é preto e fica imperceptível sobre o fundo
-   escuro dos inputs no tema dark. --pb-calendar-filter já existia definido
-   (invert(0) claro / invert(1) escuro) mas nunca tinha sido aplicado. */
+/* Ícone do <input type="date"> (o botão "Mostrar seletor de datas") — vem
+   preto por padrão do Chromium e fica imperceptível sobre o fundo escuro dos
+   inputs no tema dark. Valor literal em cada seletor (não var(--pb-calendar-
+   filter), que existia mas não tinha efeito nenhum aqui) — esse
+   ::-webkit-calendar-picker-indicator é um pseudo-elemento de UA que não
+   herda custom properties do elemento normalmente, então o var() sempre
+   caía no fallback e nunca invertia de verdade. */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: var(--pb-calendar-filter, invert(0));
+  filter: invert(0);
+}
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
 }
 
 html {
