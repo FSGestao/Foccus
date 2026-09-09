@@ -13,6 +13,11 @@ type ProfileState = {
   // verdade pro nome de exibição, distinta do nome da conta Google usada só
   // como reserva quando isso ainda não foi preenchido.
   userName: string;
+  // 'admin' | 'user' (profiles.role) — controla só a visibilidade do item
+  // "Administração" no menu do avatar; o acesso de verdade já é revalidado
+  // no servidor (proxy.ts + assertCallerIsAdmin em cada Server Action), isso
+  // aqui não é a camada de segurança.
+  role: "admin" | "user";
 
   asstGargaloAtivo: boolean;
   asstGargaloLimite: number;
@@ -60,6 +65,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   loaded: false,
   userId: null,
   userName: "",
+  role: "user",
 
   asstGargaloAtivo: true,
   asstGargaloLimite: 10,
@@ -98,6 +104,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       loaded: true,
       userId: user.id,
       userName: data.user_name ?? "",
+      role: data.role === "admin" ? "admin" : "user",
       asstGargaloAtivo: data.asst_gargalo_ativo,
       asstGargaloLimite: data.asst_gargalo_limite,
       asstQuickwinAtivo: data.asst_quickwin_ativo,

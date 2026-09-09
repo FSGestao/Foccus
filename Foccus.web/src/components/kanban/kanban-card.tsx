@@ -7,17 +7,17 @@ import type { Person } from "@/lib/people/types";
 import { PRIORITY_COLOR } from "@/lib/tasks/constants";
 import { relevantDateFor, isOverdueDate, dateLabelFor } from "@/lib/tasks/list-filters";
 
-// Card do Kanban (Foccus.dc.html:551-575) — avatar (pessoa/projeto),
-// concluir/excluir, prioridade, "aguardando", projeto e prazo. `colored`
-// alterna só o círculo do avatar entre a cor real (pessoa/projeto) e um
-// neutro — o resto (dados, layout, badges de prioridade/prazo) é igual nos
-// dois modos, como pedido ("mantendo a visualização e funcionalidades").
-export function KanbanCard({
+// Corpo visual do card, sem nenhum hook do dnd-kit — usado tanto pelo card
+// de verdade (arrastável, dentro da coluna) quanto pelo clone que o
+// DragOverlay mostra por cima de tudo durante o arraste (ver kanban/page.tsx
+// e o comentário em KanbanCard mais abaixo). Registrar dois `useDraggable`
+// com o mesmo `id` (um pro card, outro pro clone) colidiria no dnd-kit —
+// por isso o clone renderiza só isto, puro display.
+export function KanbanCardBody({
   task,
   project,
   person,
   colored,
-  onOpen,
   onToggleDone,
   onDelete,
 }: {
@@ -25,14 +25,9 @@ export function KanbanCard({
   project: Project | null;
   person: Person | null;
   colored: boolean;
-  onOpen: () => void;
   onToggleDone: () => void;
   onDelete: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: task.id,
-  });
-
   const avatarLabel = person ? person.name[0]?.toUpperCase() : project ? project.name[0]?.toUpperCase() : "·";
   const avatarBg = colored ? (person ? "var(--pb-accent)" : project ? project.color : "var(--pb-text-dim)") : "var(--pb-text-dim)";
   const showWaiting = task.status === "WAITING" && !!person;
@@ -44,20 +39,7 @@ export function KanbanCard({
   const dateColor = overdue ? "var(--pb-red)" : task.status === "WAITING" ? "var(--pb-yellow)" : "var(--pb-text-muted)";
 
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      onClick={onOpen}
-      title="Arraste para mover entre colunas ou clique para abrir detalhes"
-      className="flex cursor-grab flex-col gap-2 rounded-[9px] p-2.5 active:cursor-grabbing"
-      style={{
-        background: "var(--pb-glass-strong)",
-        border: "1px solid var(--pb-border)",
-        opacity: isDragging ? 0.4 : 1,
-        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-      }}
-    >
+    <>
       <div className="flex items-start gap-2">
         <span
           className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
@@ -146,6 +128,57 @@ export function KanbanCard({
           </span>
         )}
       </div>
+    </>
+  );
+}
+
+// Card do Kanban (Foccus.dc.html:551-575) — avatar (pessoa/projeto),
+// concluir/excluir, prioridade, "aguardando", projeto e prazo. `colored`
+// alterna só o círculo do avatar entre a cor real (pessoa/projeto) e um
+// neutro — o resto (dados, layout, badges de prioridade/prazo) é igual nos
+// dois modos, como pedido ("mantendo a visualização e funcionalidades").
+export function KanbanCard({
+  task,
+  project,
+  person,
+  colored,
+  onOpen,
+  onToggleDone,
+  onDelete,
+}: {
+  task: Task;
+  project: Project | null;
+  person: Person | null;
+  colored: boolean;
+  onOpen: () => void;
+  onToggleDone: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: task.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onClick={onOpen}
+      title="Arraste para mover entre colunas ou clique para abrir detalhes"
+      className="flex cursor-grab flex-col gap-2 rounded-[9px] p-2.5 active:cursor-grabbing"
+      style={{
+        background: "var(--pb-glass-strong)",
+        border: "1px solid var(--pb-border)",
+        // Sem transform aqui — quem se move visualmente durante o arraste é
+        // o clone no DragOverlay (kanban/page.tsx), não este card. Antes o
+        // card real era movido no lugar via translate3d, o que fazia a
+        // "sombra" arrastada ficar por baixo das colunas vizinhas (clipada
+        // pelo overflow-y/pintada por baixo do DOM seguinte) — o DragOverlay
+        // é um portal, sempre por cima de tudo.
+        visibility: isDragging ? "hidden" : "visible",
+      }}
+    >
+      <KanbanCardBody task={task} project={project} person={person} colored={colored} onToggleDone={onToggleDone} onDelete={onDelete} />
     </div>
   );
 }

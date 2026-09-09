@@ -26,6 +26,7 @@ import { AssistantModal } from "./assistant-modal";
 import { FechamentoModal } from "./fechamento-modal";
 import { NewTaskModal } from "@/components/tasks/new-task-modal";
 import { PersonModal } from "@/components/people/person-modal";
+import { AdminUsersModal } from "@/components/admin/admin-users-modal";
 
 // Header + sidebar mini-rail, portados de Foccus.dc.html:49-150 (mesma paleta,
 // mesma largura de rail 56/200px). Itens com `href: null` ainda não têm tela
@@ -38,6 +39,7 @@ const NAV_ITEMS: { key: NavKey; label: string; href: string | null }[] = [
   { key: "notes", label: "Anotações", href: "/notes" },
   { key: "waiting", label: "Aguardando", href: "/waiting" },
   { key: "kanban", label: "Kanban", href: "/kanban" },
+  { key: "calendar", label: "Calendário", href: "/calendar" },
   { key: "dashboard", label: "Dashboard", href: "/dashboard" },
 ];
 
@@ -370,6 +372,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     >
                       Minha conta
                     </Link>
+                    {profile.role === "admin" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAvatarMenuOpen(false);
+                          ui.openAdminUsersModal();
+                        }}
+                        style={{
+                          cursor: "pointer",
+                          textAlign: "left",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          color: "var(--pb-text)",
+                          background: "transparent",
+                          border: "none",
+                          borderRadius: 6,
+                          padding: "6px 8px",
+                        }}
+                      >
+                        Administração
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleSignOut}
@@ -589,6 +613,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           fechamentoStreak={profile.fechamentoStreak}
         />
       )}
+      {ui.adminUsersModalOpen && <AdminUsersModal onClose={ui.closeAdminUsersModal} />}
     </div>
   );
 }

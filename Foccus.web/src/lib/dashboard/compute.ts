@@ -135,10 +135,14 @@ export function computeKpi(scopeTasks: Task[]) {
 // ---------- Kanban do Dashboard (3 colunas) ----------
 export function buildKanbanColumns(scopeTasks: Task[]) {
   const bucketOf = (t: Task) => (t.status === "DONE" ? "done" : t.status === "TODO" ? "future" : "progress");
+  // Ordem de fluxo A Fazer → Em Progresso → Concluídas (era Concluídas →
+  // Em Progresso → Futuras) e "Futuras" renomeada pra "A Fazer" — mesmo nome
+  // que o status TODO já tem em todo o resto do app (STATUS_LABEL.TODO),
+  // "Futuras" não existia em nenhum outro lugar. Pedido do usuário, 2026-09-09.
   const defs = [
-    { key: "done", label: "Concluídas", icon: "✓", accent: "var(--db-green)" },
+    { key: "future", label: "A Fazer", icon: "○", accent: "var(--db-amber)" },
     { key: "progress", label: "Em Progresso", icon: "◐", accent: "var(--db-teal)" },
-    { key: "future", label: "Futuras", icon: "○", accent: "var(--db-amber)" },
+    { key: "done", label: "Concluídas", icon: "✓", accent: "var(--db-green)" },
   ] as const;
   return defs.map((def) => ({
     ...def,
@@ -193,7 +197,7 @@ export function buildGantt(scopeTasks: Task[], projects: Project[], filterMode: 
     }));
   }
 
-  if (!rows.length) return { isEmpty: true, weeks: [] as { label: string; leftPct: number }[], barRows: [] as GanttRow[] };
+  if (!rows.length) return { isEmpty: true, days: [] as { label: string; leftPct: number }[], barRows: [] as GanttRow[] };
 
   const starts = rows.map((r) => r.start).filter(Boolean) as string[];
   const ends = rows.map((r) => r.end).filter(Boolean) as string[];
@@ -202,9 +206,22 @@ export function buildGantt(scopeTasks: Task[], projects: Project[], filterMode: 
   if (diffDaysStr(domainStart, domainEnd) < 7) domainEnd = addDaysStr(domainStart, 14);
   const totalSpan = Math.max(diffDaysStr(domainStart, domainEnd), 1);
 
-  const weeks: { label: string; leftPct: number }[] = [];
-  for (let d = 0; d <= totalSpan; d += 7) {
-    weeks.push({ label: fmtDate(addDaysStr(domainStart, d)), leftPct: (d / totalSpan) * 100 });
+  // Régua por dia (era por semana) — pedido do usuário (2026-09-09). Passo
+  // fixo em dias (não "N marcações distribuídas por índice", que tentei antes
+  // — arredondar pra encaixar exatamente 0% e 100% deixava um intervalo mais
+  // curto que os outros, "algumas datas mais perto, outras mais distantes",
+  // usuário 2026-09-09). Passo constante = espaçamento sempre igual em %, e
+  // continua sendo dia/totalSpan de verdade — mesma conta que as barras usam
+  // (leftPct/widthPct logo abaixo), então a régua fica alinhada com o
+  // andamento real das tarefas, só não força a última marcação bater exatamente
+  // no fim do período (pode sobrar uma folga no final, sem problema).
+  const NICE_STEPS_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30, 45, 60, 90];
+  const maxCols = 10;
+  const idealStep = totalSpan / Math.max(1, maxCols - 1);
+  const step = NICE_STEPS_DAYS.find((s) => s >= idealStep) ?? Math.ceil(idealStep / 30) * 30;
+  const days: { label: string; leftPct: number }[] = [];
+  for (let d = 0; d <= totalSpan; d += step) {
+    days.push({ label: fmtDate(addDaysStr(domainStart, d)), leftPct: (d / totalSpan) * 100 });
   }
 
   const barRows: GanttRow[] = rows.map((r) => {
@@ -225,7 +242,7 @@ export function buildGantt(scopeTasks: Task[], projects: Project[], filterMode: 
     };
   });
 
-  return { isEmpty: false, weeks, barRows };
+  return { isEmpty: false, days, barRows };
 }
 
 // ---------- Burndown (barras CSS, alturas em %) ----------
@@ -293,14 +310,28 @@ export function buildBurndown(scopeTasks: Task[], forecast: Forecast) {
   function burndownBar(d: number) {
     const dateIso = addDaysStr(rangeStart, d);
     const isPast = d <= todayOffset;
+    const idealValue = idealAt(d);
+    const actualValue = isPast ? remainingAt(dateIso) : null;
+    const forecastValue = !isPast && forecast.hasForecast ? forecastAt(d) : null;
+    const trendValue = hasTrend ? trendAt(d) : null;
+    // Tooltip (hover na coluna) com os 4 valores — pedido do usuário
+    // (2026-09-09): real, ideal, previsão e tendência do dia, não só a data.
+    const tooltip = [
+      fmtDateFull(dateIso),
+      `Real: ${actualValue !== null ? Math.round(actualValue) : "—"}`,
+      `Ideal: ${Math.round(idealValue)}`,
+      `Previsão: ${forecastValue !== null ? Math.round(forecastValue) : "—"}`,
+      `Tendência: ${trendValue !== null ? Math.round(trendValue) : "—"}`,
+    ].join("\n");
     return {
       label: fmtDate(dateIso),
-      idealPct: pct(idealAt(d)),
+      tooltip,
+      idealPct: pct(idealValue),
       hasActual: isPast,
       actualPct: isPast ? pct(remainingAt(dateIso)) : 0,
       hasForecastBar: !isPast && forecast.hasForecast,
-      forecastPct: !isPast && forecast.hasForecast ? pct(forecastAt(d)) : 0,
-      trendPct: hasTrend ? pct(trendAt(d)) : null,
+      forecastPct: !isPast && forecast.hasForecast ? pct(forecastValue!) : 0,
+      trendPct: hasTrend ? pct(trendValue!) : null,
     };
   }
 

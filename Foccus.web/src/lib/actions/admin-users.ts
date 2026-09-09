@@ -5,6 +5,24 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 type ActionResult = { success: true } | { success: false; error: string };
 
+export type AdminProfileRow = {
+  id: string;
+  email: string;
+  user_name: string | null;
+  role: "admin" | "user";
+  disabled: boolean;
+  created_at: string;
+};
+
+export type AdminInviteRow = {
+  email: string;
+  user_name: string | null;
+  created_at: string;
+};
+
+type AdminUsersData = { profiles: AdminProfileRow[]; invites: AdminInviteRow[] };
+type AdminUsersDataResult = { success: true; data: AdminUsersData } | { success: false; error: string };
+
 async function assertCallerIsAdmin() {
   // Não confia só no proxy.ts (que já bloqueia /admin/* por role) — revalida aqui
   // dentro da própria Server Action, já que ela pode em tese ser chamada de outros
@@ -110,6 +128,76 @@ export async function cancelInviteAction(email: string): Promise<ActionResult> {
       .delete()
       .eq("email", email)
       .is("consumed_at", null);
+    if (error) return { success: false, error: error.message };
+
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : "Erro desconhecido." };
+  }
+}
+
+// Lê usuários cadastrados + convites pendentes pro AdminUsersModal (mesmas
+// duas consultas que /admin/users já fazia como Server Component — aqui vira
+// Server Action porque o modal é aberto por cima da tela atual, sem navegar).
+export async function getAdminUsersDataAction(): Promise<AdminUsersDataResult> {
+  try {
+    await assertCallerIsAdmin();
+    const admin = createAdminClient();
+
+    const [{ data: profiles, error: profilesError }, { data: invites, error: invitesError }] = await Promise.all([
+      admin
+        .from("profiles")
+        .select("id, email, user_name, role, disabled, created_at")
+        .order("created_at", { ascending: false }),
+      admin
+        .from("allowed_emails")
+        .select("email, user_name, created_at, consumed_at")
+        .is("consumed_at", null)
+        .order("created_at", { ascending: false }),
+    ]);
+
+    if (profilesError) return { success: false, error: profilesError.message };
+    if (invitesError) return { success: false, error: invitesError.message };
+
+    return {
+      success: true,
+      data: { profiles: (profiles ?? []) as AdminProfileRow[], invites: (invites ?? []) as AdminInviteRow[] },
+    };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : "Erro desconhecido." };
+  }
+}
+
+// Promove/rebaixa alguém entre 'user' e 'admin' — a peça que faltava (antes só
+// dava pra trocar direto no banco). Duas travas além da checagem de admin:
+// ninguém altera o próprio papel por aqui (evita se trancar fora sem querer),
+// e não é possível remover o último admin do sistema — embora bloquear a
+// autoalteração já torne isso praticamente impossível (quem está chamando é
+// admin e nunca é o alvo), a checagem fica como segunda camada, mesmo espírito
+// do assertCallerIsAdmin não confiar só no proxy.ts.
+export async function setUserRoleAction(userId: string, role: "admin" | "user"): Promise<ActionResult> {
+  try {
+    const caller = await assertCallerIsAdmin();
+
+    if (userId === caller.id) {
+      return { success: false, error: "Você não pode alterar o próprio papel." };
+    }
+
+    const admin = createAdminClient();
+
+    if (role === "user") {
+      const { count, error: countError } = await admin
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "admin")
+        .neq("id", userId);
+      if (countError) return { success: false, error: countError.message };
+      if (!count || count < 1) {
+        return { success: false, error: "Não é possível remover o último administrador." };
+      }
+    }
+
+    const { error } = await admin.from("profiles").update({ role }).eq("id", userId);
     if (error) return { success: false, error: error.message };
 
     return { success: true };

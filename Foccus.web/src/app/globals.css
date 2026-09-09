@@ -177,7 +177,10 @@ body {
   --db-amber: #b56400;
   --db-amber-bg: rgba(255, 166, 0, 0.16);
   --db-green: #15803d;
-  --db-blue: #0369a1;
+  /* Era #0369a1 (sky-700) — na linha de tendência do burndown, fina e sobre
+     o fundo bem claro do dashboard, ficava quase imperceptível (usuário,
+     2026-09-09). Um azul mais saturado/escuro contrasta bem mais. */
+  --db-blue: #1d4ed8;
   --db-red: #dc2626;
 }
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
-import { sortTasks } from "@/lib/tasks/sort";
+import { sortTasks, sortTasksByPriorityDueProject } from "@/lib/tasks/sort";
 import { relevantDateFor, isOverdueDate, dateLabelFor } from "@/lib/tasks/list-filters";
 import { useMarqueeSelection } from "@/lib/hooks/use-marquee-selection";
 import { useDisplayName } from "@/lib/hooks/use-display-name";
@@ -223,7 +223,13 @@ export function TaskListPage() {
     tabPool = tabPool.filter((t) => t.waiting_for === filterPerson);
   }
 
-  const sortedPool = sortTasks(tabPool);
+  // Nas visualizações agrupadas por Projeto/Prioridade/Prazo, a suborganização
+  // dentro de cada grupo é Prioridade > Prazo > Projeto (pedido do usuário,
+  // 2026-09-09), não a urgência de data que a lista corrida ("Nenhum") usa.
+  const sortedPool =
+    groupBy === "project" || groupBy === "priority" || groupBy === "due"
+      ? sortTasksByPriorityDueProject(tabPool, projects)
+      : sortTasks(tabPool);
 
   // Agrupamento (Foccus.dc.html:3086-3118).
   type Group = { label: string; rows: Task[] };

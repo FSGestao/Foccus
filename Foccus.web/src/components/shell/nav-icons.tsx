@@ -13,7 +13,7 @@ const svgProps = {
   strokeLinejoin: "round" as const,
 };
 
-export type NavKey = "list" | "projects" | "people" | "waiting" | "kanban" | "dashboard" | "notes";
+export type NavKey = "list" | "projects" | "people" | "waiting" | "kanban" | "calendar" | "dashboard" | "notes";
 
 export function NavIcon({ name }: { name: NavKey }) {
   switch (name) {
@@ -55,6 +55,15 @@ export function NavIcon({ name }: { name: NavKey }) {
         <svg {...svgProps}>
           <rect x={2} y={3} width={4.5} height={10} rx={1} />
           <rect x={9.5} y={3} width={4.5} height={7} rx={1} />
+        </svg>
+      );
+    case "calendar":
+      return (
+        <svg {...svgProps}>
+          <rect x={2} y={3} width={12} height={11} rx={1.5} />
+          <line x1={2} y1={6.5} x2={14} y2={6.5} />
+          <line x1={5} y1={1.5} x2={5} y2={4.5} />
+          <line x1={11} y1={1.5} x2={11} y2={4.5} />
         </svg>
       );
     case "dashboard":

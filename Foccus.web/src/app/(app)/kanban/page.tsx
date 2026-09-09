@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
 import { STATUS_LABEL, STATUS_OPTIONS, STATUS_ICON, STATUS_TINT_HEX, PRIORITY_OPTIONS, PRIORITY_COLOR } from "@/lib/tasks/constants";
 import { relevantDateFor, fmtDateShort } from "@/lib/tasks/list-filters";
+import { sortTasksByPriorityDueProject } from "@/lib/tasks/sort";
 import type { Task, TaskStatus, Priority } from "@/lib/tasks/types";
 import type { Project } from "@/lib/projects/types";
 import { KanbanColumn } from "@/components/kanban/kanban-column";
+import { KanbanCardBody } from "@/components/kanban/kanban-card";
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel";
 import { AssistantBanners } from "@/components/assistant/assistant-banners";
 
@@ -38,6 +40,8 @@ export default function KanbanPage() {
   // ler localStorage já no useState quebraria a hidratação (SSR não tem
   // acesso a ele, o HTML gerado no build sempre seria "sem cores").
   const [colored, setColored] = useState(false);
+  // Id da tarefa sendo arrastada — só pro clone do DragOverlay (ver abaixo).
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     init();
@@ -65,6 +69,7 @@ export default function KanbanPage() {
   const personById = useMemo(() => new Map(people.map((p) => [p.id, p])), [people]);
   const projectOf = (t: Task): Project | null => (t.project_id ? (projectById.get(t.project_id) ?? null) : null);
   const personOf = (t: Task) => (t.waiting_for ? (personById.get(t.waiting_for) ?? null) : null);
+  const activeTask = activeTaskId ? (tasks.find((t) => t.id === activeTaskId) ?? null) : null;
 
   const columns = useMemo(() => {
     if (groupBy === "status") {
@@ -82,7 +87,7 @@ export default function KanbanPage() {
         label: p,
         icon: PRIORITY_ICON[p],
         tintHex: PRIORITY_COLOR[p],
-        tasks: tasks.filter((t) => t.priority === p),
+        tasks: sortTasksByPriorityDueProject(tasks.filter((t) => t.priority === p), projects),
       }));
     }
     if (groupBy === "due") {
@@ -107,9 +112,12 @@ export default function KanbanPage() {
         label: `${d < today ? "⚠️" : "🗓"} ${fmtDateShort(d)}`,
         icon: undefined as string | undefined,
         tintHex: d < today ? STATUS_TINT_HEX.BLOCKED : d === today ? STATUS_TINT_HEX.WAITING : STATUS_TINT_HEX.TODO,
-        tasks: dateMap.get(d)!,
+        tasks: sortTasksByPriorityDueProject(dateMap.get(d)!, projects),
       }));
-      return [...dateCols, { id: "none", label: "· Sem Prazo", icon: undefined, tintHex: undefined, tasks: noDate }];
+      return [
+        ...dateCols,
+        { id: "none", label: "· Sem Prazo", icon: undefined, tintHex: undefined, tasks: sortTasksByPriorityDueProject(noDate, projects) },
+      ];
     }
     // project
     const cols = projects.map((p) => ({
@@ -117,15 +125,26 @@ export default function KanbanPage() {
       label: p.name,
       icon: "📁",
       tintHex: p.color,
-      tasks: tasks.filter((t) => t.project_id === p.id),
+      tasks: sortTasksByPriorityDueProject(tasks.filter((t) => t.project_id === p.id), projects),
     }));
     return [
-      { id: "none", label: "Inbox", icon: "📁", tintHex: "#94a3b8", tasks: tasks.filter((t) => !t.project_id) },
+      {
+        id: "none",
+        label: "Inbox",
+        icon: "📁",
+        tintHex: "#94a3b8",
+        tasks: sortTasksByPriorityDueProject(tasks.filter((t) => !t.project_id), projects),
+      },
       ...cols,
     ];
   }, [groupBy, tasks, projects]);
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveTaskId(String(event.active.id));
+  }
+
   function handleDragEnd(event: DragEndEvent) {
+    setActiveTaskId(null);
     const { active, over } = event;
     if (!over) return;
     const taskId = String(active.id);
@@ -144,6 +163,10 @@ export default function KanbanPage() {
     } else {
       updateTask(taskId, { project_id: targetColId === "none" ? null : targetColId });
     }
+  }
+
+  function handleDragCancel() {
+    setActiveTaskId(null);
   }
 
   function handleToggleDone(task: Task) {
@@ -224,7 +247,7 @@ export default function KanbanPage() {
         </div>
       </div>
 
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
         <div role="region" aria-label="Quadro Kanban" className="mx-auto flex w-full max-w-5xl items-start gap-4 overflow-x-auto pb-4">
           {columns.map((col) => (
             <KanbanColumn
@@ -243,6 +266,27 @@ export default function KanbanPage() {
             />
           ))}
         </div>
+        {/* Clone do card sendo arrastado, num portal do dnd-kit — sempre por
+            cima de tudo (era o card real se movendo no próprio lugar via
+            transform, que ficava clipado/pintado por baixo das colunas
+            vizinhas; ver comentário em kanban-card.tsx). */}
+        <DragOverlay>
+          {activeTask && (
+            <div
+              className="flex w-[280px] cursor-grabbing flex-col gap-2 rounded-[9px] p-2.5"
+              style={{ background: "var(--pb-surface)", border: "1px solid var(--pb-border)", boxShadow: "0 14px 32px rgba(0,0,0,0.35)" }}
+            >
+              <KanbanCardBody
+                task={activeTask}
+                project={projectOf(activeTask)}
+                person={personOf(activeTask)}
+                colored={colored}
+                onToggleDone={() => {}}
+                onDelete={() => {}}
+              />
+            </div>
+          )}
+        </DragOverlay>
       </DndContext>
 
       {selectedTask && (

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
 import type { NewPersonInput, Person } from "@/lib/people/types";
+import { sortPeopleByName } from "@/lib/people/sort";
 
 type PeopleState = {
   people: Person[];
@@ -41,7 +42,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
       set({ loading: false, error: error.message });
       return;
     }
-    set({ people: (data ?? []) as Person[], userId: user.id, loading: false, error: null });
+    set({ people: sortPeopleByName((data ?? []) as Person[]), userId: user.id, loading: false, error: null });
   },
 
   createPerson: async ({ name, role }) => {
@@ -59,7 +60,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
       set({ error: error?.message ?? "Falha ao cadastrar pessoa." });
       return null;
     }
-    set((state) => ({ people: [data as Person, ...state.people] }));
+    set((state) => ({ people: sortPeopleByName([data as Person, ...state.people]) }));
     return data as Person;
   },
 
@@ -69,13 +70,13 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
     if (!current) return;
 
     set((state) => ({
-      people: state.people.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+      people: sortPeopleByName(state.people.map((p) => (p.id === id ? { ...p, ...patch } : p))),
     }));
 
     const { error } = await supabase.from("people").update(patch).eq("id", id);
     if (error) {
       set((state) => ({
-        people: state.people.map((p) => (p.id === id ? current : p)),
+        people: sortPeopleByName(state.people.map((p) => (p.id === id ? current : p))),
         error: error.message,
       }));
     }
