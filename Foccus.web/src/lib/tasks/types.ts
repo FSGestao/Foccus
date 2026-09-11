@@ -57,6 +57,10 @@ export type Task = {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  // ID da tarefa no sistema externo de gestão de desenvolvimento pessoal,
+  // quando criada via integração (0012_integrations.sql) — usado só pra
+  // mapear o webhook de status de volta, não aparece na UI.
+  external_id: string | null;
 };
 
 // Campos aceitos ao criar uma tarefa nova pela tarefa rápida / modal "Nova Tarefa"

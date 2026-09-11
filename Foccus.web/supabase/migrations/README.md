@@ -35,6 +35,7 @@ comentário do topo quando isso é necessário.
 | `0009_jwt_hook_security_definer.sql` | Corrige o hook do `0004` (RLS bloqueava a leitura de `role` dentro do hook). |
 | `0010_deactivate_users.sql` | Coluna `profiles.disabled` + hook de JWT também injeta `app_metadata.user_disabled`. |
 | `0011_error_logs.sql` | Tabela `error_logs` (monitoramento de erro interno, sem serviço externo). |
+| `0012_integrations.sql` | `tasks.external_id`, tabela `integration_settings` e trigger de webhook — integração com o sistema de gestão de desenvolvimento pessoal (ver `docs/INTEGRATIONS.md`). |
 
 ## Próximo passo (fora do escopo atual)
 
