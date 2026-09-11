@@ -37,7 +37,13 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/privacy") ||
-    pathname.startsWith("/terms");
+    pathname.startsWith("/terms") ||
+    // Rota de integração externa (src/app/api/integrations/tasks/route.ts)
+    // tem sua própria autenticação por chave (INTEGRATION_API_KEY) — o
+    // chamador nunca tem cookie de sessão do Supabase, então sem isso o
+    // proxy redirecionava toda chamada pra /login antes mesmo de a rota
+    // rodar (achado ao testar em produção, 2026-09-11).
+    pathname.startsWith("/api/integrations");
 
   if (!claims && !isPublicPath) {
     const url = request.nextUrl.clone();
