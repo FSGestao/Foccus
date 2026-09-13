@@ -27,6 +27,7 @@ import { FechamentoModal } from "./fechamento-modal";
 import { NewTaskModal } from "@/components/tasks/new-task-modal";
 import { PersonModal } from "@/components/people/person-modal";
 import { AdminUsersModal } from "@/components/admin/admin-users-modal";
+import pkg from "../../../package.json";
 
 // Header + sidebar mini-rail, portados de Foccus.dc.html:49-150 (mesma paleta,
 // mesma largura de rail 56/200px). Itens com `href: null` ainda não têm tela
@@ -585,6 +586,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+
+        {/* Selo de versão — teste ponta a ponta de deploy (local -> GitHub ->
+            Vercel): confirma visualmente qual build está no ar. */}
+        <div
+          style={{
+            marginTop: "auto",
+            paddingTop: 8,
+            fontSize: 10.5,
+            color: "var(--pb-text-dim)",
+            textAlign: menuOpen ? "left" : "center",
+            padding: menuOpen ? "8px 8px 0" : "8px 0 0",
+          }}
+        >
+          v{pkg.version}
+        </div>
       </aside>
 
       <main style={{ marginLeft: sidebarWidth, transition: "margin-left .15s ease" }}>{children}</main>
