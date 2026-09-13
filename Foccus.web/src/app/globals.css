@@ -91,9 +91,10 @@ body {
 
 /* Tokens de cor do Foccus (--pb-*), portados de themeTokens() em
    Foccus.dc.html:1738-1816 — mesmos valores hex/rgba do sistema legado, só
-   reescritos como CSS custom properties em vez de objeto JS. Usados só dentro
-   do shell/telas do app (src/components/shell, src/components/tasks) — o
-   restante do site (login, admin) continua com --background/--foreground
+   reescritos como CSS custom properties em vez de objeto JS. Usados dentro
+   do shell/telas do app (src/components/shell, src/components/tasks) e,
+   desde a v1.5.2, também no /login (via ThemeInit, que aplica o data-theme
+   fora do AppShell) — o admin continua com --background/--foreground
    padrão acima, sem essa paleta. */
 :root {
   --pb-bg: #eef6f7;
