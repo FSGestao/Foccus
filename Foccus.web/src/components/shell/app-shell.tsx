@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Priority } from "@/lib/tasks/types";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,6 +24,8 @@ import { SearchOverlay } from "./search-overlay";
 import { ShortcutsModal } from "./shortcuts-modal";
 import { AssistantModal } from "./assistant-modal";
 import { FechamentoModal } from "./fechamento-modal";
+import { ReleaseNotesModal } from "./release-notes-modal";
+import { getUnseenReleaseNotes } from "@/lib/release-notes/data";
 import { NewTaskModal } from "@/components/tasks/new-task-modal";
 import { PersonModal } from "@/components/people/person-modal";
 import { AdminUsersModal } from "@/components/admin/admin-users-modal";
@@ -130,6 +132,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // "Novidades do Foccus" (pedido do usuário, 2026-09-14): changelog que o
+  // usuário ainda não confirmou (profiles.last_seen_release), calculado só
+  // depois que o perfil carrega pra não piscar o card antes da hora.
+  const unseenReleaseNotes = useMemo(
+    () => (profile.loaded ? getUnseenReleaseNotes(profile.lastSeenRelease) : []),
+    [profile.loaded, profile.lastSeenRelease],
+  );
 
   const sidebarWidth = menuOpen ? 200 : 56;
   const emProgressoCount = computeEmProgressoCount(tasks);
@@ -630,6 +640,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         />
       )}
       {ui.adminUsersModalOpen && <AdminUsersModal onClose={ui.closeAdminUsersModal} />}
+      {unseenReleaseNotes.length > 0 && !ui.anyModalOpen() && (
+        <ReleaseNotesModal
+          notes={unseenReleaseNotes}
+          onClose={() => profile.markReleaseNotesSeen(unseenReleaseNotes[0].version)}
+        />
+      )}
     </div>
   );
 }

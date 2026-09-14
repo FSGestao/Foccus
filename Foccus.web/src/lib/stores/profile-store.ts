@@ -36,6 +36,11 @@ type ProfileState = {
   fechamentoStreak: number;
   fechamentoLastDate: string | null;
 
+  // Última versão do changelog (src/lib/release-notes/data.ts) que o usuário
+  // já confirmou ter visto no card "Novidades" — null quer dizer que nunca
+  // confirmou nenhuma.
+  lastSeenRelease: string | null;
+
   // Só em memória (nunca persistido) — igual ao legado, é um flag calculado
   // a cada checagem periódica (ver checkQuickWinTrigger no AppShell), não um
   // dado que precise sobreviver a um refresh.
@@ -57,6 +62,7 @@ type ProfileState = {
   registerActivity: () => void;
   recordGargaloCombo: () => Promise<boolean>;
   checkFechamentoTrigger: (anyModalOpen: boolean) => Promise<boolean>;
+  markReleaseNotesSeen: (version: string) => Promise<void>;
 };
 
 let lastActivityPersistAt = 0;
@@ -83,6 +89,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   fechamentoShownDate: null,
   fechamentoStreak: 0,
   fechamentoLastDate: null,
+  lastSeenRelease: null,
 
   quickWinBannerActive: false,
   setQuickWinBannerActive: (v) => set((s) => (s.quickWinBannerActive === v ? s : { quickWinBannerActive: v })),
@@ -120,6 +127,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       fechamentoShownDate: data.fechamento_shown_date,
       fechamentoStreak: data.fechamento_streak,
       fechamentoLastDate: data.fechamento_last_date,
+      lastSeenRelease: data.last_seen_release,
     });
   },
 
@@ -204,5 +212,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       .update({ fechamento_shown_date: today, fechamento_streak: streak, fechamento_last_date: today })
       .eq("id", userId);
     return true;
+  },
+
+  markReleaseNotesSeen: async (version) => {
+    const { userId } = get();
+    if (!userId) return;
+    set({ lastSeenRelease: version });
+    const supabase = createClient();
+    await supabase.from("profiles").update({ last_seen_release: version }).eq("id", userId);
   },
 }));
