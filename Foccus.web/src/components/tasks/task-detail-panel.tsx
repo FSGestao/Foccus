@@ -263,7 +263,7 @@ export function TaskDetailPanel({
                   max={100}
                   step={5}
                   value={task.progress_pct ?? 0}
-                  onChange={(e) => onChange({ progress_pct: Number(e.target.value) })}
+                  onChange={(e) => onChange({ progress_pct: Math.round(Number(e.target.value)) })}
                   className="w-[70px] shrink-0 rounded-md px-2 py-1.5 text-sm"
                   style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
                 />
@@ -341,8 +341,11 @@ export function TaskDetailPanel({
               placeholder="Ex: 30"
               value={task.estimated_minutes ?? ""}
               onChange={(e) =>
+                // Coluna é integer no banco (0001_schema.sql) — arredonda antes
+                // de mandar, senão um valor fracionado (ex.: "0.5") quebrava a
+                // gravação com o erro cru do Postgres na tela (usuário, 2026-09-14).
                 onChange({
-                  estimated_minutes: e.target.value ? Number(e.target.value) : null,
+                  estimated_minutes: e.target.value ? Math.round(Number(e.target.value)) : null,
                 })
               }
               className="w-full rounded-md px-2 py-1.5 text-sm"

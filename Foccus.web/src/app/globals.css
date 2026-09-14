@@ -183,6 +183,12 @@ body {
      2026-09-09). Um azul mais saturado/escuro contrasta bem mais. */
   --db-blue: #1d4ed8;
   --db-red: #dc2626;
+  /* Gráfico de WIP (dashboard-wip.tsx): barra de fundo (total do dia) e cor
+     neutra pra série "sem status ou sem data" — --db-panel-strong/--db-text-dim
+     eram quase invisíveis aqui (pensados pra bordas/texto apagado, não pra
+     carregar dado), usuário 2026-09-14. */
+  --db-wip-bar-bg: rgba(11, 37, 48, 0.12);
+  --db-neutral: #64748b;
 }
 
 :root[data-theme="dark"] {
@@ -203,4 +209,6 @@ body {
   --db-green: #22c55e;
   --db-blue: #38bdf8;
   --db-red: #f87171;
+  --db-wip-bar-bg: rgba(238, 246, 247, 0.16);
+  --db-neutral: #94a3b8;
 }

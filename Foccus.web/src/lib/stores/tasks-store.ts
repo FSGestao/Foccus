@@ -94,7 +94,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
       .single();
 
     if (error || !data) {
-      set({ error: error?.message ?? "Falha ao criar tarefa." });
+      get().showInfoToast(`Não foi possível criar a tarefa: ${error?.message ?? "erro desconhecido"}`);
       return;
     }
     set((state) => ({ tasks: [data as Task, ...state.tasks] }));
@@ -137,11 +137,11 @@ export const useTasksStore = create<TasksState>((set, get) => ({
 
     const { error } = await supabase.from("tasks").update(fullPatch).eq("id", id);
     if (error) {
-      // Reverte pro estado anterior em caso de falha.
-      set((state) => ({
-        tasks: state.tasks.map((t) => (t.id === id ? current : t)),
-        error: error.message,
-      }));
+      // Reverte pro estado anterior em caso de falha. Erro vai pro toast (some
+      // sozinho) em vez do banner fixo de `error` — que ficava preso na tela
+      // até a próxima ação bem-sucedida (usuário, 2026-09-14).
+      set((state) => ({ tasks: state.tasks.map((t) => (t.id === id ? current : t)) }));
+      get().showInfoToast(`Não foi possível salvar: ${error.message}`);
     }
   },
 

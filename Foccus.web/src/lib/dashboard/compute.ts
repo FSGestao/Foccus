@@ -439,7 +439,7 @@ export function buildOverview(allTasks: Task[], projects: Project[], scopeTasksF
 export type WipWindowDays = 7 | 14 | 30 | 90;
 
 export function buildWip(scopeTasks: Task[], windowDays: WipWindowDays) {
-  if (!scopeTasks.length) return { isEmpty: true, bars: [] as ReturnType<typeof wipBar>[] };
+  if (!scopeTasks.length) return { isEmpty: true, bars: [] as ReturnType<typeof wipBar>[], maxTotal: 0 };
 
   const rangeStart = addDaysStr(TODAY, -(windowDays - 1));
 
@@ -475,24 +475,25 @@ export function buildWip(scopeTasks: Task[], windowDays: WipWindowDays) {
   function wipBar(s: (typeof snapshots)[number]) {
     const pct = (v: number) => (v / maxTotal) * 100;
     return {
+      dateLabel: fmtDateFull(s.dateIso),
       label: fmtDate(s.dateIso),
+      total: s.total,
+      done: s.done,
+      active: s.active,
+      future: s.future,
+      other: s.other,
       totalPct: pct(s.total),
       donePct: pct(s.done),
       activePct: pct(s.active),
       futurePct: pct(s.future),
       otherPct: pct(s.other),
-      tooltip: [
-        fmtDateFull(s.dateIso),
-        `Total: ${s.total}`,
-        `Concluídas: ${s.done}`,
-        `Bloqueadas/Aguardando/Em andamento: ${s.active}`,
-        `Futuras: ${s.future}`,
-        `Sem status ou sem data: ${s.other}`,
-      ].join("\n"),
     };
   }
 
-  return { isEmpty: false, bars: snapshots.map(wipBar) };
+  // maxTotal também vira as marcações do eixo Y (0 / meio / topo), pra dar
+  // uma referência de quantidade ao lado do gráfico sem precisar passar o
+  // mouse — pedido do usuário, 2026-09-14.
+  return { isEmpty: false, bars: snapshots.map(wipBar), maxTotal };
 }
 
 export { PRIORITY_COLOR };
