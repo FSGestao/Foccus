@@ -11,6 +11,29 @@ import { PersonModal } from "@/components/people/person-modal";
 
 const NEW_PERSON_VALUE = "__new__";
 
+// Cronômetro manual (0013_task_timer.sql) — mede o tempo realmente gasto na
+// tarefa pra comparar com a estimativa. "Xh MMm" acima de 1h, "MM:SS" abaixo
+// disso (mais preciso pra sessões curtas).
+function formatElapsed(totalSeconds: number): string {
+  const clamped = Math.max(0, Math.round(totalSeconds));
+  const h = Math.floor(clamped / 3600);
+  const m = Math.floor((clamped % 3600) / 60);
+  const s = clamped % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+// Soma a sessão em curso a tracked_seconds e limpa timer_started_at. Usado
+// tanto pelo botão Pausar quanto por qualquer mudança que tire a tarefa da
+// visibilidade do cronômetro (sair de Em Andamento/Aguardando, concluir) —
+// pra nunca deixar um timer "esquecido" rodando em segundo plano depois que
+// o campo some do painel.
+function stopTimerPatch(task: Task): Partial<Task> {
+  if (!task.timer_started_at) return {};
+  const elapsed = Math.max(0, Math.floor((Date.now() - new Date(task.timer_started_at).getTime()) / 1000));
+  return { tracked_seconds: (task.tracked_seconds ?? 0) + elapsed, timer_started_at: null };
+}
+
 export function TaskDetailPanel({
   task,
   onClose,
@@ -45,6 +68,31 @@ export function TaskDetailPanel({
   const showProgress = task.status === "IN_PROGRESS" || task.status === "WAITING";
   const isWaiting = task.status === "WAITING";
 
+  // Cronômetro: `now` só é lido dentro de efeitos/timers (nunca direto no
+  // corpo do componente, que precisa ser puro) — atualiza 1x/segundo
+  // enquanto está rodando, pra tempo decorrido acompanhar em tempo real.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    const tick = () => setNow(Date.now());
+    const initial = setTimeout(tick, 0); // adia pro próximo tick, não seta síncrono no corpo do efeito
+    const id = task.timer_started_at ? setInterval(tick, 1000) : null;
+    return () => {
+      clearTimeout(initial);
+      if (id) clearInterval(id);
+    };
+  }, [task.timer_started_at]);
+
+  const isTimerRunning = Boolean(task.timer_started_at);
+  const liveSeconds =
+    isTimerRunning && now !== null
+      ? (task.tracked_seconds ?? 0) + Math.max(0, Math.floor((now - new Date(task.timer_started_at!).getTime()) / 1000))
+      : (task.tracked_seconds ?? 0);
+  const accuracyPct = task.estimated_minutes ? Math.round((liveSeconds / 60 / task.estimated_minutes) * 100) : null;
+
+  function toggleTimer() {
+    onChange(isTimerRunning ? stopTimerPatch(task) : { timer_started_at: new Date().toISOString() });
+  }
+
   function commitTitle() {
     const trimmed = title.trim();
     if (trimmed && trimmed !== task.title) onChange({ title: trimmed });
@@ -61,7 +109,11 @@ export function TaskDetailPanel({
   const isDone = task.status === "DONE";
   function toggleDone() {
     onChange(
-      { status: isDone ? "TODO" : "DONE", completed_at: isDone ? null : new Date().toISOString() },
+      {
+        status: isDone ? "TODO" : "DONE",
+        completed_at: isDone ? null : new Date().toISOString(),
+        ...stopTimerPatch(task),
+      },
       isDone ? "Conclusão desfeita" : "Tarefa concluída",
     );
   }
@@ -164,7 +216,11 @@ export function TaskDetailPanel({
                 style={{ color: "var(--pb-text-dim)" }}>Status</label>
               <select
                 value={task.status}
-                onChange={(e) => onChange({ status: e.target.value as Task["status"] })}
+                onChange={(e) => {
+                  const nextStatus = e.target.value as Task["status"];
+                  const stillVisible = nextStatus === "IN_PROGRESS" || nextStatus === "WAITING";
+                  onChange({ status: nextStatus, ...(stillVisible ? {} : stopTimerPatch(task)) });
+                }}
                 className="w-full rounded-md px-2 py-1.5 text-sm"
                 style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
               >
@@ -293,6 +349,48 @@ export function TaskDetailPanel({
               style={{ background: "var(--pb-bg)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
             />
           </div>
+
+          {/* Cronômetro: mesma visibilidade do "% de conclusão" acima (só
+              enquanto a tarefa está Em Andamento ou Aguardando) — pedido do
+              usuário, 2026-09-14. */}
+          {showProgress && (
+            <div
+              className="rounded-md p-2.5"
+              style={{ background: "var(--pb-surface-subtle)", border: "1px solid var(--pb-border)" }}
+            >
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-[11px] font-semibold uppercase tracking-wide"
+                  style={{ color: "var(--pb-text-dim)" }}>Cronômetro</label>
+                {accuracyPct !== null && (
+                  <span
+                    className="text-[11px] font-semibold"
+                    title="Tempo decorrido / estimativa"
+                    style={{ color: accuracyPct <= 100 ? "var(--pb-green)" : "var(--pb-red)" }}
+                  >
+                    {accuracyPct}% do estimado
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="font-mono text-lg font-semibold tabular-nums" style={{ color: "var(--pb-text)" }}>
+                  {formatElapsed(liveSeconds)}
+                </span>
+                <button
+                  type="button"
+                  onClick={toggleTimer}
+                  className="rounded-md px-3 py-1.5 text-xs font-medium"
+                  style={{
+                    cursor: "pointer",
+                    color: isTimerRunning ? "var(--pb-text)" : "#fff",
+                    background: isTimerRunning ? "transparent" : "var(--pb-accent)",
+                    border: isTimerRunning ? "1px solid var(--pb-border)" : "1px solid transparent",
+                  }}
+                >
+                  {isTimerRunning ? "⏸ Pausar" : "▶ Iniciar"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">

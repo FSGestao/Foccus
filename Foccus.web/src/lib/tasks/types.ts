@@ -47,6 +47,12 @@ export type Task = {
   blocked_by: string | null;
   depends_on_task_id: string | null;
   estimated_minutes: number | null;
+  // Cronômetro manual (0013_task_timer.sql): tracked_seconds acumula o tempo
+  // já fechado (cada Pausar soma a sessão inteira), timer_started_at fica
+  // preenchido só enquanto o cronômetro está rodando — permite medir a
+  // acurácia entre estimated_minutes e o tempo realmente gasto.
+  tracked_seconds: number;
+  timer_started_at: string | null;
   progress_pct: number | null;
   due_date: string | null;
   priority: Priority;

@@ -418,4 +418,81 @@ export function buildOverview(allTasks: Task[], projects: Project[], scopeTasksF
   return { radialRings, heatCols, heatRows, velocityBars, avgPastLabel: Math.round(avgPast * 10) / 10, velocityGoalMet };
 }
 
+// ---------- WIP (tarefas por dia: barra do total + linhas por categoria) ----------
+// Pedido do usuário (2026-09-14): "um gráfico [...] que mostre como uma barra
+// as tarefas totais por dia, com linhas indicando tarefas concluídas,
+// bloqueadas/aguardando/em andamento, futuras e sem status ou sem datas."
+//
+// Cada dia da janela é um snapshot: só entram tarefas que já existiam nesse
+// dia (created_at <= dia). As 4 categorias são mutuamente exclusivas e somam
+// o total da barra:
+//   - done: já concluída até aquele dia (completed_at <= dia)
+//   - active: ainda não concluída e status atual é IN_PROGRESS/WAITING/BLOCKED
+//   - future: ainda não concluída, não é "active", tem due_date depois do dia
+//     (agendada pra mais tarde)
+//   - other: sobra — sem due_date, ou due_date já vencido, ou TODO/INBOX sem
+//     nenhum dos sinais acima ("sem status ou sem data" definindo urgência)
+// Igual ao resto deste arquivo (ex.: remainingAt no burndown), a categoria
+// active/future/other usa o status ATUAL da tarefa, não um histórico
+// dia-a-dia real (não existe essa granularidade salva) — aproximação
+// aceitável pro propósito do gráfico (visão de fluxo, não auditoria).
+export type WipWindowDays = 7 | 14 | 30 | 90;
+
+export function buildWip(scopeTasks: Task[], windowDays: WipWindowDays) {
+  if (!scopeTasks.length) return { isEmpty: true, bars: [] as ReturnType<typeof wipBar>[] };
+
+  const rangeStart = addDaysStr(TODAY, -(windowDays - 1));
+
+  function snapshotAt(dateIso: string) {
+    let done = 0,
+      active = 0,
+      future = 0,
+      other = 0;
+    for (const t of scopeTasks) {
+      if (!t.created_at || localDateFromISO(t.created_at) > dateIso) continue; // ainda não existia
+      if (t.status === "DONE" && t.completed_at && localDateFromISO(t.completed_at) <= dateIso) {
+        done++;
+        continue;
+      }
+      if (t.status === "IN_PROGRESS" || t.status === "WAITING" || t.status === "BLOCKED") {
+        active++;
+        continue;
+      }
+      if (t.due_date && t.due_date > dateIso) {
+        future++;
+        continue;
+      }
+      other++;
+    }
+    return { total: done + active + future + other, done, active, future, other };
+  }
+
+  const dates: string[] = [];
+  for (let d = 0; d < windowDays; d++) dates.push(addDaysStr(rangeStart, d));
+  const snapshots = dates.map((dateIso) => ({ dateIso, ...snapshotAt(dateIso) }));
+  const maxTotal = Math.max(1, ...snapshots.map((s) => s.total));
+
+  function wipBar(s: (typeof snapshots)[number]) {
+    const pct = (v: number) => (v / maxTotal) * 100;
+    return {
+      label: fmtDate(s.dateIso),
+      totalPct: pct(s.total),
+      donePct: pct(s.done),
+      activePct: pct(s.active),
+      futurePct: pct(s.future),
+      otherPct: pct(s.other),
+      tooltip: [
+        fmtDateFull(s.dateIso),
+        `Total: ${s.total}`,
+        `Concluídas: ${s.done}`,
+        `Bloqueadas/Aguardando/Em andamento: ${s.active}`,
+        `Futuras: ${s.future}`,
+        `Sem status ou sem data: ${s.other}`,
+      ].join("\n"),
+    };
+  }
+
+  return { isEmpty: false, bars: snapshots.map(wipBar) };
+}
+
 export { PRIORITY_COLOR };

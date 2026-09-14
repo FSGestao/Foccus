@@ -8,14 +8,16 @@ import { DashboardKanban } from "@/components/dashboard/dashboard-kanban";
 import { DashboardGantt } from "@/components/dashboard/dashboard-gantt";
 import { DashboardBurndown } from "@/components/dashboard/dashboard-burndown";
 import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
+import { DashboardWip } from "@/components/dashboard/dashboard-wip";
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel";
 
-type Mode = "kanban" | "gantt" | "burndown" | "overview";
+type Mode = "kanban" | "gantt" | "burndown" | "overview" | "wip";
 const MODE_TABS: { key: Mode; label: string }[] = [
   { key: "kanban", label: "Kanban" },
   { key: "gantt", label: "Gantt" },
   { key: "burndown", label: "Burndown" },
   { key: "overview", label: "Visão Geral" },
+  { key: "wip", label: "WIP" },
 ];
 
 // "Painel do Projeto" (Foccus.dc.html: viewDashboard) — identidade visual
@@ -104,6 +106,7 @@ export default function DashboardPage() {
           {mode === "overview" && (
             <DashboardOverview allTasks={tasks} projects={projects} scopeTasksForVelocity={scopeTasks} />
           )}
+          {mode === "wip" && <DashboardWip scopeTasks={scopeTasks} />}
         </div>
       </div>
 
