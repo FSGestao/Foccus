@@ -13,6 +13,14 @@ export type ReleaseNote = {
 // Mais recente primeiro.
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "1.8.0",
+    date: "2026-09-14",
+    improvements: [
+      'Guia "Como usar": um passo a passo rápido sobre tarefas, projetos, pessoas, filtros e Dashboard — aparece uma vez pra todo mundo e fica sempre disponível no menu lateral.',
+    ],
+    fixes: [],
+  },
+  {
     version: "1.7.2",
     date: "2026-09-14",
     improvements: ["Este card: sempre que houver melhorias ou correções novas, elas aparecem aqui no seu próximo acesso."],

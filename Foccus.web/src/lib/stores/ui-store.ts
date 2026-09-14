@@ -12,6 +12,7 @@ type UiState = {
   assistantModalOpen: boolean;
   fechamentoModalOpen: boolean;
   adminUsersModalOpen: boolean;
+  howToModalOpen: boolean;
 
   openNewTaskModal: () => void;
   closeNewTaskModal: () => void;
@@ -25,6 +26,8 @@ type UiState = {
   closeFechamentoModal: () => void;
   openAdminUsersModal: () => void;
   closeAdminUsersModal: () => void;
+  openHowToModal: () => void;
+  closeHowToModal: () => void;
   anyModalOpen: () => boolean;
   closeAllModals: () => void;
 };
@@ -36,6 +39,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   assistantModalOpen: false,
   fechamentoModalOpen: false,
   adminUsersModalOpen: false,
+  howToModalOpen: false,
 
   openNewTaskModal: () => set({ newTaskModalOpen: true }),
   closeNewTaskModal: () => set({ newTaskModalOpen: false }),
@@ -49,6 +53,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   closeFechamentoModal: () => set({ fechamentoModalOpen: false }),
   openAdminUsersModal: () => set({ adminUsersModalOpen: true }),
   closeAdminUsersModal: () => set({ adminUsersModalOpen: false }),
+  openHowToModal: () => set({ howToModalOpen: true }),
+  closeHowToModal: () => set({ howToModalOpen: false }),
 
   anyModalOpen: () => {
     const s = get();
@@ -58,7 +64,8 @@ export const useUiStore = create<UiState>((set, get) => ({
       s.shortcutsModalOpen ||
       s.assistantModalOpen ||
       s.fechamentoModalOpen ||
-      s.adminUsersModalOpen
+      s.adminUsersModalOpen ||
+      s.howToModalOpen
     );
   },
   closeAllModals: () =>
@@ -69,5 +76,6 @@ export const useUiStore = create<UiState>((set, get) => ({
       assistantModalOpen: false,
       fechamentoModalOpen: false,
       adminUsersModalOpen: false,
+      howToModalOpen: false,
     }),
 }));

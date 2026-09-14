@@ -26,6 +26,7 @@ import { AssistantModal } from "./assistant-modal";
 import { FechamentoModal } from "./fechamento-modal";
 import { ReleaseNotesModal } from "./release-notes-modal";
 import { getUnseenReleaseNotes } from "@/lib/release-notes/data";
+import { HowToModal } from "./how-to-modal";
 import { NewTaskModal } from "@/components/tasks/new-task-modal";
 import { PersonModal } from "@/components/people/person-modal";
 import { AdminUsersModal } from "@/components/admin/admin-users-modal";
@@ -140,6 +141,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     () => (profile.loaded ? getUnseenReleaseNotes(profile.lastSeenRelease) : []),
     [profile.loaded, profile.lastSeenRelease],
   );
+
+  // Popup "Como usar" (pedido do usuário, 2026-09-14): todo usuário vê no
+  // próximo acesso (onboarding_seen começa false pra quem já existia) e todo
+  // usuário novo vê no primeiro. Prioridade sobre o card de Novidades acima
+  // — faz mais sentido aprender a usar antes de ler o que mudou — por isso
+  // esse último só aparece com !showOnboarding.
+  const showOnboarding = profile.loaded && !profile.onboardingSeen;
+  const howToOpen = ui.howToModalOpen || showOnboarding;
 
   const sidebarWidth = menuOpen ? 200 : 56;
   const emProgressoCount = computeEmProgressoCount(tasks);
@@ -597,11 +606,45 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
+        {/* "Como usar" + selo de versão — agrupados no rodapé do rail
+            (marginTop: auto só no primeiro, o resto segue no fluxo). O item
+            só aparece com o menu expandido (menuOpen) — pedido do usuário,
+            2026-09-14: ícone sozinho no rail estreito não tem espaço pro
+            texto e ficaria ambíguo com os outros ícones de navegação. */}
+        {menuOpen && (
+          <button
+            type="button"
+            onClick={ui.openHowToModal}
+            title="Como usar o Foccus"
+            style={{
+              marginTop: "auto",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "7px 10px",
+              fontSize: 13,
+              fontWeight: 400,
+              borderRadius: 6,
+              color: "var(--pb-text)",
+              background: "transparent",
+              border: "none",
+              width: "100%",
+              textAlign: "left",
+            }}
+          >
+            <span style={{ display: "inline-flex", flex: "none", fontSize: 14 }} aria-hidden>
+              🧭
+            </span>
+            <span>Como usar</span>
+          </button>
+        )}
+
         {/* Selo de versão — teste ponta a ponta de deploy (local -> GitHub ->
             Vercel): confirma visualmente qual build está no ar. */}
         <div
           style={{
-            marginTop: "auto",
+            marginTop: menuOpen ? 0 : "auto",
             paddingTop: 8,
             fontSize: 10.5,
             color: "var(--pb-text-dim)",
@@ -640,10 +683,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         />
       )}
       {ui.adminUsersModalOpen && <AdminUsersModal onClose={ui.closeAdminUsersModal} />}
-      {unseenReleaseNotes.length > 0 && !ui.anyModalOpen() && (
+      {unseenReleaseNotes.length > 0 && !showOnboarding && !ui.anyModalOpen() && (
         <ReleaseNotesModal
           notes={unseenReleaseNotes}
           onClose={() => profile.markReleaseNotesSeen(unseenReleaseNotes[0].version)}
+        />
+      )}
+      {howToOpen && (
+        <HowToModal
+          onClose={() => {
+            ui.closeHowToModal();
+            if (!profile.onboardingSeen) profile.markOnboardingSeen();
+          }}
         />
       )}
     </div>

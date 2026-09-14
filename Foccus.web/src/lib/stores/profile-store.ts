@@ -40,6 +40,9 @@ type ProfileState = {
   // já confirmou ter visto no card "Novidades" — null quer dizer que nunca
   // confirmou nenhuma.
   lastSeenRelease: string | null;
+  // Guia "Como usar" (0015_onboarding.sql) — false até o usuário fechar o
+  // popup pela 1ª vez; depois disso só reabre manualmente pelo menu.
+  onboardingSeen: boolean;
 
   // Só em memória (nunca persistido) — igual ao legado, é um flag calculado
   // a cada checagem periódica (ver checkQuickWinTrigger no AppShell), não um
@@ -63,6 +66,7 @@ type ProfileState = {
   recordGargaloCombo: () => Promise<boolean>;
   checkFechamentoTrigger: (anyModalOpen: boolean) => Promise<boolean>;
   markReleaseNotesSeen: (version: string) => Promise<void>;
+  markOnboardingSeen: () => Promise<void>;
 };
 
 let lastActivityPersistAt = 0;
@@ -90,6 +94,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   fechamentoStreak: 0,
   fechamentoLastDate: null,
   lastSeenRelease: null,
+  onboardingSeen: false,
 
   quickWinBannerActive: false,
   setQuickWinBannerActive: (v) => set((s) => (s.quickWinBannerActive === v ? s : { quickWinBannerActive: v })),
@@ -128,6 +133,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       fechamentoStreak: data.fechamento_streak,
       fechamentoLastDate: data.fechamento_last_date,
       lastSeenRelease: data.last_seen_release,
+      onboardingSeen: data.onboarding_seen ?? false,
     });
   },
 
@@ -220,5 +226,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     set({ lastSeenRelease: version });
     const supabase = createClient();
     await supabase.from("profiles").update({ last_seen_release: version }).eq("id", userId);
+  },
+
+  markOnboardingSeen: async () => {
+    const { userId } = get();
+    if (!userId) return;
+    set({ onboardingSeen: true });
+    const supabase = createClient();
+    await supabase.from("profiles").update({ onboarding_seen: true }).eq("id", userId);
   },
 }));
