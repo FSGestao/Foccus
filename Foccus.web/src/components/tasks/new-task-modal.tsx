@@ -10,11 +10,12 @@ export function NewTaskModal({
   onSubmit,
 }: {
   onClose: () => void;
-  onSubmit: (title: string, priority: Priority, projectId: string | null) => void;
+  onSubmit: (title: string, priority: Priority, projectId: string | null, dueDate: string | null) => void;
 }) {
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<Priority>("P3");
   const [projectId, setProjectId] = useState<string>("");
+  const [dueDate, setDueDate] = useState<string>("");
   const projects = useProjectsStore((s) => s.projects);
   const initProjects = useProjectsStore((s) => s.init);
 
@@ -28,7 +29,7 @@ export function NewTaskModal({
   function submit() {
     const trimmed = title.trim();
     if (!trimmed) return;
-    onSubmit(trimmed, priority, projectId || null);
+    onSubmit(trimmed, priority, projectId || null, dueDate || null);
     onClose();
   }
 
@@ -108,6 +109,24 @@ export function NewTaskModal({
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="new-task-due-date" className="text-sm font-medium">
+            Data
+          </label>
+          <input
+            id="new-task-due-date"
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submit();
+              if (e.key === "Escape") onClose();
+            }}
+            className="rounded-md px-3 py-2 text-sm"
+            style={{ border: "1px solid var(--pb-border)", background: "var(--pb-surface-subtle)" }}
+          />
         </div>
 
         <div className="flex justify-end gap-2 pt-2">

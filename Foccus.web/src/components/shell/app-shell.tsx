@@ -520,30 +520,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 600 }}>+</span>
             {menuOpen && <span>Tarefa</span>}
           </button>
-
-          <button
-            type="button"
-            onClick={ui.openNewPersonModal}
-            title="Cadastrar nova pessoa"
-            style={{
-              cursor: "pointer",
-              fontWeight: 500,
-              fontSize: 13,
-              color: "var(--pb-text)",
-              background: "var(--pb-surface-subtle)",
-              border: "1px solid var(--pb-border)",
-              borderRadius: 6,
-              padding: "8px 10px",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              justifyContent: menuOpen ? "flex-start" : "center",
-              width: "100%",
-            }}
-          >
-            <span style={{ fontSize: 14, lineHeight: 1, fontWeight: 600 }}>+</span>
-            {menuOpen && <span>Pessoa</span>}
-          </button>
         </div>
 
         {menuOpen && (
@@ -664,8 +640,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {ui.newTaskModalOpen && (
         <NewTaskModal
           onClose={ui.closeNewTaskModal}
-          onSubmit={(title: string, priority: Priority, project_id: string | null) =>
-            createTask({ title, priority, project_id })
+          onSubmit={(title: string, priority: Priority, project_id: string | null, due_date: string | null) =>
+            createTask({ title, priority, project_id, due_date })
           }
         />
       )}

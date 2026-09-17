@@ -13,6 +13,16 @@ export type ReleaseNote = {
 // Mais recente primeiro.
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "1.9.0",
+    date: "2026-09-17",
+    improvements: [
+      'O card de "Nova tarefa" agora tem um campo de Data, além de nome, prioridade e projeto.',
+    ],
+    fixes: [
+      'O botão "Cadastrar nova pessoa" foi removido do menu lateral (o cadastro de pessoas continua disponível na tela de Pessoas).',
+    ],
+  },
+  {
     version: "1.8.0",
     date: "2026-09-14",
     improvements: [

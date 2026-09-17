@@ -77,4 +77,5 @@ export type NewTaskInput = {
   title: string;
   priority?: Priority;
   project_id?: string | null;
+  due_date?: string | null;
 };

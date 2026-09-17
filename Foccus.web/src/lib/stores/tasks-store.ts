@@ -76,7 +76,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
     await get().createTask({ title: trimmed });
   },
 
-  createTask: async ({ title, priority, project_id }) => {
+  createTask: async ({ title, priority, project_id, due_date }) => {
     const { userId } = get();
     if (!userId) return;
     const supabase = createClient();
@@ -89,6 +89,7 @@ export const useTasksStore = create<TasksState>((set, get) => ({
         priority: priority ?? "P3",
         status: "TODO",
         project_id: project_id ?? null,
+        due_date: due_date ?? null,
       })
       .select()
       .single();
