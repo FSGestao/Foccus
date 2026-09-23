@@ -8,31 +8,9 @@ import { usePeopleStore } from "@/lib/stores/people-store";
 import { useDisplayName } from "@/lib/hooks/use-display-name";
 import { Checklist } from "./checklist";
 import { PersonModal } from "@/components/people/person-modal";
+import { formatElapsed, stopTimerPatch, liveSeconds as computeLiveSeconds } from "@/lib/tasks/timer";
 
 const NEW_PERSON_VALUE = "__new__";
-
-// Cronômetro manual (0013_task_timer.sql) — mede o tempo realmente gasto na
-// tarefa pra comparar com a estimativa. "Xh MMm" acima de 1h, "MM:SS" abaixo
-// disso (mais preciso pra sessões curtas).
-function formatElapsed(totalSeconds: number): string {
-  const clamped = Math.max(0, Math.round(totalSeconds));
-  const h = Math.floor(clamped / 3600);
-  const m = Math.floor((clamped % 3600) / 60);
-  const s = clamped % 60;
-  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-// Soma a sessão em curso a tracked_seconds e limpa timer_started_at. Usado
-// tanto pelo botão Pausar quanto por qualquer mudança que tire a tarefa da
-// visibilidade do cronômetro (sair de Em Andamento/Aguardando, concluir) —
-// pra nunca deixar um timer "esquecido" rodando em segundo plano depois que
-// o campo some do painel.
-function stopTimerPatch(task: Task): Partial<Task> {
-  if (!task.timer_started_at) return {};
-  const elapsed = Math.max(0, Math.floor((Date.now() - new Date(task.timer_started_at).getTime()) / 1000));
-  return { tracked_seconds: (task.tracked_seconds ?? 0) + elapsed, timer_started_at: null };
-}
 
 export function TaskDetailPanel({
   task,
@@ -83,11 +61,8 @@ export function TaskDetailPanel({
   }, [task.timer_started_at]);
 
   const isTimerRunning = Boolean(task.timer_started_at);
-  const liveSeconds =
-    isTimerRunning && now !== null
-      ? (task.tracked_seconds ?? 0) + Math.max(0, Math.floor((now - new Date(task.timer_started_at!).getTime()) / 1000))
-      : (task.tracked_seconds ?? 0);
-  const accuracyPct = task.estimated_minutes ? Math.round((liveSeconds / 60 / task.estimated_minutes) * 100) : null;
+  const liveSecondsValue = isTimerRunning && now !== null ? computeLiveSeconds(task, now) : (task.tracked_seconds ?? 0);
+  const accuracyPct = task.estimated_minutes ? Math.round((liveSecondsValue / 60 / task.estimated_minutes) * 100) : null;
 
   function toggleTimer() {
     onChange(isTimerRunning ? stopTimerPatch(task) : { timer_started_at: new Date().toISOString() });
@@ -376,7 +351,7 @@ export function TaskDetailPanel({
               </div>
               <div className="flex items-center gap-2.5">
                 <span className="font-mono text-lg font-semibold tabular-nums" style={{ color: "var(--pb-text)" }}>
-                  {formatElapsed(liveSeconds)}
+                  {formatElapsed(liveSecondsValue)}
                 </span>
                 <button
                   type="button"

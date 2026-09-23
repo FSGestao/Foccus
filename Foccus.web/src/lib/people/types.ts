@@ -7,6 +7,8 @@ export type Person = {
   user_id: string;
   name: string;
   role: string | null;
+  company: string | null;
+  sector: string | null;
   status: PersonStatus;
   created_at: string;
 };
@@ -14,4 +16,6 @@ export type Person = {
 export type NewPersonInput = {
   name: string;
   role?: string;
+  company?: string;
+  sector?: string;
 };

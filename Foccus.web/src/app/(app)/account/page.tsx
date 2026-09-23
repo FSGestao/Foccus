@@ -2,6 +2,7 @@
 
 import { useDisplayName } from "@/lib/hooks/use-display-name";
 import { DeleteAccountForm } from "@/components/account/delete-account-form";
+import { ImportCsvPanel } from "@/components/account/import-csv-panel";
 
 // Minha conta — dados pessoais (LGPD art. 9º), exportação (art. 18, II) e
 // exclusão (art. 18, VI) dos próprios dados. Acessível pelo menu do avatar.
@@ -55,6 +56,49 @@ export default function AccountPage() {
             Baixar meus dados (.xlsx)
           </a>
         </div>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold" style={{ color: "var(--pb-text-muted)" }}>
+          Exportar em CSV
+        </h2>
+        <p className="text-sm" style={{ color: "var(--pb-text-muted)" }}>
+          Um arquivo por tabela — útil pra editar numa planilha e reimportar depois.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="/api/account/export/csv/tasks"
+            className="self-start rounded-md px-4 py-2 text-sm font-medium"
+            style={{ background: "var(--pb-glass-strong)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+          >
+            Tarefas (.csv)
+          </a>
+          <a
+            href="/api/account/export/csv/projects"
+            className="self-start rounded-md px-4 py-2 text-sm font-medium"
+            style={{ background: "var(--pb-glass-strong)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+          >
+            Projetos (.csv)
+          </a>
+          <a
+            href="/api/account/export/csv/people"
+            className="self-start rounded-md px-4 py-2 text-sm font-medium"
+            style={{ background: "var(--pb-glass-strong)", border: "1px solid var(--pb-border)", color: "var(--pb-text)" }}
+          >
+            Pessoas (.csv)
+          </a>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold" style={{ color: "var(--pb-text-muted)" }}>
+          Importar de CSV
+        </h2>
+        <p className="text-sm" style={{ color: "var(--pb-text-muted)" }}>
+          Use o mesmo formato dos arquivos exportados acima. Cada linha vira um registro novo —
+          reimportar o mesmo arquivo duas vezes duplica.
+        </p>
+        <ImportCsvPanel />
       </section>
 
       <section

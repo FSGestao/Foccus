@@ -35,9 +35,9 @@ export function PersonCard({
         <span className="flex-1 truncate font-semibold">{person.name}</span>
       </div>
 
-      {person.role && (
+      {(person.role || person.company || person.sector) && (
         <span className="text-xs" style={{ color: "var(--pb-text-muted)" }}>
-          {person.role}
+          {[person.role, person.company, person.sector].filter(Boolean).join(" · ")}
         </span>
       )}
 

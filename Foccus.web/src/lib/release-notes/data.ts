@@ -13,6 +13,17 @@ export type ReleaseNote = {
 // Mais recente primeiro.
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "1.10.0",
+    date: "2026-09-23",
+    improvements: [
+      "Exportação e importação de tarefas, projetos e pessoas em CSV (tela Minha conta).",
+      'Novo gadget de cronômetro flutuante: mostra o tempo rodando, lista as tarefas "A fazer", "Em andamento" e "Aguardando" e permite iniciar, pausar e parar o cronômetro sem abrir a tarefa. Ao parar, pergunta se a tarefa foi concluída.',
+      "A linha da tarefa agora mostra o tempo do cronômetro (rodando ou já registrado) quando há espaço — o nome da tarefa continua tendo prioridade.",
+      "Cadastro de Pessoa ganhou os campos opcionais Empresa e Setor.",
+    ],
+    fixes: [],
+  },
+  {
     version: "1.9.0",
     date: "2026-09-17",
     improvements: [

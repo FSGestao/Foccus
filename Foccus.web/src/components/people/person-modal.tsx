@@ -10,15 +10,17 @@ export function PersonModal({
 }: {
   person?: Person;
   onClose: () => void;
-  onSubmit: (patch: { name: string; role?: string }) => void;
+  onSubmit: (patch: { name: string; role?: string; company?: string; sector?: string }) => void;
 }) {
   const [name, setName] = useState(person?.name ?? "");
   const [role, setRole] = useState(person?.role ?? "");
+  const [company, setCompany] = useState(person?.company ?? "");
+  const [sector, setSector] = useState(person?.sector ?? "");
 
   function submit() {
     const trimmed = name.trim();
     if (!trimmed) return;
-    onSubmit({ name: trimmed, role: role.trim() });
+    onSubmit({ name: trimmed, role: role.trim(), company: company.trim(), sector: sector.trim() });
     onClose();
   }
 
@@ -68,6 +70,37 @@ export function PersonModal({
             className="rounded-md px-3 py-2 text-sm"
             style={{ border: "1px solid var(--pb-border)", background: "var(--pb-surface-subtle)" }}
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Empresa (opcional)</label>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submit();
+                if (e.key === "Escape") onClose();
+              }}
+              className="rounded-md px-3 py-2 text-sm"
+              style={{ border: "1px solid var(--pb-border)", background: "var(--pb-surface-subtle)" }}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Setor (opcional)</label>
+            <input
+              type="text"
+              value={sector}
+              onChange={(e) => setSector(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submit();
+                if (e.key === "Escape") onClose();
+              }}
+              className="rounded-md px-3 py-2 text-sm"
+              style={{ border: "1px solid var(--pb-border)", background: "var(--pb-surface-subtle)" }}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">

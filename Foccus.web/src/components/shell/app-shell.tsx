@@ -28,6 +28,7 @@ import { ReleaseNotesModal } from "./release-notes-modal";
 import { getUnseenReleaseNotes } from "@/lib/release-notes/data";
 import { HowToModal } from "./how-to-modal";
 import { NewTaskModal } from "@/components/tasks/new-task-modal";
+import { TimerGadget } from "@/components/timer/timer-gadget";
 import { PersonModal } from "@/components/people/person-modal";
 import { AdminUsersModal } from "@/components/admin/admin-users-modal";
 import pkg from "../../../package.json";
@@ -633,6 +634,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <main style={{ marginLeft: sidebarWidth, transition: "margin-left .15s ease" }}>{children}</main>
+
+      <TimerGadget />
 
       {/* Modais globais — moram aqui (não em cada tela) porque os atalhos
           N/?/Esc e o botão "+ Tarefa" da sidebar precisam funcionar de

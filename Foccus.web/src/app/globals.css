@@ -51,6 +51,18 @@ select option {
   color: var(--pb-text);
 }
 
+/* Badge de tempo da linha da tarefa (task-row.tsx: TaskTimeBadge) — some
+   antes do título começar a truncar quando a linha fica estreita, pra dar
+   preferência ao nome da tarefa sobre o cronômetro (pedido do usuário,
+   2026-09-23, sem um % fixo entre os dois). `container-type: inline-size` é
+   setado inline em .task-row-click; o breakpoint aqui é medido pela largura
+   da própria linha, não da viewport. */
+@container (max-width: 420px) {
+  .task-row-time {
+    display: none;
+  }
+}
+
 /* Ícone do <input type="date"> (o botão "Mostrar seletor de datas") — vem
    preto por padrão do Chromium e fica imperceptível sobre o fundo escuro dos
    inputs no tema dark. Valor literal em cada seletor (não var(--pb-calendar-

@@ -1,10 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Task } from "@/lib/tasks/types";
 import { PRIORITY_COLOR, STATUS_COLOR, STATUS_ICON, STATUS_LABEL } from "@/lib/tasks/constants";
 import { relevantDateFor, isOverdueDate, dateLabelFor } from "@/lib/tasks/list-filters";
 import { useProjectsStore } from "@/lib/stores/projects-store";
+import { formatElapsed, liveSeconds as computeLiveSeconds } from "@/lib/tasks/timer";
+
+// Badge de tempo (item 4, pedido do usuário 2026-09-23): só aparece quando a
+// tarefa tem tempo rodando ou já acumulado. Fica num container query
+// (task-row-click, ver globals.css) que some o badge antes do nome começar a
+// truncar — o nome tem prioridade sobre o tempo quando o espaço aperta, sem
+// precisar de um %fixo entre os dois.
+function TaskTimeBadge({ task }: { task: Task }) {
+  const isRunning = Boolean(task.timer_started_at);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [isRunning]);
+
+  const seconds = computeLiveSeconds(task, now);
+  if (seconds <= 0 && !isRunning) return null;
+
+  return (
+    <span
+      className="task-row-time inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-xs font-mono tabular-nums"
+      title={isRunning ? "Cronômetro rodando" : "Tempo registrado nesta tarefa"}
+      style={{ color: isRunning ? "var(--pb-accent)" : "var(--pb-text-dim)" }}
+    >
+      {isRunning && <span aria-hidden style={{ color: "var(--pb-accent)" }}>●</span>}
+      {formatElapsed(seconds)}
+    </span>
+  );
+}
 
 // Cartão de vidro (--pb-glass-card + blur), porta fiel do `buildRow` do
 // legado (Foccus.dc.html:2514-2586, markup em :341-420): botões ✓/✕ em vez
@@ -62,10 +93,11 @@ export function TaskRow({
         onClick={onRowClick}
         data-task-id={task.id}
         title="Clique para abrir. Segure Shift ou Ctrl para selecionar múltiplas."
-        className="flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors"
+        className="task-row-click flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors"
         style={{
           background: isSelected ? "var(--pb-accent-bg)" : "transparent",
           borderLeft: `3px solid ${isSelected ? "var(--pb-accent)" : "transparent"}`,
+          containerType: "inline-size",
         }}
       >
         <button
@@ -151,6 +183,8 @@ export function TaskRow({
         >
           {task.title}
         </span>
+
+        <TaskTimeBadge task={task} />
 
         {project && (
           <span className="inline-flex shrink-0 items-center gap-1 text-xs" style={{ color: "var(--pb-text-dim)" }}>

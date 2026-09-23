@@ -45,14 +45,20 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
     set({ people: sortPeopleByName((data ?? []) as Person[]), userId: user.id, loading: false, error: null });
   },
 
-  createPerson: async ({ name, role }) => {
+  createPerson: async ({ name, role, company, sector }) => {
     const { userId } = get();
     if (!userId) return null;
     const supabase = createClient();
 
     const { data, error } = await supabase
       .from("people")
-      .insert({ user_id: userId, name: name.trim(), role: role?.trim() || null })
+      .insert({
+        user_id: userId,
+        name: name.trim(),
+        role: role?.trim() || null,
+        company: company?.trim() || null,
+        sector: sector?.trim() || null,
+      })
       .select()
       .single();
 

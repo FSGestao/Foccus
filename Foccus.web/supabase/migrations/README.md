@@ -39,6 +39,7 @@ comentário do topo quando isso é necessário.
 | `0013_task_timer.sql` | `tasks.tracked_seconds` + `tasks.timer_started_at` — cronômetro manual (Iniciar/Pausar) no painel de detalhe da tarefa. |
 | `0014_release_notes.sql` | `profiles.last_seen_release` — controla o card de "Novidades do Foccus" (changelog não visto) no login. |
 | `0015_onboarding.sql` | `profiles.onboarding_seen` — controla o popup "Como usar" (guia rápido) no primeiro acesso de cada usuário. |
+| `0016_people_company_sector.sql` | `people.company` + `people.sector` — campos opcionais de empresa/setor no cadastro de pessoa. |
 
 ## Próximo passo (fora do escopo atual)
 
