@@ -13,6 +13,14 @@ export type ReleaseNote = {
 // Mais recente primeiro.
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "1.12.0",
+    date: "2026-09-23",
+    improvements: [
+      "Popup do gadget de cronômetro ficou mais largo e organizado: lista agrupada por status (A Fazer, Em andamento, Aguardando), com prioridade, projeto e busca quando há muitas tarefas.",
+    ],
+    fixes: [],
+  },
+  {
     version: "1.11.0",
     date: "2026-09-23",
     improvements: [
