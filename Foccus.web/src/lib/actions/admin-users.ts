@@ -2,8 +2,10 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendInviteEmail } from "@/lib/email/invite-email";
 
 type ActionResult = { success: true } | { success: false; error: string };
+type InviteActionResult = { success: true; emailWarning?: string } | { success: false; error: string };
 
 export type AdminProfileRow = {
   id: string;
@@ -52,9 +54,9 @@ async function assertCallerIsAdmin() {
 // com Google pela primeira vez (ver src/app/auth/callback/route.ts), que
 // confere esta allowlist antes de deixar a conta existir.
 export async function inviteUserAction(
-  _prevState: ActionResult | null,
+  _prevState: InviteActionResult | null,
   formData: FormData,
-): Promise<ActionResult> {
+): Promise<InviteActionResult> {
   try {
     const caller = await assertCallerIsAdmin();
 
@@ -85,6 +87,13 @@ export async function inviteUserAction(
 
     if (inviteError) {
       return { success: false, error: inviteError.message };
+    }
+
+    // O convite (allowlist) já está gravado nesse ponto — uma falha aqui não
+    // desfaz isso, só avisa o admin que precisa avisar a pessoa por fora.
+    const emailResult = await sendInviteEmail(email, userName);
+    if (!emailResult.sent) {
+      return { success: true, emailWarning: `Convite salvo, mas o e-mail não foi enviado: ${emailResult.error}` };
     }
 
     return { success: true };

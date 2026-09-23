@@ -22,14 +22,17 @@ baixos de storage/conexões, problemático pra uso real com outras pessoas.
 
 **Pré-requisito**: inserir cartão no painel do Supabase e fazer o upgrade.
 
-## 3. E-mail de boas-vindas
+## 3. Domínio próprio no Resend (e-mail de convite)
 
-Quando um admin convida alguém em `/admin/users`, a pessoa não recebe
-nenhum e-mail — só descobre o acesso se avisada por fora do sistema.
+O e-mail de convite (`/admin/users`, resolvido em 2026-09-23 com
+`RESEND_API_KEY`) sai do remetente compartilhado `onboarding@resend.dev`
+porque o Foccus não tem domínio próprio verificado no Resend ainda. Funciona,
+mas tem mais chance de cair em spam do que um remetente com domínio próprio
+verificado (SPF/DKIM).
 
-**Pré-requisito**: conta e API key de um provedor de e-mail (ex.: Resend,
-SendGrid). Depois disso é só código (chamar a API no
-`inviteUserAction`, `src/lib/actions/admin-users.ts`).
+**Pré-requisito**: domínio próprio + adicionar/verificar ele no painel do
+Resend (Domains → Add Domain, alguns registros DNS). Depois é só trocar o
+`FROM` em `src/lib/email/invite-email.ts`.
 
 ---
 

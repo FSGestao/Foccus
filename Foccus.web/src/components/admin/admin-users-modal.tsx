@@ -30,6 +30,8 @@ export function AdminUsersModal({ onClose }: { onClose: () => void }) {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteWarning, setInviteWarning] = useState<string | null>(null);
+  const [inviteSentMessage, setInviteSentMessage] = useState<string | null>(null);
   const [rowError, setRowError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -57,6 +59,8 @@ export function AdminUsersModal({ onClose }: { onClose: () => void }) {
     const email = inviteEmail.trim();
     if (!email) return;
     setInviteError(null);
+    setInviteWarning(null);
+    setInviteSentMessage(null);
     startTransition(async () => {
       const result = await inviteUserAction(null, (() => {
         const fd = new FormData();
@@ -67,6 +71,11 @@ export function AdminUsersModal({ onClose }: { onClose: () => void }) {
       if (!result.success) {
         setInviteError(result.error);
         return;
+      }
+      if (result.emailWarning) {
+        setInviteWarning(result.emailWarning);
+      } else {
+        setInviteSentMessage(`Convite enviado por e-mail para ${email}.`);
       }
       setInviteEmail("");
       setInviteName("");
@@ -187,6 +196,8 @@ export function AdminUsersModal({ onClose }: { onClose: () => void }) {
                 </button>
               </form>
               {inviteError && <p className="text-sm" style={{ color: "var(--pb-red)" }}>{inviteError}</p>}
+              {inviteWarning && <p className="text-sm" style={{ color: "var(--pb-yellow)" }}>{inviteWarning}</p>}
+              {inviteSentMessage && <p className="text-sm" style={{ color: "var(--pb-green)" }}>{inviteSentMessage}</p>}
             </section>
 
             {rowError && <p className="text-sm" style={{ color: "var(--pb-red)" }}>{rowError}</p>}

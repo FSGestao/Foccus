@@ -13,6 +13,15 @@ export type ReleaseNote = {
 // Mais recente primeiro.
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "1.11.0",
+    date: "2026-09-23",
+    improvements: [
+      "Ao convidar alguém em Administração → Usuários, a pessoa agora recebe um e-mail de convite com um passo a passo de como acessar.",
+      'Os seletores de "Aguardando quem" (no painel da tarefa e no filtro da lista) agora mostram Empresa e Setor da pessoa, além do nome.',
+    ],
+    fixes: [],
+  },
+  {
     version: "1.10.0",
     date: "2026-09-23",
     improvements: [

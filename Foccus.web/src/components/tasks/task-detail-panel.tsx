@@ -275,7 +275,7 @@ export function TaskDetailPanel({
                   <option value="">Ninguém selecionado</option>
                   {people.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name}
+                      {[p.name, p.company, p.sector].filter(Boolean).join(" / ")}
                     </option>
                   ))}
                   <option value={NEW_PERSON_VALUE}>+ Nova pessoa...</option>

@@ -469,7 +469,7 @@ export function TaskListPage() {
             <option value="all">👤 Todas as Pessoas</option>
             {people.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {[p.name, p.company, p.sector].filter(Boolean).join(" / ")}
               </option>
             ))}
           </select>
