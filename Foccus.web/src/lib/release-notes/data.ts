@@ -13,6 +13,14 @@ export type ReleaseNote = {
 // Mais recente primeiro.
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "1.13.1",
+    date: "2026-09-30",
+    improvements: [],
+    fixes: [
+      "O alerta de gargalo agora conta só as tarefas Em andamento e Aguardando, e o número bate com a lista que abre em \"Ver essas tarefas\". Inbox e Bloqueadas não entram mais na conta.",
+    ],
+  },
+  {
     version: "1.13.0",
     date: "2026-09-30",
     improvements: [

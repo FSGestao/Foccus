@@ -49,7 +49,7 @@ export function GargaloBanner({ emProgressoCount }: { emProgressoCount: number }
             Alerta de Trânsito no Fluxo
           </h2>
           <p className="m-0 text-[13.5px] leading-relaxed" style={{ color: "var(--pb-text-muted)" }}>
-            Você tem {emProgressoCount} tarefas travadas em &quot;Em Progresso&quot;. Antes de começar algo novo, que tal
+            Você tem {emProgressoCount} tarefas travadas entre Em andamento e Aguardando. Antes de começar algo novo, que tal
             limparmos esse gargalo?
           </p>
         </div>

@@ -96,7 +96,7 @@ export function AssistantModal({ onClose, emProgressoCount }: { onClose: () => v
                   🚦 Destruidor de Gargalos
                 </div>
                 <div className="mt-1 text-xs" style={{ color: "var(--pb-text-dim)" }}>
-                  Avisa quando muitas tarefas se acumulam em &quot;Em Progresso&quot; e some sozinho quando você resolve — resolver
+                  Avisa quando muitas tarefas se acumulam em Em andamento e Aguardando e some sozinho quando você resolve — resolver
                   no mesmo dia soma um Combo de Fluxo.
                 </div>
               </div>
@@ -107,7 +107,7 @@ export function AssistantModal({ onClose, emProgressoCount }: { onClose: () => v
               />
             </div>
             <div className="text-[11.5px]" style={{ color: "var(--pb-text-dim)" }}>
-              Agora: {emProgressoCount} tarefa(s) em &quot;Em Progresso&quot; (limite atual: {p.asstGargaloLimite}).
+              Agora: {emProgressoCount} tarefa(s) em andamento ou aguardando (limite atual: {p.asstGargaloLimite}).
             </div>
             {p.asstGargaloAtivo && (
               <div className="flex items-center gap-2 text-[12.5px]" style={{ color: "var(--pb-text)" }}>

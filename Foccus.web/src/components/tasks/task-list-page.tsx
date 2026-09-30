@@ -14,6 +14,7 @@ import { TaskRow } from "./task-row";
 import { TaskDetailPanel } from "./task-detail-panel";
 import { BulkActionBar } from "./bulk-action-bar";
 import { AssistantBanners } from "@/components/assistant/assistant-banners";
+import { isGargaloTask } from "@/lib/assistant/compute";
 
 // Visões da lista: os cards de resumo são as próprias abas (substituíram as
 // abas Todas/Hoje/Concluídas e os pills de filtro rápido, que repetiam os
@@ -131,7 +132,7 @@ export function TaskListPage() {
 
   // Recorte aberto pelo popup do gargalo: Em andamento + Aguardando. Não é um
   // card — fica ativo até o usuário escolher uma visão ou limpar o aviso.
-  const gargaloPool = openTasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "WAITING");
+  const gargaloPool = openTasks.filter(isGargaloTask);
 
   // Selects de Projeto/Aguardando refinam a visão escolhida (filtro AND).
   let tabPool = focusGargalo ? gargaloPool : viewPools[view];

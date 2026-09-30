@@ -23,14 +23,16 @@ function localDateFromISO(iso: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function isOpenTask(t: Task): boolean {
-  return t.status !== "CANCELLED" && t.status !== "DONE";
+// Gargalo no sentido do Assistente = tarefas Em andamento ou Aguardando (o
+// que está "travado" no fluxo). Inbox e Bloqueadas ficam de fora — pedido do
+// usuário, 2026-09-30. Mesmo critério do recorte da Minha Lista aberto pelo
+// popup do gargalo.
+export function isGargaloTask(t: Task): boolean {
+  return t.status === "IN_PROGRESS" || t.status === "WAITING";
 }
 
-// "Em Progresso" no sentido do Assistente = tudo que não é Futura (TODO) nem
-// Concluída/Cancelada — mesma definição usada no Kanban do Dashboard.
 export function computeEmProgressoCount(tasks: Task[]): number {
-  return tasks.filter((t) => isOpenTask(t) && t.status !== "TODO").length;
+  return tasks.filter(isGargaloTask).length;
 }
 
 export function computeGargaloBreach(
