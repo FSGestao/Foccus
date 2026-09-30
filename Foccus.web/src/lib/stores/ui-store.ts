@@ -13,6 +13,9 @@ type UiState = {
   fechamentoModalOpen: boolean;
   adminUsersModalOpen: boolean;
   howToModalOpen: boolean;
+  // Recorte especial da Minha Lista aberto pelo popup do gargalo (Em
+  // andamento + Aguardando). Some ao escolher qualquer card de visão.
+  listFocusGargalo: boolean;
 
   openNewTaskModal: () => void;
   closeNewTaskModal: () => void;
@@ -28,6 +31,7 @@ type UiState = {
   closeAdminUsersModal: () => void;
   openHowToModal: () => void;
   closeHowToModal: () => void;
+  setListFocusGargalo: (v: boolean) => void;
   anyModalOpen: () => boolean;
   closeAllModals: () => void;
 };
@@ -40,6 +44,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   fechamentoModalOpen: false,
   adminUsersModalOpen: false,
   howToModalOpen: false,
+  listFocusGargalo: false,
 
   openNewTaskModal: () => set({ newTaskModalOpen: true }),
   closeNewTaskModal: () => set({ newTaskModalOpen: false }),
@@ -55,6 +60,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   closeAdminUsersModal: () => set({ adminUsersModalOpen: false }),
   openHowToModal: () => set({ howToModalOpen: true }),
   closeHowToModal: () => set({ howToModalOpen: false }),
+  setListFocusGargalo: (v) => set({ listFocusGargalo: v }),
 
   anyModalOpen: () => {
     const s = get();

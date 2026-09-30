@@ -13,6 +13,19 @@ export type ReleaseNote = {
 // Mais recente primeiro.
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "1.13.0",
+    date: "2026-09-30",
+    improvements: [
+      "O topo da Minha Lista ficou mais enxuto. Os cards Hoje, Atrasadas, Aguardando, Próximas, Todas e Concluídas agora são as próprias abas da lista, e os filtros de Projeto, Aguardando e Agrupar ficam numa linha só.",
+      "O alerta de gargalo (\"Alerta de Trânsito no Fluxo\") agora aparece como popup, igual ao Fechamento do dia. O botão \"Ver essas tarefas\" abre a Minha Lista mostrando só as tarefas Em andamento e Aguardando.",
+      "Saíram os filtros rápidos P1 e Bloqueadas. Para ver as P1 juntas, use \"Agrupar: Urgência\".",
+    ],
+    fixes: [
+      "O card \"Hoje\" conta só as tarefas que vencem hoje; as atrasadas ficam no card delas.",
+      "O card \"Próximas\" agora mostra de fato as tarefas com data futura.",
+    ],
+  },
+  {
     version: "1.12.0",
     date: "2026-09-23",
     improvements: [

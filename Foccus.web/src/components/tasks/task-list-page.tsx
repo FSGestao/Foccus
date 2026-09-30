@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProjectsStore } from "@/lib/stores/projects-store";
 import { usePeopleStore } from "@/lib/stores/people-store";
+import { useUiStore } from "@/lib/stores/ui-store";
 import { sortTasks, sortTasksByPriorityDueProject } from "@/lib/tasks/sort";
 import { relevantDateFor, isOverdueDate, dateLabelFor } from "@/lib/tasks/list-filters";
 import { useMarqueeSelection } from "@/lib/hooks/use-marquee-selection";
@@ -14,20 +15,10 @@ import { TaskDetailPanel } from "./task-detail-panel";
 import { BulkActionBar } from "./bulk-action-bar";
 import { AssistantBanners } from "@/components/assistant/assistant-banners";
 
-type Tab = "all" | "today" | "done";
-const TAB_DEFS: { key: Tab; label: string }[] = [
-  { key: "all", label: "Todas" },
-  { key: "today", label: "Hoje" },
-  { key: "done", label: "Concluídas" },
-];
-
-type QuickFilterKey = "filterP1" | "filterWaiting" | "filterBlocked" | "filterOverdue";
-const QUICK_FILTER_DEFS: { key: QuickFilterKey; label: string }[] = [
-  { key: "filterP1", label: "⚑ P1" },
-  { key: "filterWaiting", label: "⏳ Aguardando" },
-  { key: "filterBlocked", label: "⛔ Bloqueadas" },
-  { key: "filterOverdue", label: "⚠️ Atrasadas" },
-];
+// Visões da lista: os cards de resumo são as próprias abas (substituíram as
+// abas Todas/Hoje/Concluídas e os pills de filtro rápido, que repetiam os
+// mesmos recortes).
+type View = "today" | "overdue" | "waiting" | "upcoming" | "all" | "done";
 
 type GroupBy = "none" | "project" | "priority" | "due";
 
@@ -35,20 +26,6 @@ type GroupBy = "none" | "project" | "priority" | "due";
 function todayISO(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function pillStyle(active: boolean): React.CSSProperties {
-  return {
-    cursor: "pointer",
-    padding: "4px 10px",
-    fontSize: 11.5,
-    borderRadius: 20,
-    fontWeight: 500,
-    transition: "all .1s ease",
-    border: `1px solid ${active ? "var(--pb-accent)" : "var(--pb-border)"}`,
-    background: active ? "var(--pb-accent-bg)" : "var(--pb-surface)",
-    color: active ? "var(--pb-accent)" : "var(--pb-text-dim)",
-  };
 }
 
 function selectStyle(): React.CSSProperties {
@@ -93,11 +70,13 @@ export function TaskListPage() {
 
   // Controles de visualização (Foccus.dc.html:1884-1893) — só desta tela, por
   // isso ficam em estado local em vez de num store compartilhado.
-  const [tab, setTab] = useState<Tab>("all");
-  const [filterP1, setFilterP1] = useState(false);
-  const [filterWaiting, setFilterWaiting] = useState(false);
-  const [filterBlocked, setFilterBlocked] = useState(false);
-  const [filterOverdue, setFilterOverdue] = useState(false);
+  const [view, setViewState] = useState<View>("all");
+  const focusGargalo = useUiStore((s) => s.listFocusGargalo);
+  const setFocusGargalo = useUiStore((s) => s.setListFocusGargalo);
+  function setView(v: View) {
+    setFocusGargalo(false);
+    setViewState(v);
+  }
   const [filterProject, setFilterProject] = useState("all");
   const [filterPerson, setFilterPerson] = useState("all");
   const [groupBy, setGroupBy] = useState<GroupBy>("none");
@@ -117,13 +96,6 @@ export function TaskListPage() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const quickFilterState: Record<QuickFilterKey, [boolean, (v: boolean) => void]> = {
-    filterP1: [filterP1, setFilterP1],
-    filterWaiting: [filterWaiting, setFilterWaiting],
-    filterBlocked: [filterBlocked, setFilterBlocked],
-    filterOverdue: [filterOverdue, setFilterOverdue],
-  };
-
   useEffect(() => {
     init();
     initProjects();
@@ -134,88 +106,35 @@ export function TaskListPage() {
   const today = todayISO();
   const openTasks = tasks.filter((t) => t.status !== "CANCELLED" && t.status !== "DONE");
 
-  // Cards de resumo (Foccus.dc.html:3120-3125) — clicáveis, cada um reseta os
-  // pills e aplica seu próprio filtro/aba.
-  function resetQuickFilters() {
-    setFilterP1(false);
-    setFilterWaiting(false);
-    setFilterBlocked(false);
-    setFilterOverdue(false);
-  }
-  const todayCount = openTasks.filter((t) => {
-    const d = relevantDateFor(t);
-    return !!d && d <= today;
-  }).length;
-  const overdueCount = openTasks.filter((t) => isOverdueDate(t, relevantDateFor(t))).length;
-  const waitingCount = tasks.filter((t) => t.status === "WAITING").length;
-  const upcomingCount = openTasks.filter((t) => {
-    const d = relevantDateFor(t);
-    return !!d && d > today;
-  }).length;
-  const summaryStats: { label: string; value: number; color: string; onClick: () => void }[] = [
-    {
-      label: "Hoje",
-      value: todayCount,
-      color: "var(--pb-accent)",
-      onClick: () => {
-        resetQuickFilters();
-        setTab("today");
-      },
-    },
-    {
-      label: "Atrasadas",
-      value: overdueCount,
-      color: "var(--pb-red)",
-      onClick: () => {
-        resetQuickFilters();
-        setFilterOverdue(true);
-        setTab("all");
-      },
-    },
-    {
-      label: "Aguardando",
-      value: waitingCount,
-      color: "var(--pb-yellow)",
-      onClick: () => {
-        resetQuickFilters();
-        setFilterWaiting(true);
-        setTab("all");
-      },
-    },
-    {
-      label: "Próximas",
-      value: upcomingCount,
-      color: "var(--pb-blue)",
-      onClick: () => {
-        resetQuickFilters();
-        setTab("all");
-      },
-    },
+  // Cards de resumo (Foccus.dc.html:3120-3125) — cada card é uma visão da
+  // lista e o número dele é exatamente o que a visão mostra. "Hoje" conta só
+  // o que vence hoje: as atrasadas já têm o card delas.
+  const viewPools: Record<View, Task[]> = {
+    today: openTasks.filter((t) => relevantDateFor(t) === today),
+    overdue: openTasks.filter((t) => isOverdueDate(t, relevantDateFor(t))),
+    waiting: openTasks.filter((t) => t.status === "WAITING"),
+    upcoming: openTasks.filter((t) => {
+      const d = relevantDateFor(t);
+      return !!d && d > today;
+    }),
+    all: openTasks,
+    done: tasks.filter((t) => t.status === "DONE"),
+  };
+  const viewDefs: { key: View; label: string; color: string }[] = [
+    { key: "today", label: "Hoje", color: "var(--pb-accent)" },
+    { key: "overdue", label: "Atrasadas", color: "var(--pb-red)" },
+    { key: "waiting", label: "Aguardando", color: "var(--pb-yellow)" },
+    { key: "upcoming", label: "Próximas", color: "var(--pb-blue)" },
+    { key: "all", label: "Todas", color: "var(--pb-text)" },
+    { key: "done", label: "Concluídas", color: "var(--pb-green)" },
   ];
 
-  // Pool da aba selecionada (Foccus.dc.html:3053-3062).
-  let tabPool: Task[];
-  if (tab === "today") {
-    tabPool = openTasks.filter((t) => {
-      const d = relevantDateFor(t);
-      return !!d && d <= today;
-    });
-  } else if (tab === "done") {
-    tabPool = tasks.filter((t) => t.status === "DONE");
-  } else {
-    tabPool = openTasks;
-  }
+  // Recorte aberto pelo popup do gargalo: Em andamento + Aguardando. Não é um
+  // card — fica ativo até o usuário escolher uma visão ou limpar o aviso.
+  const gargaloPool = openTasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "WAITING");
 
-  // Pills (filtro AND por cima da aba) + selects de Projeto/Pessoa.
-  if (filterP1 || filterWaiting || filterBlocked || filterOverdue) {
-    tabPool = tabPool.filter((t) => {
-      if (filterP1 && t.priority !== "P1") return false;
-      if (filterWaiting && t.status !== "WAITING") return false;
-      if (filterBlocked && t.status !== "BLOCKED") return false;
-      if (filterOverdue && !isOverdueDate(t, relevantDateFor(t))) return false;
-      return true;
-    });
-  }
+  // Selects de Projeto/Aguardando refinam a visão escolhida (filtro AND).
+  let tabPool = focusGargalo ? gargaloPool : viewPools[view];
   if (filterProject !== "all") {
     tabPool = tabPool.filter((t) => (t.project_id ?? "inbox") === filterProject);
   }
@@ -378,59 +297,109 @@ export function TaskListPage() {
     <div className="mx-auto flex max-w-4xl flex-col gap-5 px-4 py-8">
       <AssistantBanners />
 
-      <div className="flex flex-wrap items-center justify-between gap-3.5">
-        <div>
-          <h1 className="text-xl font-semibold" style={{ color: "var(--pb-text)" }}>
-            Lista de {userFirstName}
-          </h1>
-          <div className="mt-0.5 text-xs" style={{ color: "var(--pb-text-muted)" }}>
-            Visualização operacional de tarefas e compromissos
-          </div>
-        </div>
-
-        <div className="flex items-stretch overflow-hidden rounded-lg" style={{ background: "var(--pb-glass)", border: "1px solid var(--pb-border)" }}>
-          {summaryStats.map((stat, i) => (
-            <button
-              key={stat.label}
-              type="button"
-              onClick={stat.onClick}
-              title={`Filtrar por ${stat.label}`}
-              className="flex min-w-[68px] flex-col items-center px-3.5 py-1.5"
-              style={{ borderRight: i < summaryStats.length - 1 ? "1px solid var(--pb-border)" : undefined }}
-            >
-              <span className="text-base font-bold leading-tight" style={{ color: stat.color }}>
-                {stat.value}
-              </span>
-              <span className="mt-0.5 text-[10px] font-medium uppercase tracking-wide" style={{ color: "var(--pb-text-dim)" }}>
-                {stat.label}
-              </span>
-            </button>
-          ))}
+      <div>
+        <h1 className="text-xl font-semibold" style={{ color: "var(--pb-text)" }}>
+          Lista de {userFirstName}
+        </h1>
+        <div className="mt-0.5 text-xs" style={{ color: "var(--pb-text-muted)" }}>
+          Visualização operacional de tarefas e compromissos
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex gap-1 rounded-full p-1" style={{ background: "var(--pb-glass)", border: "1px solid var(--pb-border)" }}>
-          {TAB_DEFS.map((t) => {
-            const active = tab === t.key;
-            return (
-              <button
-                key={t.key}
-                type="button"
-                onClick={() => setTab(t.key)}
-                className="rounded-full px-4 py-1.5 text-xs font-semibold"
-                style={{
-                  color: active ? "var(--pb-on-accent)" : "var(--pb-text-muted)",
-                  background: active ? "var(--pb-accent)" : "transparent",
-                }}
+      {/* Visões: 6 cards numa linha; em tela estreita quebra em 2 linhas de 3. */}
+      <div
+        role="tablist"
+        aria-label="Visões da lista"
+        className="grid grid-cols-3 gap-px overflow-hidden rounded-lg sm:grid-cols-6"
+        style={{ background: "var(--pb-border)", border: "1px solid var(--pb-border)" }}
+      >
+        {viewDefs.map((v) => {
+          const active = !focusGargalo && view === v.key;
+          return (
+            <button
+              key={v.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setView(v.key)}
+              title={`Ver: ${v.label}`}
+              className="flex cursor-pointer flex-col items-center px-2 py-2"
+              style={{
+                background: active ? "var(--pb-accent-bg)" : "var(--pb-glass)",
+                boxShadow: active ? "inset 0 -2px 0 var(--pb-accent)" : undefined,
+              }}
+            >
+              <span className="text-lg font-bold leading-tight" style={{ color: v.color }}>
+                {viewPools[v.key].length}
+              </span>
+              <span
+                className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                style={{ color: active ? "var(--pb-accent)" : "var(--pb-text-dim)" }}
               >
-                {t.label}
-              </button>
-            );
-          })}
-        </div>
+                {v.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-        <div className="flex items-center gap-1.5">
+      {focusGargalo && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-3.5 py-2 text-[13px]"
+          style={{ background: "var(--pb-accent-bg)", border: "1px solid var(--pb-accent)", color: "var(--pb-accent)" }}
+        >
+          <span>
+            🚦 Mostrando <strong>Em andamento</strong> e <strong>Aguardando</strong> ({gargaloPool.length})
+          </span>
+          <button
+            type="button"
+            onClick={() => setFocusGargalo(false)}
+            className="cursor-pointer rounded-full px-3 py-1 text-xs font-medium"
+            style={{ color: "var(--pb-accent)", background: "transparent", border: "1px solid var(--pb-accent)" }}
+          >
+            ✕ Ver todas
+          </button>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)} title="Filtrar tarefas por Projeto" style={selectStyle()}>
+          <option value="all">📁 Todos os Projetos</option>
+          <option value="inbox">📥 Inbox</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={filterPerson}
+          onChange={(e) => setFilterPerson(e.target.value)}
+          title="Filtrar tarefas por quem você está aguardando"
+          style={selectStyle()}
+        >
+          <option value="all">👤 Aguardando: todos</option>
+          {people.map((p) => (
+            <option key={p.id} value={p.id}>
+              {[p.name, p.company, p.sector].filter(Boolean).join(" / ")}
+            </option>
+          ))}
+        </select>
+        {(filterProject !== "all" || filterPerson !== "all") && (
+          <button
+            type="button"
+            onClick={() => {
+              setFilterProject("all");
+              setFilterPerson("all");
+            }}
+            className="cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium"
+            style={{ color: "var(--pb-text-dim)", background: "transparent", border: "1px solid var(--pb-border)" }}
+          >
+            ✕ Limpar
+          </button>
+        )}
+
+        <div className="ml-auto flex items-center gap-1.5">
           <label className="text-[11.5px] font-medium" style={{ color: "var(--pb-text-dim)" }}>
             Agrupar:
           </label>
@@ -439,39 +408,6 @@ export function TaskListPage() {
             <option value="project">Projeto</option>
             <option value="priority">Urgência</option>
             <option value="due">Prazo</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2 overflow-x-auto">
-          {QUICK_FILTER_DEFS.map((qf) => {
-            const [active, setActive] = quickFilterState[qf.key];
-            return (
-              <button key={qf.key} type="button" onClick={() => setActive(!active)} title={`Filtro rápido: ${qf.label}`} style={pillStyle(active)}>
-                {qf.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)} title="Filtrar tarefas por Projeto" style={selectStyle()}>
-            <option value="all">📁 Todos os Projetos</option>
-            <option value="inbox">📥 Inbox</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-          <select value={filterPerson} onChange={(e) => setFilterPerson(e.target.value)} title="Filtrar tarefas por Responsável" style={selectStyle()}>
-            <option value="all">👤 Todas as Pessoas</option>
-            {people.map((p) => (
-              <option key={p.id} value={p.id}>
-                {[p.name, p.company, p.sector].filter(Boolean).join(" / ")}
-              </option>
-            ))}
           </select>
         </div>
       </div>

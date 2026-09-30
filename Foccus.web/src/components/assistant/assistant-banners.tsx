@@ -2,6 +2,7 @@
 
 import { useTasksStore } from "@/lib/stores/tasks-store";
 import { useProfileStore } from "@/lib/stores/profile-store";
+import { useUiStore } from "@/lib/stores/ui-store";
 import { computeGargaloBreach, computeQuickWinCandidates } from "@/lib/assistant/compute";
 import { GargaloBanner } from "./gargalo-banner";
 import { QuickWinBanner } from "./quick-win-banner";
@@ -20,6 +21,9 @@ function todayISO(): string {
 export function AssistantBanners() {
   const tasks = useTasksStore((s) => s.tasks);
   const profile = useProfileStore();
+  // O gargalo é popup: espera outro modal/tarefa aberta fechar pra não empilhar.
+  const otherModalOpen = useUiStore((s) => s.anyModalOpen());
+  const taskOpen = useTasksStore((s) => !!s.selectedTaskId);
   const today = todayISO();
 
   const { count: emProgressoCount, breach: gargaloBreach } = computeGargaloBreach(
@@ -38,7 +42,9 @@ export function AssistantBanners() {
     quickWinCandidates.length > 0 &&
     profile.quickWinDismissedDate !== today;
 
-  if (showGargaloBanner) return <GargaloBanner emProgressoCount={emProgressoCount} />;
+  if (showGargaloBanner) {
+    return otherModalOpen || taskOpen ? null : <GargaloBanner emProgressoCount={emProgressoCount} />;
+  }
   if (showQuickWinBanner) return <QuickWinBanner candidates={quickWinCandidates} />;
   return null;
 }
